@@ -1,119 +1,58 @@
-from .models import ProductPrice
+from apps.distributors.models import Distributor
+from apps.products.models import Product
+
+from .models import DistributorPrice, ProductPrice
 
 
-
-
-class PricingService:
-
-
-    @staticmethod
-    def get_customer_price(
-        customer,
-        product
-    ):
-
-
-        price = ProductPrice.objects.filter(
-
-            customer=customer,
-
-            product=product
-
-        ).first()
-
-
-
-        if not price:
-
-            return None
-
-
-
-        return price.price
-
-
-
+class PricingSelector:
+    """کوئری‌های قیمت‌گذاری"""
 
     @staticmethod
-    def set_customer_price(
+    def distributor_shop(distributor):
+        """قیمت‌های فروشگاه یک پخش‌کننده"""
+        return DistributorPrice.objects.filter(
+            distributor=distributor
+        ).select_related("product", "distributor")
 
-        customer,
+    @staticmethod
+    def all_prices():
+        return DistributorPrice.objects.select_related(
+            "product", "distributor"
+        ).all()
 
-        product,
+    # ---------- سازگاری با کد قدیمی (per-customer، منسوخ) ----------
 
-        price
-
-    ):
-
-
-        product_price, _ = ProductPrice.objects.update_or_create(
-
-
-            customer=customer,
-
-
-            product=product,
-
-
-            defaults={
-
-                "price": price
-
-            }
-
+    @staticmethod
+    def customer_prices(customer):
+        return ProductPrice.objects.filter(
+            customer=customer
+        ).select_related(
+            "product",
+            "customer"
         )
 
 
-        return product_price
+def get_product_price(customer, product: Product):
+    """
+    قیمت مؤثر محصول برای مشتری:
 
+    1. اگر معرف (پخش‌کننده) مشتری روی محصول قیمت گذاشته باشد → همان قیمت
+    2. در غیر این صورت → قیمت پایه شرکت (fallback مصوب کارفرما)
+    """
 
+    distributor = getattr(customer, "distributor", None)
 
+    if distributor is not None:
 
-    @staticmethod
-    def delete_customer_price(
+        shop_price = (
+            DistributorPrice.objects
+            .filter(distributor=distributor, product=product)
+            .values_list("price", flat=True)
+            .first()
+        )
 
-        customer,
+        if shop_price is not None:
 
-        product
+            return shop_price
 
-    ):
-
-
-        return ProductPrice.objects.filter(
-
-            customer=customer,
-
-            product=product
-
-        ).delete()
-
-
-
-
-def get_product_price(
-
-    customer,
-
-    product
-
-):
-
-
-    price = PricingService.get_customer_price(
-
-        customer,
-
-        product
-
-    )
-
-    if price is None:
-
-
-        # در نبود قیمت اختصاصی، قیمت پایه محصول ملاک است
-
-        return product.base_price
-
-
-
-    return price
+    return product.base_price

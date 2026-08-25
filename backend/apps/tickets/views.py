@@ -1,6 +1,6 @@
 # backend/apps/tickets/views.py
 from rest_framework import viewsets, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -27,6 +27,8 @@ class TicketViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_permissions(self):
+        if self.action == 'guest_request':
+            return [AllowAny()]
         if self.action in ['reply', 'close', 'assign', 'add_note']:
             return [IsAdminOrSecretary()]
         return [IsAuthenticated()]
@@ -227,3 +229,50 @@ class TicketViewSet(viewsets.ModelViewSet):
             'low': low,
             'by_category': category_stats
         })
+    @action(
+        detail=False,
+        methods=["post"],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+        url_path="guest-request",
+    )
+    def guest_request(self, request):
+        """
+        درخواست ایجاد حساب کاربری توسط کاربر ناشناس (بدون ثبت‌نام).
+        تیکت به صف ادمین کل می‌رود و پس از تایید، مشتریِ زیرمجموعه
+        ادمین کل ساخته می‌شود.
+        """
+        title = (request.data.get("title") or "").strip()
+        message = (request.data.get("message") or "").strip()
+        guest_name = (request.data.get("guest_name") or "").strip()
+        guest_phone = (request.data.get("guest_phone") or "").strip()
+
+        missing = [f for f, v in [
+            ("guest_name", guest_name), ("guest_phone", guest_phone),
+            ("message", message),
+        ] if not v]
+        if missing:
+            return Response(
+                {"error": f"فیلدهای الزامی: {', '.join(missing)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ticket = Ticket.objects.create(
+            user=None,
+            title=title or "درخواست ایجاد حساب کاربری",
+            message=message,
+            category=Ticket.Category.ACCOUNT_REQUEST,
+            priority=Ticket.Priority.MEDIUM,
+            guest_name=guest_name,
+            guest_phone=guest_phone,
+        )
+        return Response(
+            {
+                "id": ticket.id,
+                "message": (
+                    "درخواست شما ثبت شد؛ پس از بررسی توسط پشتیبانی "
+                    "با شما تماس گرفته خواهد شد."
+                ),
+            },
+            status=status.HTTP_201_CREATED,
+        )

@@ -17,17 +17,24 @@ class Ticket(models.Model):
         TECHNICAL = "TECHNICAL", "مشکل فنی"
         SUGGESTION = "SUGGESTION", "پیشنهاد"
         COMPLAINT = "COMPLAINT", "شکایت"
+        ACCOUNT_REQUEST = "ACCOUNT_REQUEST", "درخواست ایجاد حساب"
 
     class Priority(models.TextChoices):
         LOW = "LOW", "کم"
         MEDIUM = "MEDIUM", "متوسط"
         HIGH = "HIGH", "بالا"
 
+    # برای تیکت‌های مهمان (درخواست حساب) خالی است
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="tickets"
+        related_name="tickets",
+        null=True,
+        blank=True,
     )
+
+    guest_name = models.CharField(max_length=150, blank=True, default="")
+    guest_phone = models.CharField(max_length=15, blank=True, default="")
 
     title = models.CharField(max_length=200)
     message = models.TextField()
@@ -61,7 +68,8 @@ class Ticket(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.title} - {self.user.username}"
+        owner = self.user.username if self.user else (self.guest_name or "مهمان")
+        return f"{self.title} - {owner}"
 
     def mark_as_answered(self, reply_message):
         self.admin_reply = reply_message

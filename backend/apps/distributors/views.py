@@ -207,8 +207,6 @@ class DistributorCustomerViewSet(viewsets.ModelViewSet):
         return Customer.objects.none()
 
 
-
-
     def perform_create(self, serializer):
 
 
@@ -216,7 +214,36 @@ class DistributorCustomerViewSet(viewsets.ModelViewSet):
 
 
 
-        if user.role != "DISTRIBUTOR":
+        if user.role == "DISTRIBUTOR":
+
+
+            serializer.save(
+                distributor=user.distributor_profile
+            )
+
+        elif user.is_superuser or user.role in ["ADMIN", "SECRETARY"]:
+
+            from apps.distributors.models import Distributor
+
+            distributor_id = self.request.data.get("distributor_id")
+
+            if not distributor_id:
+
+                raise PermissionError(
+
+                    "برای ساخت مشتری، شناسه پخش‌کننده معرف الزامی است."
+
+                )
+
+            distributor = Distributor.objects.filter(pk=distributor_id).first()
+
+            if not distributor:
+
+                raise PermissionError("پخش‌کننده یافت نشد.")
+
+            serializer.save(distributor=distributor)
+
+        else:
 
 
             raise PermissionError(
@@ -224,11 +251,3 @@ class DistributorCustomerViewSet(viewsets.ModelViewSet):
                 "Only distributors can create customers."
 
             )
-
-
-
-        serializer.save(
-
-            distributor=user.distributor_profile
-
-        )

@@ -7,3 +7,7 @@ from .finance import OwnerFinancialReportView
 from .tickets import OwnerTicketViewSet
 from .discounts import OwnerDiscountView
 from .settings import OwnerSettingsView
+from .account_requests import (
+    AccountRequestListView,
+    AccountRequestApproveView,
+)

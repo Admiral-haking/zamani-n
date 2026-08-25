@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Count
 from django.utils import timezone
@@ -24,6 +24,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
 
     permission_classes = [
+        IsAuthenticated,
         IsAdminOrSecretary
     ]
 
@@ -49,11 +50,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
 
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("category").filter(is_active=True)
 
     serializer_class = ProductSerializer
 
     permission_classes = [
+        IsAuthenticated,
         IsAdminOrSecretary
     ]
 
@@ -85,10 +87,10 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 # ========================================
-# 👇 API جدید برای پرفروش‌ترین محصولات
+# API پرفروش‌ترین محصولات (فقط برای کاربران لاگین‌کرده)
 # ========================================
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_best_sellers(request):
     """
     دریافت پرفروش‌ترین محصولات:

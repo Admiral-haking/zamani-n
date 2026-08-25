@@ -2,6 +2,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from apps.accounts.models import User
+from apps.customers.models import Customer
+from apps.distributors.models import Distributor
+
 User = get_user_model()
 
 
@@ -98,3 +102,59 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
         )
+
+
+class AccountCreateSerializer(serializers.ModelSerializer):
+    """
+    ساخت حساب کاربری توسط ادمین کل / منشی.
+
+    ثبت‌نام آزاد وجود ندارد؛ تنها این endpoint ها حساب می‌سازند:
+      - پخش‌کننده  (ادمین/منشی)
+      - منشی       (فقط ادمین کل)
+      - مشتری      (ادمین/منشی؛ بدون distributor_id زیرمجموعه ادمین کل است)
+    """
+
+    distributor_id = serializers.IntegerField(
+        write_only=True,
+        required=False,
+        allow_null=True,
+        help_text="فقط برای مشتری: شناسه پخش‌کننده معرف",
+    )
+
+    company_name = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True,
+        help_text="فقط برای مشتری: نام کسب‌وکار",
+    )
+
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    class Meta:
+
+        model = User
+
+        fields = (
+            "username",
+            "password",
+            "phone",
+            "first_name",
+            "last_name",
+            "distributor_id",
+            "company_name",
+        )
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("این نام کاربری قبلاً گرفته شده است.")
+        return value
+
+    def validate_phone(self, value):
+        if value and User.objects.filter(phone=value).exists():
+            raise serializers.ValidationError("این شماره قبلاً ثبت شده است.")
+        return value
+
+    def validate_distributor_id(self, value):
+        if value is not None and not Distributor.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("پخش‌کننده یافت نشد.")
+        return value

@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from .views import ProductPriceViewSet
+from .views import DistributorPriceViewSet, LegacyProductPriceViewSet
 
 
 
@@ -14,9 +14,21 @@ router.register(
 
     r"",
 
-    ProductPriceViewSet,
+    DistributorPriceViewSet,
 
     basename="prices"
+
+)
+
+
+
+router.register(
+
+    r"legacy",
+
+    LegacyProductPriceViewSet,
+
+    basename="legacy-prices"
 
 )
 

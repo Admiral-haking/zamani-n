@@ -12,19 +12,20 @@ from .views import (
 router = DefaultRouter()
 
 
-router.register(
-    "",
-    DistributorViewSet,
-    basename="distributors"
-)
-
-
+# ترتیب مهم است: مسیرهای دارای پیشوند باید قبل از پیشوند خالی ثبت شوند
+# تا الگوی detail با (?P<pk>) آن‌ها را ندزدهد
 router.register(
     "customers",
     DistributorCustomerViewSet,
     basename="distributor-customers"
 )
 
+
+router.register(
+    "",
+    DistributorViewSet,
+    basename="distributors"
+)
 
 
 urlpatterns = [
