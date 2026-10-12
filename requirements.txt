@@ -6,3 +6,5 @@ django-filter>=25.1,<26
 django-extensions>=3.2,<5
 drf-spectacular>=0.28,<1
 psycopg[binary]>=3.2,<4
+requests>=2.32,<3
+Pillow>=11,<12
