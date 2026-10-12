@@ -5,9 +5,9 @@
       "root": "front"
     },
     "backend": {
-      "root": ".",
+      "root": "backend",
       "framework": "django",
-      "entrypoint": "api/index.py"
+      "entrypoint": "config/wsgi.py"
     }
   },
   "rewrites": [

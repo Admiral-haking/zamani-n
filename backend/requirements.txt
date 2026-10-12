@@ -16,6 +16,7 @@ PyJWT==2.13.0
 PyYAML==6.0.3
 referencing==0.37.0
 requests==2.34.2
+dj-database-url==2.3.0
 rpds-py==2026.6.3
 sqlparse==0.5.5
 typing_extensions==4.16.0
