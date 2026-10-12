@@ -39,9 +39,29 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me-in-production-genera
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()] or (['localhost', '127.0.0.1'] if (os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true') else [])
+def _env_list(name):
+    return [value.strip() for value in os.environ.get(name, '').split(',') if value.strip()]
 
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+
+ALLOWED_HOSTS = _env_list('DJANGO_ALLOWED_HOSTS')
+for vercel_host in (
+    os.environ.get('VERCEL_URL', ''),
+    os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+):
+    if vercel_host and vercel_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(vercel_host.removeprefix('https://').removeprefix('http://').rstrip('/'))
+if not ALLOWED_HOSTS and DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = _env_list('DJANGO_CSRF_TRUSTED_ORIGINS')
+for vercel_origin in (
+    os.environ.get('VERCEL_URL', ''),
+    os.environ.get('VERCEL_PROJECT_PRODUCTION_URL', ''),
+):
+    if vercel_origin:
+        origin = vercel_origin if '://' in vercel_origin else f'https://{vercel_origin}'
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin.rstrip('/'))
 
 
 
