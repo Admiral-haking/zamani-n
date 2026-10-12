@@ -38,9 +38,10 @@ class Command(BaseCommand):
                     "is_active": True,
                 },
             )
-            if created:
-                user.set_password(password)
-                user.save(update_fields=["password"])
+            # Demo credentials are intentionally controlled by the deployment
+            # secret so a forgotten test password can be rotated in Vercel.
+            user.set_password(password)
+            user.save(update_fields=["password"])
 
         admin = User.objects.get(username="demo_admin")
         categories = {
