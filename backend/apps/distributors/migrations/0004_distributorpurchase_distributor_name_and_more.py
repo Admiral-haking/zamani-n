@@ -15,7 +15,7 @@ def backfill_distributor_name(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('distributors', '0003_distributorpurchase'),
+        ('distributors', '0002_distributor_city'),
     ]
 
     operations = [
