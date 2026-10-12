@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>پیش‌نمایش فاکتور فروش</title>
+<style>
+    @page { size: A4; margin: 12mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, "Segoe UI", Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 20px; }
+    .invoice { max-width: 820px; margin: 0 auto; border: 3px solid #1f3864; background: #fff; }
+    .invoice-header { text-align: center; padding: 24px 22px 16px; background: #f7f9fc; border-bottom: 3px solid #f5c518; }
+    .invoice-header .logo { height: 86px; max-width: 240px; object-fit: contain; }
+    .brand-name { font-size: 26px; font-weight: bold; color: #1f3864; letter-spacing: 3px; margin-top: 6px; }
+    .head-strip { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #1f3864; color: #fff; padding: 12px 22px; font-size: 13px; flex-wrap: wrap; }
+    .head-strip .side { font-size: 12.5px; line-height: 1.9; }
+    .head-strip .doc-title { background: #f5c518; color: #111; font-weight: bold; font-size: 15px; padding: 6px 24px; border-radius: 4px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 14px 24px; font-size: 13px; border-bottom: 2px solid #e6e8ee; }
+    .meta div { line-height: 2; }
+    .meta b { display: inline-block; min-width: 74px; color: #1f3864; }
+    table { width: 100%; border-collapse: collapse; }
+    .items th { background: #1f3864; color: #fff; padding: 11px 10px; font-size: 13px; border: 2px solid #1f3864; }
+    .items td { padding: 10px; font-size: 13px; border: 2px solid #33415e; }
+    .items tbody tr:nth-child(even) td { background: #f5f7fb; }
+    .totals { width: 46%; margin-right: auto; margin-top: 16px; border: 2px solid #33415e; }
+    .totals td { padding: 10px 14px; font-size: 13.5px; border: 2px solid #33415e; }
+    .totals .final { background: #fff3cd; font-weight: bold; font-size: 14.5px; }
+    .sign { display: flex; justify-content: space-between; gap: 28px; margin-top: 40px; padding: 0 30px; font-size: 12.5px; color: #444; }
+    .sign .box { text-align: center; width: 42%; border-top: 2px solid #444; padding-top: 10px; font-weight: bold; }
+    .terms { margin: 24px 24px 0; padding: 14px 16px; border: 2px dashed #1f3864; background: #f8fafd; font-size: 12.5px; line-height: 2.1; }
+    .terms .card { font-weight: bold; color: #1f3864; font-size: 13.5px; }
+    .terms .text { color: #333; text-align: justify; margin-top: 4px; }
+    .footer { text-align: center; font-size: 11.5px; color: #777; padding: 16px; border-top: 2px solid #e6e8ee; margin-top: 22px; }
+    .btn-print { display: block; margin: 18px auto; padding: 10px 26px; font-size: 14px; cursor: pointer; background: #1f3864; color: #fff; border: none; border-radius: 6px; }
+    @media print { .btn-print { display: none; } }
+</style>
+</head>
+<body>
+    <button class="btn-print" onclick="window.print()">🖨 چاپ فاکتور</button>
+    <div class="invoice">
+        <div class="invoice-header">
+            <img src="image/sarfactor.jpg" alt="سر فاکتور" class="logo"
+                 onerror="this.onerror=null;var d=this.dataset;if(!d.f){d.f=1;this.src='image/logo.jpg';}if(!d.s){d.s=1;this.src='image/log/logo.jpg';}">
+            <div class="brand-name">پخش زمانی</div>
+        </div>
+        <div class="head-strip">
+            <div class="side" style="text-align:right;">شماره فاکتور: ۲۱</div>
+            <div class="doc-title">فاکتور فروش</div>
+            <div class="side" style="text-align:left;">تاریخ: ۱ مهر ۱۴۰۵</div>
+        </div>
+        <div class="meta">
+            <div><b>نام مشتری:</b> مهدیار تقاوی</div>
+            <div><b>کد رهگیری:</b> TRK-21-59D4E6</div>
+            <div><b>روش پرداخت:</b> کارت به کارت</div>
+            <div><b>وضعیت:</b> تایید شده</div>
+        </div>
+        <table class="items">
+            <thead>
+                <tr>
+                    <th style="width:6%;">ردیف</th>
+                    <th>شرح کالا</th>
+                    <th style="width:10%;">تعداد</th>
+                    <th style="width:18%;">قیمت واحد</th>
+                    <th style="width:18%;">مبلغ تخفیف</th>
+                    <th style="width:18%;">مبلغ کل</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="text-align:center;">۱</td>
+                    <td>استیک 60 درصد</td>
+                    <td style="text-align:center;">۲</td>
+                    <td>۳۸۰٬۰۰۰ تومان</td>
+                    <td>۰ تومان</td>
+                    <td>۷۶۰٬۰۰۰ تومان</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="totals">
+            <tr><td>جمع کل:</td><td style="text-align:left;">۷۶۰٬۰۰۰ تومان</td></tr>
+            <tr><td>تخفیف کل:</td><td style="text-align:left;">۰ تومان</td></tr>
+            <tr><td>پرداخت شده:</td><td style="text-align:left;">۷۶۰٬۰۰۰ تومان</td></tr>
+            <tr><td class="final">مانده بدهی:</td><td class="final" style="text-align:left;">۰ تومان</td></tr>
+        </table>
+        <div class="sign">
+            <div class="box">امضا و مهر فروشنده</div>
+            <div class="box">امضای خریدار</div>
+        </div>
+        <div class="terms">
+            <div class="card">ش کارت : <span dir="ltr">5041721056972384</span> محسن زمانی راد(بانک رسالت)</div>
+            <div class="text">این فاکتور پس از امضاء اینجانب یا نماینده ام سند تجاری تلقی شده و اجناس این فاکتور را صحیح و سالم تحویل گرفته و متعهد به پرداخت کل مانده حساب می باشم</div>
+        </div>
+        <div class="footer">با تشکر از خرید شما — پخش زمانی</div>
+    </div>
+</body>
+</html>
