@@ -11747,18 +11747,22 @@ scrollTopBtn.addEventListener('click', function() {
                 const isLocal = location.protocol === 'file:' || h === 'localhost' || h === '127.0.0.1';
                 return isLocal ? 'http://127.0.0.1:8000/api' : location.origin + '/api';
             })();
+            const SITE_API_TIMEOUT_MS = 20000;
 
             function siteApi(endpoint, options) {
                 const token = localStorage.getItem('access_token') || '';
                 const opts = options || {};
                 const headers = Object.assign({}, opts.headers || {}, token ? { 'Authorization': 'Bearer ' + token } : {});
-                return fetch(__SITE_API + endpoint, Object.assign({}, opts, { headers: headers }))
+                const controller = new AbortController();
+                const timer = setTimeout(function () { controller.abort(); }, SITE_API_TIMEOUT_MS);
+                return fetch(__SITE_API + endpoint, Object.assign({}, opts, { headers: headers, signal: controller.signal }))
                     .then(function(r) {
                         if (r.status === 204) return { success: true, status: 204, data: null };
                         return r.json().then(function(d) { return { success: r.ok, status: r.status, data: d }; })
                                 .catch(function() { return { success: r.ok, status: r.status, data: null }; });
                     })
-                    .catch(function() { return { success: false, status: 0, data: null }; });
+                    .catch(function(error) { return { success: false, status: 0, data: null, error: error && error.name === 'AbortError' ? 'timeout' : 'network' }; })
+                    .finally(function() { clearTimeout(timer); });
             }
 
             let customerPricing = null;
