@@ -140,6 +140,11 @@ async function apiRequest(endpoint, options = {}) {
                 }
 
                 const data = await readApiResponse(retryResponse);
+                if (!retryResponse.ok) {
+                    window.dispatchEvent(new CustomEvent('zamani:api-failure', {
+                        detail: { endpoint: endpoint, status: retryResponse.status, data: data }
+                    }));
+                }
                 return {
                     success: retryResponse.ok,
                     status: retryResponse.status,
@@ -165,6 +170,11 @@ async function apiRequest(endpoint, options = {}) {
         }
 
         const data = await readApiResponse(response);
+        if (!response.ok) {
+            window.dispatchEvent(new CustomEvent('zamani:api-failure', {
+                detail: { endpoint: endpoint, status: response.status, data: data }
+            }));
+        }
         return {
             success: response.ok,
             status: response.status,
@@ -173,6 +183,9 @@ async function apiRequest(endpoint, options = {}) {
 
     } catch (error) {
         console.error("API Error:", error);
+        window.dispatchEvent(new CustomEvent('zamani:api-failure', {
+            detail: { endpoint: endpoint, status: 0, error: error.message }
+        }));
         return {
             success: false,
             status: 0,

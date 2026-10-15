@@ -17,6 +17,19 @@ class SecretaryPanel {
         this.inventory = [];
         this.notifications = [];
         this._replyFiles = [];
+        this.loadFailures = new Map();
+        window.addEventListener('zamani:api-failure', (event) => {
+            const detail = event.detail || {};
+            const endpoint = String(detail.endpoint || '');
+            const labels = [
+                ['dashboard', 'داشبورد'], ['customers', 'مشتریان'], ['orders', 'سفارش‌ها'],
+                ['tickets', 'تیکت‌ها'], ['products', 'محصولات'], ['distributors', 'پخش‌کننده‌ها'],
+                ['finance/transactions', 'تراکنش‌ها'], ['finance/checks', 'چک‌ها'],
+                ['inventory', 'انبار'], ['notifications', 'اعلان‌ها']
+            ];
+            const match = labels.find(([key]) => endpoint.includes(key));
+            if (match) this.loadFailures.set(match[0], match[1]);
+        });
 
         this.init();
     }
@@ -56,7 +69,12 @@ class SecretaryPanel {
             ]);
 
             this.renderAll();
-            console.log('✅ تمام داده‌ها بارگذاری شدند');
+            if (this.loadFailures.size) {
+                const failed = Array.from(this.loadFailures.values()).join('، ');
+                this.showError(`بارگذاری این بخش‌ها ناموفق بود: ${failed}. اتصال و دسترسی را بررسی کنید.`);
+            } else {
+                console.log('✅ تمام داده‌ها بارگذاری شدند');
+            }
         } catch (error) {
             console.error('❌ خطا در بارگذاری داده‌ها:', error);
             this.showError('خطا در بارگذاری داده‌ها. لطفاً صفحه را مجدداً بارگذاری کنید.');
