@@ -6,7 +6,7 @@
       "root": "backend",
       "framework": "django",
       "entrypoint": "config/wsgi.py",
-      "buildCommand": "python manage.py migrate --noinput && if [ -n \"$SEED_ADMIN_PASSWORD\" ]; then python scripts/create_users.py; fi"
+      "buildCommand": "python manage.py migrate --noinput && if [ -n \"$SEED_ADMIN_PASSWORD\" ] && [ -n \"$SEED_SECRETARY_PASSWORD\" ] && [ -n \"$SEED_DISTRIBUTOR_PASSWORD\" ] && [ -n \"$SEED_CUSTOMER_PASSWORD\" ]; then python scripts/create_users.py; else echo 'Seed passwords are incomplete; skipping demo-user seed.'; fi"
     }
   },
   "rewrites": [
