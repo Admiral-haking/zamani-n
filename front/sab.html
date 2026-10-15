@@ -3546,14 +3546,49 @@
                 });
             }
 
+            const value = (id) => document.getElementById(id)?.value.trim() || '';
+            const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
+
             document.addEventListener('click', async (event) => {
+                const customerButton = event.target.closest('#saveNewCustomerBtn');
+                const distributorButton = event.target.closest('#saveNewDistributorBtn');
+                const checkButton = event.target.closest('#saveCheckBtn');
                 const profileButton = event.target.closest('#saveProfileBtn');
                 const passwordButton = event.target.closest('#savePasswordBtn');
-                if (!profileButton && !passwordButton) return;
+                if (!profileButton && !passwordButton && !customerButton && !distributorButton && !checkButton) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
-                if (profileButton) {
+                if (customerButton) {
+                    const parts = value('newCustomerName').split(/\s+/);
+                    const result = await apiPost('accounts/users/create-customer/', {
+                        first_name: parts.shift() || '', last_name: parts.join(' '),
+                        username: value('newCustomerUsername'), password: value('newCustomerPassword'),
+                        phone: value('newCustomerPhone'), national_code: value('newCustomerNationalId'),
+                        company_name: value('newCustomerName'), distributor_id: value('newCustomerDistributor') || null
+                    });
+                    showApiResult('addCustomerMsg', result, 'مشتری در دیتابیس ذخیره شد.');
+                } else if (distributorButton) {
+                    const parts = value('newDistributorName').split(/\s+/);
+                    const result = await apiPost('accounts/users/create-distributor/', {
+                        first_name: parts.shift() || '', last_name: parts.join(' '),
+                        username: value('newDistributorUsername'), password: value('newDistributorPassword'),
+                        phone: value('newDistributorPhone') || null
+                    });
+                    showApiResult('addDistributorMsg', result, 'پخش‌کننده در دیتابیس ذخیره شد.');
+                } else if (checkButton) {
+                    const found = await apiGet(`customers/?search=${encodeURIComponent(value('checkPhone'))}`);
+                    const customer = found.success && (found.data?.results || found.data || [])[0];
+                    if (!customer?.id) {
+                        showMsg('addCheckMsg', '❌ ابتدا مشتری را در سیستم ثبت کنید تا چک به او متصل شود.', 'error');
+                        return;
+                    }
+                    const result = await apiPost('finance/checks/', {
+                        customer: customer.id, check_number: value('checkPhone'), bank_name: 'نامشخص',
+                        amount: value('checkAmount'), issue_date: value('checkReceiveDate'), due_date: value('checkDueDate')
+                    });
+                    showApiResult('addCheckMsg', result, 'چک در دیتابیس ذخیره شد.');
+                } else if (profileButton) {
                     const result = await apiPut('accounts/me/', {
                         first_name: document.getElementById('editName')?.value.trim() || '',
                         email: document.getElementById('editEmail')?.value.trim() || '',
