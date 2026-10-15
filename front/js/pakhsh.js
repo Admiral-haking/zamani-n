@@ -931,8 +931,12 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 });
             });
             chain.then(function () {
-                if (done) done(true, saved);
+                if (done) done(saved === keys.length, saved);
+            }).catch(function () {
+                if (done) done(false, saved);
             });
+        }).catch(function () {
+            if (done) done(false, 0);
         });
     };
 
@@ -985,13 +989,17 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 $id('addCustomerForm').style.display = 'none';
                 if (mb) {
                     mb.innerHTML = '';
-                    var note = 'مشتری با موفقیت ایجاد شد. اکنون می‌تواند با نام کاربری و رمز عبور وارد شود.';
-                    if (nPending) note += ' (' + faNum(saved) + ' قیمت دستی ثبت شد.)';
-                    mb.appendChild(msgBox(note, true));
+                    var note = ok
+                        ? 'مشتری با موفقیت ایجاد شد. اکنون می‌تواند با نام کاربری و رمز عبور وارد شود.'
+                        : 'مشتری ایجاد شد، اما ذخیره قیمت‌های دستی کامل نشد.';
+                    if (ok && nPending) note += ' (' + faNum(saved) + ' قیمت دستی ثبت شد.)';
+                    mb.appendChild(msgBox(note, ok));
                 }
                 me.loadCustomers();
                 me.rebuildCustomerPriceList();
             });
+        }).catch(function () {
+            if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برای ایجاد مشتری برقرار نشد.', false)); }
         });
     };
 
@@ -1582,6 +1590,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 me.checksQuery = '';
                 me.checksPage = 1;
                 me.loadChecks();
+            }).catch(function () {
+                finish();
+                if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برای ثبت چک برقرار نشد.', false)); }
             });
         };
 
@@ -1611,6 +1622,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.customers.push(res.data);
             me.custMap[res.data.id] = res.data;
             afterCustomer(res.data.id);
+        }).catch(function () {
+            finish();
+            if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برای ایجاد مشتری برقرار نشد.', false)); }
         });
     };
 
