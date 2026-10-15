@@ -329,6 +329,8 @@ class CustomerPriceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         user = self.request.user
+        if not user.is_authenticated:
+            return ProductPrice.objects.none()
 
         base = ProductPrice.objects.select_related(
             "customer", "customer__user", "product"
