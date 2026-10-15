@@ -22,7 +22,7 @@ from apps.products.models import Product
 
 
 def _is_staff(user):
-    return user.is_superuser or user.role in ["ADMIN", "SECRETARY"]
+    return bool(user.is_authenticated and (user.is_superuser or user.role in ["ADMIN", "SECRETARY"]))
 
 
 class DistributorPriceViewSet(viewsets.ModelViewSet):
