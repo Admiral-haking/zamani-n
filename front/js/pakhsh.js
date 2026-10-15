@@ -89,6 +89,18 @@
         return 'خطای ناشناخته.';
     }
 
+    function renderPanelLoadError(targetId, message, retry) {
+        var target = $id(targetId);
+        if (!target) return;
+        var content = '<i class="fas fa-exclamation-triangle"></i><span>' + esc(message || 'بارگذاری اطلاعات ناموفق بود.') + '</span>' +
+            (retry ? '<button type="button" class="btn-secondary btn-sm panel-retry-btn">تلاش دوباره</button>' : '');
+        target.innerHTML = target.tagName === 'TBODY'
+            ? '<tr><td colspan="10" class="load-error-cell"><div class="load-error">' + content + '</div></td></tr>'
+            : '<div class="load-error">' + content + '</div>';
+        var button = target.querySelector('.panel-retry-btn');
+        if (button && retry) button.addEventListener('click', retry);
+    }
+
     function msgBox(msg, ok) {
         if (!msg) return;
         var box = document.createElement('div');
@@ -242,7 +254,10 @@
     DistributorPanel.prototype.loadInventoryFromServer = function () {
         var me = this;
         apiGet('/inventory/?page_size=500').then(function (res) {
-            if (!res || !res.success) return;
+            if (!res || !res.success) {
+                renderPanelLoadError('companyInventoryGrid', errMsg(res), function () { me.loadInventoryFromServer(); });
+                return;
+            }
             var rows = Array.isArray(res.data) ? res.data : ((res.data && res.data.results) || []);
             var inv = {};
             rows.forEach(function (row) {
@@ -264,6 +279,8 @@
                     '<div class="summary-values"><div class="summary-item"><span class="summary-label">📦 بسته‌ای</span><span class="summary-value package">' + faNum(p.pkg) + '</span></div>' +
                     '<div class="summary-item"><span class="summary-label">📦 کارتنی</span><span class="summary-value carton">' + faNum(p.carton) + '</span></div></div></div>';
             }).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--text-gray);padding:18px;font-size:13px;">داده‌ای از انبار شرکت در دسترس نیست.</div>';
+        }).catch(function () {
+            renderPanelLoadError('companyInventoryGrid', 'بارگذاری انبار شرکت ناموفق بود.', function () { me.loadInventoryFromServer(); });
         });
     };
 
@@ -339,12 +356,15 @@
         apiGet('/distributors/dashboard/').then(function (res) {
             if (!res.success) {
                 console.warn('dashboard', errMsg(res));
+                renderPanelLoadError('companyInventoryGrid', 'بارگذاری داشبورد ناموفق بود.', function () { me.loadDashboard(); });
                 return;
             }
             me.dashboard = res.data;
             me.distributor = res.data.distributor || null;
             me.renderDashboard();
             me.renderSettings();
+        }).catch(function () {
+            renderPanelLoadError('companyInventoryGrid', 'ارتباط با داشبورد برقرار نشد.', function () { me.loadDashboard(); });
         });
     };
 
@@ -543,9 +563,14 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.loadPurchases = function () {
         var me = this;
         apiGet('/distributors/purchases/?page_size=100').then(function (res) {
-            if (!res.success) return;
+            if (!res.success) {
+                renderPanelLoadError('purchaseHistoryBody', errMsg(res), function () { me.loadPurchases(); });
+                return;
+            }
             me.purchases = res.data.results || res.data || [];
             me.renderPurchases();
+        }).catch(function () {
+            renderPanelLoadError('purchaseHistoryBody', 'بارگذاری تاریخچه خرید ناموفق بود.', function () { me.loadPurchases(); });
         });
     };
 
