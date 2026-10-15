@@ -73,10 +73,14 @@ class AccountRequestApproveView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        national_id = (request.data.get("national_id") or "").strip() or None
         user = User.objects.create(
             username=username,
             role=User.Role.CUSTOMER,
             phone=ticket.guest_phone or None,
+            first_name=(request.data.get("first_name") or ticket.guest_name).strip(),
+            last_name=(request.data.get("last_name") or "").strip(),
+            national_code=national_id,
         )
         user.set_password(password)
         user.save()
@@ -85,7 +89,11 @@ class AccountRequestApproveView(APIView):
         if customer is None:
             customer = Customer(user=user)
         customer.phone = ticket.guest_phone
-        customer.company_name = ticket.guest_name
+        customer.company_name = (request.data.get("shop_name") or ticket.guest_name).strip()
+        customer.shop_name = (request.data.get("shop_name") or ticket.guest_name).strip()
+        customer.national_id = national_id
+        customer.postal_code = (request.data.get("postal_code") or "").strip()
+        customer.address = (request.data.get("address") or "").strip()
         customer.distributor = None  # زیرمجموعه ادمین کل
         customer.save()
 
@@ -112,6 +120,35 @@ class AccountRequestApproveView(APIView):
             "user": {"id": user.id, "username": username},
             "message": "حساب مشتری زیرمجموعه ادمین کل ساخته شد.",
         })
+
+
+class AccountRequestRejectView(APIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def post(self, request, pk=None):
+        ticket = Ticket.objects.filter(
+            pk=pk, category=Ticket.Category.ACCOUNT_REQUEST, user__isnull=True
+        ).first()
+        if not ticket:
+            return Response({"error": "درخواست یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+        ticket.admin_reply = (request.data.get("note") or "درخواست رد شد.").strip()
+        ticket.admin_replied_at = timezone_now()
+        ticket.status = Ticket.Status.CLOSED
+        ticket.save(update_fields=["admin_reply", "admin_replied_at", "status", "updated_at"])
+        return Response({"message": "درخواست رد شد."})
+
+
+class AccountRequestDeleteView(APIView):
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def delete(self, request, pk=None):
+        ticket = Ticket.objects.filter(
+            pk=pk, category=Ticket.Category.ACCOUNT_REQUEST, user__isnull=True
+        ).first()
+        if not ticket:
+            return Response({"error": "درخواست یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+        ticket.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 def timezone_now():

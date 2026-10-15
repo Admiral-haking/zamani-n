@@ -8285,10 +8285,10 @@
                 if (status) params.push('status=' + encodeURIComponent(status));
                 if (q) params.push('search=' + encodeURIComponent(q));
                 params.push('page_size=200');
-                return apiGet('customers/public-registrations/?' + params.join('&')).then(function(res) {
+                return apiGet('owner/account-requests/?' + params.join('&')).then(function(res) {
                     let rows = [];
                     if (res && res.success && res.data) {
-                        rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
+                        rows = Array.isArray(res.data) ? res.data : (res.data.requests || res.data.results || []);
                     }
                     publicRegRows = rows;
                     renderPublicRegList(rows);
@@ -8305,9 +8305,9 @@
                 const content = document.getElementById('publicRegViewContent');
                 if (!content) return;
                 const rows = [];
-                rows.push('<div class="profile-field"><span class="field-label">👤 نام کامل</span><span class="field-value">' + escapeHtml(((r.first_name || '') + ' ' + (r.last_name || '')).trim() || '—') + '</span></div>');
-                rows.push('<div class="profile-field"><span class="field-label">🏪 نام مغازه</span><span class="field-value">' + escapeHtml(r.shop_name || '—') + '</span></div>');
-                rows.push('<div class="profile-field"><span class="field-label">📞 شماره تماس</span><span class="field-value">' + toFaDigits(r.phone || '—') + '</span></div>');
+                rows.push('<div class="profile-field"><span class="field-label">👤 نام کامل</span><span class="field-value">' + escapeHtml(((r.first_name || '') + ' ' + (r.last_name || '')).trim() || r.guest_name || '—') + '</span></div>');
+                rows.push('<div class="profile-field"><span class="field-label">🏪 نام مغازه</span><span class="field-value">' + escapeHtml(r.shop_name || r.title || '—') + '</span></div>');
+                rows.push('<div class="profile-field"><span class="field-label">📞 شماره تماس</span><span class="field-value">' + toFaDigits(r.phone || r.guest_phone || '—') + '</span></div>');
                 rows.push('<div class="profile-field"><span class="field-label">🆔 کد ملی</span><span class="field-value">' + toFaDigits(r.national_id || '—') + '</span></div>');
                 rows.push('<div class="profile-field"><span class="field-label">📍 کد پستی</span><span class="field-value">' + toFaDigits(r.postal_code || '—') + '</span></div>');
                 rows.push('<div class="profile-field"><span class="field-label">🏠 آدرس</span><span class="field-value">' + escapeHtml(r.address || '—') + '</span></div>');
@@ -8355,11 +8355,11 @@
                 const r = publicRegRows.find(function(x) { return String(x.id) === String(id); });
                 if (!r) return;
                 document.getElementById('publicRegEditId').value = r.id;
-                document.getElementById('publicRegFirstName').value = r.first_name || '';
+                document.getElementById('publicRegFirstName').value = r.first_name || r.guest_name || '';
                 document.getElementById('publicRegLastName').value = r.last_name || '';
-                document.getElementById('publicRegPhone').value = r.phone || '';
+                document.getElementById('publicRegPhone').value = r.phone || r.guest_phone || '';
                 document.getElementById('publicRegNationalId').value = r.national_id || '';
-                document.getElementById('publicRegShopName').value = r.shop_name || '';
+                document.getElementById('publicRegShopName').value = r.shop_name || (r.title || '').replace(/^درخواست ایجاد حساب\s*-\s*/, '') || '';
                 document.getElementById('publicRegPostalCode').value = r.postal_code || '';
                 document.getElementById('publicRegAddress').value = r.address || '';
                 document.getElementById('publicRegUsername').value = '';
@@ -8421,7 +8421,7 @@
                 if (dist) body.distributor = parseInt(dist, 10);
                 const btn = document.getElementById('publicRegApproveBtn');
                 if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ایجاد...'; }
-                apiPost('customers/public-registrations/' + id + '/approve/', body).then(function(res) {
+                apiPost('owner/account-requests/' + id + '/approve/', body).then(function(res) {
                     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> تایید و ایجاد مشتری'; }
                     if (res && res.success) {
                         showMsg('publicRegMsg', '✅ ' + ((res.data && res.data.message) ? res.data.message : 'مشتری ایجاد شد.'), 'success');
@@ -8441,7 +8441,7 @@
                 const id = document.getElementById('publicRegEditId').value;
                 if (!id) return;
                 if (!confirm('این درخواست ثبت‌نام رد شود؟')) return;
-                apiPost('customers/public-registrations/' + id + '/reject/', {
+                apiPost('owner/account-requests/' + id + '/reject/', {
                     note: document.getElementById('publicRegNote').value.trim()
                 }).then(function(res) {
                     if (res && res.success) {
@@ -8493,7 +8493,7 @@
                     if (t.classList.contains('public-reg-edit')) { openPublicRegEdit(id); return; }
                     if (t.classList.contains('public-reg-delete')) {
                         if (!confirm('این درخواست ثبت‌نام حذف شود؟')) return;
-                        apiDelete('customers/public-registrations/' + id + '/').then(function(res) {
+                        apiDelete('owner/account-requests/' + id + '/').then(function(res) {
                             if (res && res.success) { showMsg('publicRegMsg', 'درخواست حذف شد.', 'info'); loadPublicRegistrations(); }
                             else { showMsg('publicRegMsg', '⚠️ خطا در حذف.', 'error'); }
                         });

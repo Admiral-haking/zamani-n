@@ -10,4 +10,6 @@ from .settings import OwnerSettingsView
 from .account_requests import (
     AccountRequestListView,
     AccountRequestApproveView,
+    AccountRequestRejectView,
+    AccountRequestDeleteView,
 )

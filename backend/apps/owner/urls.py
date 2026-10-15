@@ -5,6 +5,8 @@ from .views import (
     OwnerUserViewSet,
     AccountRequestListView,
     AccountRequestApproveView,
+    AccountRequestRejectView,
+    AccountRequestDeleteView,
 )
 
 router = DefaultRouter()
@@ -18,5 +20,7 @@ urlpatterns = [
         AccountRequestApproveView.as_view(),
         name='owner-account-request-approve',
     ),
+    path('account-requests/<int:pk>/reject/', AccountRequestRejectView.as_view(), name='owner-account-request-reject'),
+    path('account-requests/<int:pk>/', AccountRequestDeleteView.as_view(), name='owner-account-request-delete'),
     path('', include(router.urls)),
 ]
