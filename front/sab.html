@@ -3553,13 +3553,18 @@
                     if (el) el.textContent = Number(value || 0).toLocaleString('fa-IR');
                 };
                 setNumber('ordersTodayCount', data.orders?.today);
-                setNumber('newCustomersCount', data.users?.customers);
-                setNumber('transactionsCount', data.orders?.total);
+                setNumber('newCustomersCount', data.today?.new_customers);
+                setNumber('transactionsCount', data.today?.transactions);
                 setCard('cardOrdersToday', data.orders?.today);
-                setCard('cardNewCustomers', data.users?.customers);
-                setCard('cardTransactions', data.orders?.total);
+                setCard('cardNewCustomers', data.today?.new_customers);
+                setCard('cardTransactions', data.today?.transactions);
                 const revenue = document.querySelector('#cardIncomeToday .value');
                 if (revenue) revenue.textContent = Number(data.finance?.today_revenue || 0).toLocaleString('fa-IR') + ' تومان';
+                const dashboardTickets = document.getElementById('dashboardTickets');
+                if (dashboardTickets) {
+                    const tickets = data.recent_tickets || [];
+                    dashboardTickets.innerHTML = tickets.length ? tickets.map((ticket) => `<div class="ticket-item"><b>${String(ticket.title || 'تیکت').replace(/[&<>]/g, '')}</b><span>${String(ticket.status || '').replace(/[&<>]/g, '')}</span></div>`).join('') : '<div class="ticket-item">تیکتی ثبت نشده است.</div>';
+                }
             }
 
             const value = (id) => document.getElementById(id)?.value.trim() || '';

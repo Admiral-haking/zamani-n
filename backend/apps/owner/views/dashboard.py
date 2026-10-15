@@ -10,6 +10,7 @@ from apps.accounts.models import User
 from apps.products.models import Product
 from apps.orders.models import Order
 from apps.finance.models import Transaction
+from apps.tickets.models import Ticket
 
 
 class OwnerDashboardView(APIView):
@@ -38,6 +39,10 @@ class OwnerDashboardView(APIView):
         pending_orders = Order.objects.filter(status='PENDING').count()
         today_orders = Order.objects.filter(created_at__date=today).count()
         week_orders = Order.objects.filter(created_at__gte=week_ago).count()
+        today_customers = User.objects.filter(
+            role=User.Role.CUSTOMER, date_joined__date=today
+        ).count()
+        today_transactions = Transaction.objects.filter(created_at__date=today).count()
 
         # آمار مالی
         total_revenue = Transaction.objects.filter(
@@ -64,6 +69,11 @@ class OwnerDashboardView(APIView):
         ).aggregate(total=Sum('amount'))['total'] or 0
 
         data = {
+            'today': {
+                'new_customers': today_customers,
+                'orders': today_orders,
+                'transactions': today_transactions,
+            },
             'users': {
                 'total': total_users,
                 'customers': total_customers,
@@ -90,5 +100,13 @@ class OwnerDashboardView(APIView):
                 'total_debt': total_debt,
             }
         }
+
+        data['recent_tickets'] = list(
+            Ticket.objects.select_related('user').order_by('-created_at')[:5].values(
+                'id', 'title', 'status', 'created_at'
+            )
+        )
+        for ticket in data['recent_tickets']:
+            ticket['created_at'] = ticket['created_at'].isoformat()
 
         return Response(data)
