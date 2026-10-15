@@ -139,6 +139,17 @@ class CheckSerializer(serializers.ModelSerializer):
             "registered_by",
         )
 
+    def validate(self, attrs):
+        amount = attrs.get('amount', getattr(self.instance, 'amount', None))
+        issue_date = attrs.get('issue_date', getattr(self.instance, 'issue_date', None))
+        due_date = attrs.get('due_date', getattr(self.instance, 'due_date', None))
+
+        if amount is not None and amount <= 0:
+            raise serializers.ValidationError({'amount': 'مبلغ چک باید بیشتر از صفر باشد.'})
+        if issue_date and due_date and due_date < issue_date:
+            raise serializers.ValidationError({'due_date': 'تاریخ سررسید نمی‌تواند قبل از تاریخ دریافت باشد.'})
+        return attrs
+
     def get_customer_name(self, obj):
         if obj.customer_id:
             return obj.customer.company_name or obj.customer.user.get_full_name() or (

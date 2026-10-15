@@ -1,3 +1,25 @@
-from django.test import TestCase
+from datetime import date
+from decimal import Decimal
 
-# Create your tests here.
+from django.test import TestCase
+from rest_framework.exceptions import ValidationError
+
+from .serializers import CheckSerializer
+
+
+class CheckSerializerTests(TestCase):
+    def test_check_amount_must_be_positive(self):
+        with self.assertRaises(ValidationError):
+            CheckSerializer().validate({
+                'amount': Decimal('0'),
+                'issue_date': date(2026, 1, 2),
+                'due_date': date(2026, 1, 3),
+            })
+
+    def test_due_date_cannot_precede_issue_date(self):
+        with self.assertRaises(ValidationError):
+            CheckSerializer().validate({
+                'amount': Decimal('1000'),
+                'issue_date': date(2026, 1, 3),
+                'due_date': date(2026, 1, 2),
+            })
