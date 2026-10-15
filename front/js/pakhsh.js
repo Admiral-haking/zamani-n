@@ -2460,7 +2460,15 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.deleteModalPrice = function (id) {
         var me = this;
         apiDelete('/pricing/customer-prices/' + id + '/').then(function (res) {
-            if (res && res.success) me.loadModalPrices();
+            if (res && res.success) {
+                me.loadModalPrices();
+                return;
+            }
+            var m = $id('priceModalResult');
+            if (m) m.textContent = errMsg(res) || 'حذف قیمت انجام نشد.';
+        }).catch(function () {
+            var m = $id('priceModalResult');
+            if (m) m.textContent = 'ارتباط با سرور برای حذف قیمت برقرار نشد.';
         });
     };
 
@@ -2511,7 +2519,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                                 product: it.product,
                                 price: it.price,
                                 discount_price: it.discount_price || null
-                            }).then(function (r) { if (r && r.success) savedCount++; });
+                        }).then(function (r) {
+                            if (r && r.success) savedCount++;
+                            else throw new Error(errMsg(r));
+                        });
                         });
                     });
                     return c2;
@@ -2526,7 +2537,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                     var rows = (res && res.success) ? (res.data.results || res.data || []) : [];
                     var target = rows[0];
                     if (!target) return;
-                    return apiDelete('/pricing/customer-prices/' + target.id + '/');
+                    return apiDelete('/pricing/customer-prices/' + target.id + '/').then(function (deleteRes) {
+                        if (!deleteRes || !deleteRes.success) throw new Error(errMsg(deleteRes));
+                    });
                 });
             });
         });
