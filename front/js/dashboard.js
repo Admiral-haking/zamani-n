@@ -29,10 +29,19 @@ class Dashboard {
         }
 
         try {
-            await this.loadAllData();
+            const results = await this.loadAllData();
+            const failed = results.filter(result => result.status === 'rejected');
+            // Promise.allSettled keeps one broken widget from hiding the rest,
+            // but a dashboard with no usable API data must not claim success.
+            if (failed.length >= results.length - 1) {
+                throw new Error('اطلاعات اصلی داشبورد بارگذاری نشد');
+            }
             this.renderDashboard();
             this.jalaliEnhanceCust();
-            this.showToast('✅ داشبورد با موفقیت بارگذاری شد', 'success');
+            this.showToast(
+                failed.length ? '⚠️ بخشی از اطلاعات داشبورد بارگذاری نشد' : '✅ داشبورد با موفقیت بارگذاری شد',
+                failed.length ? 'warning' : 'success'
+            );
         } catch (error) {
             console.error('❌ خطا در بارگذاری داشبورد:', error);
             this.showToast('❌ خطا در بارگذاری اطلاعات داشبورد', 'error');
