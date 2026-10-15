@@ -14,6 +14,7 @@ from apps.inventory.models import Inventory
 from apps.tickets.models import Ticket
 from apps.finance.models import Transaction
 from apps.common.permissions.permissions import IsAdminOrSecretary
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 # فاکتورهایی که فروش محسوب می‌شوند (خریدهای واقعی مشتری)
 SALES_STATUSES = ('CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED')
@@ -26,6 +27,7 @@ class DashboardView(APIView):
 
     permission_classes = [IsAdminOrSecretary]
 
+    @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request):
         try:
             # Use Django's configured timezone (Asia/Tehran), not the host UTC

@@ -6,6 +6,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from apps.owner.permissions import IsOwner
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 from apps.accounts.models import User
 from apps.products.models import Product
 from apps.orders.models import Order
@@ -16,6 +17,7 @@ from apps.tickets.models import Ticket
 class OwnerDashboardView(APIView):
     permission_classes = [IsAuthenticated, IsOwner]
 
+    @extend_schema(responses=OpenApiTypes.OBJECT)
     def get(self, request):
         now = timezone.now()
         today = now.date()
