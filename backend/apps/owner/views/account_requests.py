@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from apps.owner.permissions import IsOwner
+from apps.common.permissions.permissions import IsAdminOrSecretary
 from apps.accounts.models import User
 from apps.customers.models import Customer
 from apps.tickets.models import Ticket
@@ -13,7 +13,7 @@ from apps.audit.services import AuditService
 class AccountRequestListView(APIView):
     """لیست تیکت‌های «درخواست ایجاد حساب» برای ادمین کل"""
 
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
     def get(self, request):
         qs = Ticket.objects.filter(
@@ -41,7 +41,7 @@ class AccountRequestApproveView(APIView):
     مشتری جدید زیرمجموعه خودِ ادمین کل (بدون معرف) ساخته می‌شود.
     """
 
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
     def post(self, request, pk=None):
         ticket = Ticket.objects.filter(
@@ -123,7 +123,7 @@ class AccountRequestApproveView(APIView):
 
 
 class AccountRequestRejectView(APIView):
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
     def post(self, request, pk=None):
         ticket = Ticket.objects.filter(
@@ -139,7 +139,7 @@ class AccountRequestRejectView(APIView):
 
 
 class AccountRequestDeleteView(APIView):
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
     def delete(self, request, pk=None):
         ticket = Ticket.objects.filter(
