@@ -55,6 +55,14 @@ button:disabled,
     opacity: .58;
 }
 
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+    outline: 2px solid rgba(230, 179, 30, .9);
+    outline-offset: 2px;
+}
+
 @keyframes panel-section-in {
     from { opacity: .65; transform: translateY(3px); }
     to { opacity: 1; transform: translateY(0); }
