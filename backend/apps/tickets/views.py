@@ -3,6 +3,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Count, Q
@@ -334,12 +335,14 @@ class TicketViewSet(viewsets.ModelViewSet):
             return None
         return Ticket.objects.filter(pk=pk, user__isnull=True).prefetch_related('messages__attachments').first()
 
+    @extend_schema(exclude=True)
     def support_chat_detail(self, request, pk=None):
         ticket = self._get_staff_chat(pk)
         if not ticket:
             return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(self._support_chat_payload(ticket))
 
+    @extend_schema(exclude=True)
     def support_chat_read(self, request, pk=None):
         ticket = self._get_staff_chat(pk)
         if not ticket:
@@ -348,6 +351,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.save(update_fields=['status', 'updated_at'])
         return Response(self._support_chat_payload(ticket))
 
+    @extend_schema(exclude=True)
     def support_chat_reply(self, request, pk=None):
         ticket = self._get_staff_chat(pk)
         if not ticket:
@@ -367,6 +371,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket._prefetched_objects_cache = {}
         return Response(self._support_chat_payload(ticket))
 
+    @extend_schema(exclude=True)
     def support_chat_close(self, request, pk=None):
         ticket = self._get_staff_chat(pk)
         if not ticket:
@@ -375,6 +380,7 @@ class TicketViewSet(viewsets.ModelViewSet):
         ticket.save(update_fields=['status', 'updated_at'])
         return Response(self._support_chat_payload(ticket))
 
+    @extend_schema(exclude=True)
     def support_chat_delete(self, request, pk=None):
         ticket = self._get_staff_chat(pk)
         if not ticket:
