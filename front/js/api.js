@@ -71,7 +71,7 @@ async function refreshAccessToken() {
     }
 
     try {
-        const response = await fetch(`${API_URL}/accounts/refresh/`, {
+        const response = await fetchWithApiTimeout(`${API_URL}/accounts/refresh/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
