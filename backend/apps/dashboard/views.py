@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 from datetime import datetime, timedelta
 
 from apps.orders.models import Order
@@ -22,18 +23,20 @@ class DashboardView(APIView):
     """
     داشبورد کامل برای پنل منشی
     """
-    
+
     permission_classes = [IsAdminOrSecretary]
 
     def get(self, request):
         try:
-            today = datetime.now().date()
-            
+            # Use Django's configured timezone (Asia/Tehran), not the host UTC
+            # clock, so "today" matches the dates shown to staff in the UI.
+            today = timezone.localdate()
+
             # ===== آمار پایه =====
             total_customers = Customer.objects.filter(is_active=True).count()
             total_products = Product.objects.filter(is_active=True).count()
             total_orders = Order.objects.count()
-            
+
             # ===== سفارشات امروز =====
             today_orders = Order.objects.filter(created_at__date=today)
             today_orders_count = today_orders.count()
@@ -47,23 +50,23 @@ class DashboardView(APIView):
             today_transactions_count = Transaction.objects.filter(
                 created_at__date=today
             ).count()
-            
+
             # ===== مشتریان جدید امروز =====
             today_new_customers = Customer.objects.filter(created_at__date=today).count()
-            
+
             # ===== تیکت‌های باز =====
             open_tickets = Ticket.objects.filter(
                 status__in=['OPEN', 'ANSWERED']
             ).count()
-            
+
             # ===== موجودی کم =====
             low_stock = Inventory.objects.filter(
                 quantity__lte=10
             ).count()
-            
+
             # ===== سفارشات در انتظار =====
             pending_orders = Order.objects.filter(status='PENDING').count()
-            
+
 # ===== فروش هفتگی =====
             start_of_week = today - timedelta(days=today.weekday())
             weekly_orders = Order.objects.filter(
@@ -83,12 +86,12 @@ class DashboardView(APIView):
             monthly_revenue = monthly_orders.aggregate(
                 total=Sum('total_price')
             )['total'] or 0
-            
+
             # ===== ۵ سفارش اخیر =====
             recent_orders = Order.objects.select_related(
                 'customer__user'
             ).prefetch_related('payments').order_by('-created_at')[:5]
-            
+
             recent_orders_data = []
             for order in recent_orders:
                 recent_orders_data.append({
@@ -98,7 +101,7 @@ class DashboardView(APIView):
                     'status': order.status,
                     'created_at': order.created_at.strftime('%Y-%m-%d %H:%M')
                 })
-            
+
             # ===== مشتریان برتر (فروش‌های واقعی) =====
             top_customers_qs = Order.objects.filter(
                 status__in=SALES_STATUSES
@@ -142,16 +145,16 @@ class DashboardView(APIView):
                     'status': ticket.status,
                     'created_at': ticket.created_at.strftime('%Y-%m-%d %H:%M')
                 })
-            
+
             # ===== نمودار فروش (بر اساس بازه انتخابی) =====
             chart_period = request.query_params.get('chart_period', 'daily')
             sales_chart = self._build_sales_chart(today, chart_period)
-            
+
             # ===== کل مانده حساب مشتریان =====
             total_balance = Customer.objects.aggregate(
                 total=Sum('account_balance')
             )['total'] or 0
-            
+
             return Response({
                 'summary': {
                     'total_customers': total_customers,
@@ -175,7 +178,7 @@ class DashboardView(APIView):
                 'recent_tickets': recent_tickets_data,
                 'sales_chart': sales_chart
             })
-            
+
         except Exception as e:
             return Response({'error': str(e)}, status=500)
 

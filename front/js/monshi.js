@@ -17,7 +17,7 @@ class SecretaryPanel {
         this.inventory = [];
         this.notifications = [];
         this._replyFiles = [];
-        
+
         this.init();
     }
 
@@ -54,7 +54,7 @@ class SecretaryPanel {
                 this.loadInventory(),
                 this.loadNotifications()
             ]);
-            
+
             this.renderAll();
             console.log('✅ تمام داده‌ها بارگذاری شدند');
         } catch (error) {
@@ -93,7 +93,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('customers/');
             if (response.success) {
-                this.customers = Array.isArray(response.data.results) ? response.data.results : 
+                this.customers = Array.isArray(response.data.results) ? response.data.results :
                                Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت مشتریان:', response.data);
@@ -111,7 +111,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('orders/');
             if (response.success) {
-                this.orders = Array.isArray(response.data.results) ? response.data.results : 
+                this.orders = Array.isArray(response.data.results) ? response.data.results :
                             Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت سفارشات:', response.data);
@@ -129,7 +129,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('tickets/');
             if (response.success) {
-                this.tickets = Array.isArray(response.data.results) ? response.data.results : 
+                this.tickets = Array.isArray(response.data.results) ? response.data.results :
                              Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت تیکت‌ها:', response.data);
@@ -147,7 +147,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('products/');
             if (response.success) {
-                this.products = Array.isArray(response.data.results) ? response.data.results : 
+                this.products = Array.isArray(response.data.results) ? response.data.results :
                                Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت محصولات:', response.data);
@@ -167,7 +167,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('distributors/?page_size=100');
             if (response.success) {
-                this.distributors = Array.isArray(response.data.results) ? response.data.results : 
+                this.distributors = Array.isArray(response.data.results) ? response.data.results :
                                    Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت توزیع‌کنندگان:', response.data);
@@ -185,7 +185,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('finance/transactions/');
             if (response.success) {
-                this.transactions = Array.isArray(response.data.results) ? response.data.results : 
+                this.transactions = Array.isArray(response.data.results) ? response.data.results :
                                    Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت تراکنش‌ها:', response.data);
@@ -203,7 +203,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('finance/checks/');
             if (response.success) {
-                this.checks = Array.isArray(response.data.results) ? response.data.results : 
+                this.checks = Array.isArray(response.data.results) ? response.data.results :
                              Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت چک‌ها:', response.data);
@@ -221,7 +221,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('inventory/');
             if (response.success) {
-                this.inventory = Array.isArray(response.data.results) ? response.data.results : 
+                this.inventory = Array.isArray(response.data.results) ? response.data.results :
                                 Array.isArray(response.data) ? response.data : [];
             } else {
                 console.error('خطا در دریافت موجودی:', response.data);
@@ -239,7 +239,7 @@ class SecretaryPanel {
         try {
             const response = await apiGet('notifications/');
             if (response.success) {
-                this.notifications = Array.isArray(response.data.results) ? response.data.results : 
+                this.notifications = Array.isArray(response.data.results) ? response.data.results :
                                     Array.isArray(response.data) ? response.data : [];
                 this.updateNotificationBadge();
             } else {
@@ -278,7 +278,7 @@ class SecretaryPanel {
         if (!this.dashboardData) return;
 
         const data = this.dashboardData;
-        
+
         this.updateElement('cardNewCustomers .value', data.today?.new_customers || 0);
         this.updateElement('cardOrdersToday .value', data.today?.orders_count || 0);
         this.updateElement('cardIncomeToday .value', this.formatPrice(data.today?.income || 0));
@@ -420,7 +420,8 @@ class SecretaryPanel {
         if (!kind || kind === 'newCustomers') {
             const body = document.getElementById('newCustomersTableBody');
             if (body) {
-                const todayStr = new Date().toISOString().slice(0, 10);
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
                 const list = Array.isArray(this.customers) ? this.customers.filter(c => {
                     const d = (c && c.created_at || '').toString().slice(0, 10);
                     return d === todayStr;
@@ -444,7 +445,8 @@ class SecretaryPanel {
         if (!kind || kind === 'ordersToday') {
             const body = document.getElementById('ordersTodayTableBody');
             if (body) {
-                const todayStr = new Date().toISOString().slice(0, 10);
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
                 const list = Array.isArray(this.orders) ? this.orders.filter(o => (o.created_at || '').toString().slice(0, 10) === todayStr) : [];
                 if (!list.length) {
                     body.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--text-gray);">سفارشی امروز ثبت نشده است.</td></tr>';
@@ -1559,7 +1561,7 @@ class SecretaryPanel {
     renderInventory() {
         const lowStockItems = Array.isArray(this.inventory) ? this.inventory.filter(item => item.quantity <= item.minimum_stock) : [];
         const lowStockCount = lowStockItems.length;
-        
+
         const badge = document.querySelector('.panel-badge .low-stock-count');
         if (badge) {
             badge.textContent = lowStockCount;
@@ -2393,7 +2395,7 @@ class SecretaryPanel {
             if (price && !isNaN(price) && parseInt(price) > 0) {
                 const weight = prompt('وزن (گرم):');
                 const meatPercent = prompt('درصد گوشت:');
-                
+
                 apiPost('products/', {
                     name: name.trim(),
                     base_price: parseInt(price),

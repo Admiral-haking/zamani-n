@@ -115,9 +115,9 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
     'apps.returns',
-    
-    'apps.owner',  
-    
+
+    'apps.owner',
+
 ]
 
 
@@ -464,6 +464,18 @@ SPECTACULAR_SETTINGS = {
 
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('DJANGO_CORS_ALLOW_ALL', 'False').lower() == 'true'
 CORS_ALLOWED_ORIGINS = _csv_env('DJANGO_CORS_ALLOWED_ORIGINS')
+
+# Vercel terminates TLS before forwarding requests to Django. Keep secure
+# cookie/transport defaults enabled for production while leaving local HTTP
+# development usable.
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'true').lower() == 'true'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('DJANGO_SECURE_HSTS_SECONDS', '0'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+    SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
 
 
 # --------------------------------------------------

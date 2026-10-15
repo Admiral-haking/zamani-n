@@ -156,7 +156,7 @@ class ProductDiscountViewSet(viewsets.ModelViewSet):
         # ساخت/ویرایش/حذف فقط منشی و مدیر (پخش‌کننده هم در پنل خودش مجاز است)؛
         # خواندن برای هر کاربر واردشده
         if self.action in ["create", "update", "partial_update", "destroy"]:
-            if self.request.user.role == "DISTRIBUTOR":
+            if getattr(self.request.user, "role", None) == "DISTRIBUTOR":
                 return [IsAuthenticated()]
             return [IsAdminOrSecretary()]
         return [IsAuthenticated()]
