@@ -3539,8 +3539,21 @@
             const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             const rows = (result) => Array.isArray(result?.data) ? result.data : (result?.data?.results || []);
 
+            // Network-backed initialization must never create a window where
+            // form clicks are silently handled by the old demo handlers. Queue
+            // persistence actions until the authenticated handlers below are
+            // attached.
+            const pendingOwnerActions = [];
+            const ownerActionSelector = '#saveNewCustomerBtn,#saveNewDistributorBtn,#saveCheckBtn,#submitTicketBtn,#saveProfileBtn,#savePasswordBtn,.api-view-ticket,.api-close-ticket,#sendReplyBtn,#saveNoteBtn,.api-cash-check,.api-delete-check,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,.approve-invoice,.reject-invoice';
+            document.addEventListener('click', (event) => {
+                if (window.__ownerApiHandlersReady || !event.target.closest(ownerActionSelector)) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                const target = event.target.closest(ownerActionSelector);
+                if (target) pendingOwnerActions.push(target);
+            }, true);
+
             const profile = await apiGet('accounts/me/');
-            if (!profile.success) return;
             const user = profile.data || {};
             const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '—';
             const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || '—'; };
@@ -3785,6 +3798,11 @@
                     if (result.success) setTimeout(() => document.getElementById('passwordModal')?.classList.remove('active'), 700);
                 }
             }, true);
+
+            window.__ownerApiHandlersReady = true;
+            pendingOwnerActions.splice(0).forEach((target) => {
+                if (target && document.contains(target)) target.click();
+            });
         })();
     </script>
     <script>
