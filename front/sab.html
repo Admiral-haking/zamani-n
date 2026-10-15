@@ -3732,7 +3732,9 @@
                         first_name: parts.shift() || '', last_name: parts.join(' '),
                         username: value('newCustomerUsername'), password: value('newCustomerPassword'),
                         phone: value('newCustomerPhone'), national_code: value('newCustomerNationalId'),
-                        company_name: value('newCustomerName'), distributor_id: value('newCustomerDistributor') || null
+                        company_name: value('newCustomerName'), distributor_id: value('newCustomerDistributor') || null,
+                        address: value('newCustomerAddress'), postal_code: value('newCustomerPostalCode'),
+                        tag: value('newCustomerTag') || 'normal'
                     });
                     showApiResult('addCustomerMsg', result, 'مشتری در دیتابیس ذخیره شد.');
                     if (result.success) loadOwnerTables();
