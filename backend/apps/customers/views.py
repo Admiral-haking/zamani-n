@@ -109,6 +109,8 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 
         user = self.request.user
+        if not user.is_authenticated:
+            return Customer.objects.none()
 
 
         from apps.orders.models import Order

@@ -41,6 +41,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return Order.objects.none()
         
         # منشی و ادمین: همه سفارشات
         if user.role in ['ADMIN', 'SECRETARY']:
