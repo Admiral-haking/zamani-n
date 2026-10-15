@@ -795,6 +795,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/distributors/customers/?page_size=200').then(function (res) {
             if (!res.success) {
                 console.warn('customers', errMsg(res));
+                renderPanelLoadError('customerList', errMsg(res), function () { me.loadCustomers(); });
                 return;
             }
             me.customers = res.data.results || res.data || [];
@@ -1161,6 +1162,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/tickets/open_tickets/').then(function (res) {
             if (!res.success) {
                 console.warn('tickets', errMsg(res));
+                renderPanelLoadError('ticketList', errMsg(res), function () { me.loadTickets(); });
                 return;
             }
             me.tickets = res.data.tickets || [];
@@ -1352,6 +1354,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/finance/checks/?page_size=100').then(function (res) {
             if (!res.success) {
                 console.warn('checks', errMsg(res));
+                renderPanelLoadError('checksTableBody', errMsg(res), function () { me.loadChecks(); });
                 return;
             }
             me.checks = res.data.results || res.data || [];
@@ -1742,6 +1745,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/products/discounts/?page_size=100').then(function (res) {
             if (!res.success) {
                 console.warn('discounts', errMsg(res));
+                renderPanelLoadError('discountsTableBody', errMsg(res), function () { me.loadDiscounts(); });
                 return;
             }
             me.discounts = res.data.results || res.data || [];
