@@ -1326,6 +1326,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
 
     DistributorPanel.prototype.submitNewTicket = function () {
         var me = this;
+        var submitButton = $id('submitTicketBtn');
+        if (submitButton && submitButton.disabled) return;
         var title = ($id('ticketSubjectInput').value || '').trim();
         var message = ($id('ticketMessageInput').value || '').trim();
         var mb = $id('ticketFormMsg');
@@ -1333,8 +1335,21 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         if (!title) { mb.innerHTML = ''; mb.appendChild(msgBox('موضوع را وارد کنید.', false)); return; }
         if (!message) { mb.innerHTML = ''; mb.appendChild(msgBox('متن تیکت را وارد کنید.', false)); return; }
 
+        var originalText = submitButton ? submitButton.innerHTML : '';
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ارسال...';
+        }
+        var restore = function () {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        };
+
         apiPost('/tickets/', { title: title, message: message }).then(function (res) {
             if (!res.success) {
+                restore();
                 mb.innerHTML = '';
                 mb.appendChild(msgBox(errMsg(res), false));
                 return;
@@ -1343,6 +1358,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             mb.innerHTML = '';
             mb.appendChild(msgBox('تیکت شما با موفقیت ثبت شد و به دست مسئول مربوطه خواهد رسید.', true));
             me.loadTickets();
+            restore();
         });
     };
 
