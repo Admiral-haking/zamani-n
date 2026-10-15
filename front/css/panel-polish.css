@@ -106,6 +106,20 @@
     overflow: hidden;
 }
 
+.table-wrap,
+.orders-table-wrap,
+.financial-table-wrap,
+.cheque-table-wrap,
+.backup-table-wrap,
+.reminder-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: 12px;
+    scrollbar-width: thin;
+}
+
 .data-table th,
 .data-table td {
     vertical-align: middle;
