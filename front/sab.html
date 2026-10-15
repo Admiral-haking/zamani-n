@@ -3527,6 +3527,11 @@
                 return;
             }
 
+            const value = (id) => document.getElementById(id)?.value.trim() || '';
+            const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
+            const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            const rows = (result) => Array.isArray(result?.data) ? result.data : (result?.data?.results || []);
+
             const profile = await apiGet('accounts/me/');
             if (!profile.success) return;
             const user = profile.data || {};
@@ -3588,11 +3593,6 @@
                 const transactionBody = document.getElementById('transactionTableBody');
                 if (transactionBody) transactionBody.innerHTML = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.id)}</td><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="4">تراکنشی ثبت نشده است.</td></tr>';
             }
-
-            const value = (id) => document.getElementById(id)?.value.trim() || '';
-            const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
-            const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-            const rows = (result) => Array.isArray(result?.data) ? result.data : (result?.data?.results || []);
 
             async function loadOwnerTables() {
                 const [customers, distributors, tickets, checks] = await Promise.all([
