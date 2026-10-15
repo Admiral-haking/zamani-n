@@ -57,6 +57,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return Transaction.objects.none()
         
         if user.role in ['ADMIN', 'SECRETARY']:
             return Transaction.objects.select_related('customer', 'user', 'payment', 'order').prefetch_related('order__items__product').all()
@@ -562,6 +564,8 @@ class CheckViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return Check.objects.none()
         
         if user.role in ['ADMIN', 'SECRETARY']:
             return Check.objects.select_related('customer').all()

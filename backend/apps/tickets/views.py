@@ -38,6 +38,8 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return Ticket.objects.none()
         
         # منشی و ادمین: همه تیکت‌ها با اطلاعات کاربر
         if user.role in ['ADMIN', 'SECRETARY']:
