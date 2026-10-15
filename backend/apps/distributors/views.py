@@ -64,6 +64,8 @@ class DistributorViewSet(viewsets.ModelViewSet):
 
 
         user = self.request.user
+        if not user.is_authenticated:
+            return Distributor.objects.none()
 
 
 
@@ -407,6 +409,8 @@ class DistributorPurchaseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         user = self.request.user
+        if not user.is_authenticated:
+            return DistributorPurchase.objects.none()
 
         if user.role in ["ADMIN", "SECRETARY"]:
 
@@ -542,6 +546,8 @@ class DistributorCustomerViewSet(viewsets.ModelViewSet):
 
 
         user = self.request.user
+        if not user.is_authenticated:
+            return Customer.objects.none()
 
 
         qs = Customer.objects.annotate(
