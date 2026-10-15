@@ -8,6 +8,7 @@ from apps.accounts.models import User
 from apps.customers.models import Customer
 from apps.tickets.models import Ticket
 from apps.audit.services import AuditService
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 
 class AccountRequestListView(APIView):
@@ -15,6 +16,7 @@ class AccountRequestListView(APIView):
 
     permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
+    @extend_schema(responses={200: OpenApiTypes.OBJECT}, tags=["Owner"])
     def get(self, request):
         qs = Ticket.objects.filter(
             category=Ticket.Category.ACCOUNT_REQUEST,
@@ -43,6 +45,7 @@ class AccountRequestApproveView(APIView):
 
     permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
+    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT}, tags=["Owner"])
     def post(self, request, pk=None):
         ticket = Ticket.objects.filter(
             pk=pk,
@@ -125,6 +128,7 @@ class AccountRequestApproveView(APIView):
 class AccountRequestRejectView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
+    @extend_schema(request=OpenApiTypes.OBJECT, responses={200: OpenApiTypes.OBJECT}, tags=["Owner"])
     def post(self, request, pk=None):
         ticket = Ticket.objects.filter(
             pk=pk, category=Ticket.Category.ACCOUNT_REQUEST, user__isnull=True
@@ -141,6 +145,7 @@ class AccountRequestRejectView(APIView):
 class AccountRequestDeleteView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
+    @extend_schema(responses={204: None}, tags=["Owner"])
     def delete(self, request, pk=None):
         ticket = Ticket.objects.filter(
             pk=pk, category=Ticket.Category.ACCOUNT_REQUEST, user__isnull=True
