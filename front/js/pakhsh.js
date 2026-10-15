@@ -68,6 +68,7 @@
 
     function errMsg(res) {
         if (!res) return 'خطای ارتباط با سرور.';
+        if (res.error) return res.error;
         var d = res.data;
         if (!d) return 'خطای ارتباط با سرور.';
         if (typeof d === 'string') return d;
