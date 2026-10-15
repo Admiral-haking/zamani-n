@@ -8877,7 +8877,7 @@
             showMsg(id, res && res.success ? '✅ ' + ok : '❌ ' + ((res && (res.data?.detail || res.data?.error)) || 'عملیات در دیتابیس انجام نشد.'), res && res.success ? 'success' : 'error');
         }
         document.addEventListener('click', async function (event) {
-            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,.approve-invoice,.reject-invoice');
+            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,#saveNoteBtn,.approve-invoice,.reject-invoice');
             if (!target) return;
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -8900,6 +8900,15 @@
                 const body = document.getElementById('msgContent')?.value?.trim() || '';
                 const res = await apiPost('sms/send/', { phone, subject: 'پیام از زامنی برگر', body });
                 resultMessage('msgModalResult', res, 'پیام در سامانه ثبت شد.');
+                return;
+            }
+            if (target.id === 'saveNoteBtn') {
+                const ticketId = window.secretaryPanel?.currentTicket?.id;
+                const note = val('ticketNoteInput');
+                if (!ticketId || !note) return resultMessage('noteMsg', {success:false,data:{error:'ابتدا تیکت و متن یادداشت را مشخص کنید'}}, '');
+                const res = await apiPost(`tickets/${ticketId}/add_note/`, { note });
+                resultMessage('noteMsg', res, 'یادداشت در دیتابیس ذخیره شد.');
+                if (res.success) document.getElementById('ticketNoteInput').value = '';
                 return;
             }
             if (target.classList.contains('approve-invoice') || target.classList.contains('reject-invoice')) {
