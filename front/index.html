@@ -11372,6 +11372,7 @@ function addBothToCart(productId, productName) {
             const supportLoadErrorStyle = document.createElement('style');
             supportLoadErrorStyle.textContent = '.support-load-error{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:24px;text-align:center;color:#f3b1aa}.support-load-error i{font-size:20px}.support-load-error button{border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:8px 14px;background:rgba(255,255,255,.08);color:inherit;cursor:pointer}';
             document.head.appendChild(supportLoadErrorStyle);
+            const SUPPORT_API_TIMEOUT_MS = 20000;
 
             // فراخوانی عمومی گفتگو: توکن منقضی نباید ارسال پیام را خراب کند.
             // ابتدا با توکن، در صورت 401 تلاش برای تمدید، در نهایت ارسال بدون توکن (مهمان).
@@ -11380,13 +11381,16 @@ function addBothToCart(productId, productName) {
                 function call(token) {
                     const headers = Object.assign({}, opts.headers || {});
                     if (token) headers['Authorization'] = 'Bearer ' + token;
-                    return fetch(__SITE_API + endpoint, Object.assign({}, opts, { headers: headers }))
+                    const controller = new AbortController();
+                    const timer = setTimeout(function () { controller.abort(); }, SUPPORT_API_TIMEOUT_MS);
+                    return fetch(__SITE_API + endpoint, Object.assign({}, opts, { headers: headers, signal: controller.signal }))
                         .then(function (r) {
                             return r.json().catch(function () { return null; }).then(function (d) {
                                 return { success: r.ok, status: r.status, data: d };
                             });
                         })
-                        .catch(function () { return { success: false, status: 0, data: null }; });
+                        .catch(function (error) { return { success: false, status: 0, data: null, error: error && error.name === 'AbortError' ? 'timeout' : 'network' }; })
+                        .finally(function () { clearTimeout(timer); });
                 }
                 let token = '';
                 try { token = localStorage.getItem('access_token') || ''; } catch (e) { token = ''; }
