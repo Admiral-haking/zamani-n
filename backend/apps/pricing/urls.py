@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from .views import DistributorPriceViewSet, LegacyProductPriceViewSet
+from .views import DistributorPriceViewSet, LegacyProductPriceViewSet, CustomerPriceViewSet
 
 
 
@@ -34,6 +34,12 @@ router.register(
 
 
 
+router.register(
+    r"customer-prices",
+    CustomerPriceViewSet,
+    basename="customer-prices",
+)
+
 urlpatterns = [
 
     path(
@@ -45,3 +51,4 @@ urlpatterns = [
     )
 
 ]
+

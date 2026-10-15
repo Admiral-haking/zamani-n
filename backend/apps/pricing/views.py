@@ -135,6 +135,28 @@ class DistributorPriceViewSet(viewsets.ModelViewSet):
 
         serializer.save()
 
+    @action(detail=False, methods=["post"])
+    def bulk(self, request):
+        """ثبت یا به‌روزرسانی قیمت چند محصول برای یک مشتری."""
+        customer = self._customer_in_scope(request.data.get("customer"))
+        if customer is None:
+            return Response({"error": "مشتری معتبر برای ثبت قیمت یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
+        prices = request.data.get("prices", [])
+        if not isinstance(prices, list):
+            return Response({"error": "قالب prices باید لیست باشد."}, status=status.HTTP_400_BAD_REQUEST)
+        created = updated = 0
+        for item in prices:
+            if not isinstance(item, dict):
+                continue
+            product = self._resolve_product(item.get("product") or item.get("product_id"))
+            price = self._resolve_price(item.get("price"))
+            _, was_created = ProductPrice.objects.update_or_create(
+                customer=customer, product=product, defaults={"price": price}
+            )
+            created += int(was_created)
+            updated += int(not was_created)
+        return Response({"success": True, "created": created, "updated": updated, "customer": customer.id})
+
     def perform_destroy(self, instance):
 
 
