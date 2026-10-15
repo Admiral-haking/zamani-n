@@ -293,6 +293,7 @@ class SecretaryPanel {
         if (!this.loadFailures.size) return;
 
         const sections = {
+            dashboard: { id: 'salesChart', method: 'loadDashboard' },
             customers: { id: 'customerList', method: 'loadCustomers' },
             orders: { id: 'invoiceTableBody', method: 'loadOrders' },
             tickets: { id: 'ticketList', method: 'loadTickets' },
