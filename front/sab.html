@@ -3553,13 +3553,21 @@
                 const customerButton = event.target.closest('#saveNewCustomerBtn');
                 const distributorButton = event.target.closest('#saveNewDistributorBtn');
                 const checkButton = event.target.closest('#saveCheckBtn');
+                const ticketButton = event.target.closest('#submitTicketBtn');
                 const profileButton = event.target.closest('#saveProfileBtn');
                 const passwordButton = event.target.closest('#savePasswordBtn');
-                if (!profileButton && !passwordButton && !customerButton && !distributorButton && !checkButton) return;
+                if (!profileButton && !passwordButton && !customerButton && !distributorButton && !checkButton && !ticketButton) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
-                if (customerButton) {
+                if (ticketButton) {
+                    const result = await apiPost('tickets/', {
+                        title: value('ticketSubjectInput'),
+                        message: value('ticketMessageInput'),
+                        category: (value('ticketCategory') || 'general').toUpperCase()
+                    });
+                    showApiResult('ticketFormMsg', result, 'تیکت در دیتابیس ثبت شد.');
+                } else if (customerButton) {
                     const parts = value('newCustomerName').split(/\s+/);
                     const result = await apiPost('accounts/users/create-customer/', {
                         first_name: parts.shift() || '', last_name: parts.join(' '),
