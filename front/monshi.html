@@ -8868,6 +8868,39 @@
         })();
     </script>
 
+    <script>
+    // جلوگیری از موفقیت جعلی handlerهای قدیمی و اتصال عملیات به API واقعی.
+    (function bindPersistentSecretaryActions() {
+        function val(id) { return document.getElementById(id)?.value?.trim() || ''; }
+        function resultMessage(id, res, ok) {
+            if (typeof showMsg !== 'function') return;
+            showMsg(id, res && res.success ? '✅ ' + ok : '❌ ' + ((res && (res.data?.detail || res.data?.error)) || 'عملیات در دیتابیس انجام نشد.'), res && res.success ? 'success' : 'error');
+        }
+        document.addEventListener('click', async function (event) {
+            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn');
+            if (!target) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (target.id === 'submitTicketBtn') {
+                const title = val('ticketSubjectInput');
+                const message = val('ticketMessageInput');
+                if (!title || !message) return resultMessage('ticketFormMsg', {success:false,data:{error:'موضوع و متن تیکت الزامی است'}}, '');
+                const res = await apiPost('tickets/', { title, message, category: (val('ticketCategory') || 'general').toUpperCase() });
+                resultMessage('ticketFormMsg', res, 'تیکت در دیتابیس ثبت شد.');
+                if (res.success && typeof loadTickets === 'function') loadTickets();
+                return;
+            }
+            if (target.id === 'sendSmsDialogBtn') {
+                const res = await apiPost('sms/send/', { phone: val('smsRecipient'), subject: val('smsSubject') || 'بدون موضوع', body: val('smsMessage') });
+                resultMessage('smsDialogResult', res, 'پیامک در سامانه ثبت شد.');
+                return;
+            }
+            const res = await apiPost('sms/send_bulk/', { group: val('bulkGroup'), subject: val('bulkSubject'), body: val('bulkMessage') });
+            resultMessage('bulkModalResult', res, 'پیامک انبوه در سامانه ثبت شد.');
+        }, true);
+    })();
+    </script>
+
     <script src="js/api.js?v=4"></script>
     <script src="js/monshi.js?v=4"></script>
     <script>
