@@ -1443,6 +1443,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
 
     DistributorPanel.prototype.submitCheck = function () {
         var me = this;
+        var submitButton = $id('saveCheckBtn');
         var name = ($id('checkName').value || '').trim();
         var phone = ($id('checkPhone').value || '').trim();
         var nationalId = ($id('checkNationalId').value || '').trim();
@@ -1456,9 +1457,23 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         };
         if (!name) return showErr('لطفاً نام و نام خانوادگی صاحب چک را وارد کنید.');
         if (!phone) return showErr('لطفاً شماره تماس را وارد کنید.');
-        if (!amount) return showErr('لطفاً مبلغ چک را وارد کنید.');
+        if (!nationalId) return showErr('لطفاً کد ملی صاحب چک را وارد کنید.');
+        if (!amount || Number(amount) <= 0) return showErr('مبلغ چک باید بیشتر از صفر باشد.');
         if (!receiveDate) return showErr('لطفاً تاریخ دریافت چک را وارد کنید.');
         if (!dueDate) return showErr('لطفاً تاریخ سررسید چک را وارد کنید.');
+        if (dueDate < receiveDate) return showErr('تاریخ سررسید نمی‌تواند قبل از تاریخ دریافت باشد.');
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ذخیره...';
+        }
+        var finish = function () {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = submitButton.dataset.originalText || 'ذخیره چک';
+            }
+        };
 
         var existing = null;
         for (var i = 0; i < me.customers.length; i++) {
@@ -1466,12 +1481,13 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         }
 
         var afterCustomer = function (custId) {
-            if (!custId) return showErr('خطا در ایجاد مشتری جدید');
+            if (!custId) { finish(); return showErr('خطا در ایجاد مشتری جدید'); }
             var fileInput = $id('checkFile');
             var imageFile = null;
             if (fileInput && fileInput.files && fileInput.files.length > 0) {
                 imageFile = fileInput.files[0];
                 if (!/^image\//.test(imageFile.type || '')) {
+                    finish();
                     return showErr('فقط فایل تصویری (JPG / PNG / و...) مجاز است');
                 }
             }
@@ -1486,9 +1502,11 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
 
             apiUpload('/finance/checks/', fd).then(function (res) {
                 if (!res.success) {
+                    finish();
                     if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox(errMsg(res), false)); }
                     return;
                 }
+                finish();
                 if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('چک با موفقیت ثبت شد.', true)); }
                 var form = $id('addCheckForm');
                 if (form) form.classList.remove('active');
@@ -1525,6 +1543,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                     if (me.customers[j].phone === phone) { again = me.customers[j]; break; }
                 }
                 if (again) { afterCustomer(again.id); return; }
+                finish();
                 if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox(errMsg(res), false)); }
                 return;
             }
