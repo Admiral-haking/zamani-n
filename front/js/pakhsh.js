@@ -965,7 +965,7 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
 
     DistributorPanel.prototype.rebuildCustomerPriceList = function () {
         var me = this;
-        var box = $id('customerPriceGrid');
+        var box = $id('customerPriceGrid') || $id('productListGrid');
         if (!box) return;
         if (!this.productsLoaded) {
             box.innerHTML = '<div style="opacity:0.6;font-size:12px;padding:8px;">O_O� O-OU, O"OO�U_O�OO�UO U.O-O�U^U,OO�...</div>';
