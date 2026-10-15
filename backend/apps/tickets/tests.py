@@ -40,3 +40,13 @@ class PublicTicketWorkflowTests(TestCase):
         response = self.client.post(f"/api/tickets/support-chats/{ticket_id}/close/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["status"], Ticket.Status.CLOSED)
+        self.client.force_authenticate(user=None)
+        response = self.client.post(
+            "/api/tickets/support-chats/send/",
+            {"guest_key": "test-chat-key", "guest_name": "مهمان جدید", "text": "پیگیری دوباره"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        reopened = Ticket.objects.get(pk=ticket_id)
+        self.assertEqual(reopened.status, Ticket.Status.OPEN)
+        self.assertEqual(reopened.guest_name, "مهمان جدید")

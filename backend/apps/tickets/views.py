@@ -563,6 +563,11 @@ class TicketViewSet(viewsets.ModelViewSet):
             )
             sender = TicketMessage.Sender.GUEST
         else:
+            # پیام جدید مهمان روی گفت‌وگوی بسته باید دوباره در صف پاسخ قرار بگیرد.
+            ticket.guest_name = name or ticket.guest_name
+            ticket.guest_phone = phone or ticket.guest_phone
+            ticket.status = Ticket.Status.OPEN
+            ticket.save(update_fields=['guest_name', 'guest_phone', 'status', 'updated_at'])
             sender = TicketMessage.Sender.GUEST
         msg = TicketMessage.objects.create(ticket=ticket, sender=sender, sender_name=name or ticket.guest_name or 'مهمان', text=text)
         for uploaded in request.FILES.getlist('files'):
