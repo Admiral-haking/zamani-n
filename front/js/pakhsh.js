@@ -680,10 +680,15 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.loadOrders = function () {
         var me = this;
         apiGet('/orders/?page_size=100').then(function (res) {
-            if (!res.success) return;
+            if (!res.success) {
+                renderPanelLoadError('salesHistoryBody', errMsg(res), function () { me.loadOrders(); });
+                return;
+            }
             me.orders = res.data.results || res.data || [];
             me.renderOrders();
             me.renderLedgerIfOpen();
+        }).catch(function () {
+            renderPanelLoadError('salesHistoryBody', 'بارگذاری فاکتورها ناموفق بود.', function () { me.loadOrders(); });
         });
     };
 
@@ -804,6 +809,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.customers.forEach(function (c) { me.custMap[c.id] = c; });
             me.renderCustomerList();
             me.renderReminderCustomerSelect();
+        }).catch(function () {
+            renderPanelLoadError('customerList', 'بارگذاری مشتریان ناموفق بود.', function () { me.loadCustomers(); });
         });
     };
 
@@ -1170,6 +1177,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.renderTickets();
             var badge = $id('ticketBadge');
             if (badge) badge.textContent = String(me.tickets.length);
+        }).catch(function () {
+            renderPanelLoadError('ticketList', 'بارگذاری تیکت‌ها ناموفق بود.', function () { me.loadTickets(); });
         });
     };
 
@@ -1376,6 +1385,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             }
             me.checks = res.data.results || res.data || [];
             me.renderChecks();
+        }).catch(function () {
+            renderPanelLoadError('checksTableBody', 'بارگذاری چک‌ها ناموفق بود.', function () { me.loadChecks(); });
         });
     };
 
@@ -1772,6 +1783,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             }
             me.discounts = res.data.results || res.data || [];
             me.renderDiscounts();
+        }).catch(function () {
+            renderPanelLoadError('discountsTableBody', 'بارگذاری تخفیف‌ها ناموفق بود.', function () { me.loadDiscounts(); });
         });
     };
 
@@ -2110,6 +2123,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (!res.success) return;
             me.reminders = res.data.results || res.data || [];
             me.renderReminders();
+        }).catch(function () {
+            renderPanelLoadError('reminderTableBody', 'بارگذاری یادآوری‌ها ناموفق بود.', function () { me.loadReminders(); });
         });
     };
 
@@ -2224,6 +2239,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (!res.success) return;
             me.smsHistory = res.data.results || res.data || [];
             me.renderSmsHistory();
+        }).catch(function () {
+            renderPanelLoadError('smsHistoryBody', 'بارگذاری تاریخچه پیامک ناموفق بود.', function () { me.loadSmsHistory(); });
         });
     };
 
@@ -2472,6 +2489,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.notifications = res.data.results || res.data || [];
             me.renderNotifications();
             me.renderNotifBadge();
+        }).catch(function () {
+            renderPanelLoadError('notificationsList', 'بارگذاری اعلان‌ها ناموفق بود.', function () { me.loadNotifications(); });
         });
     };
 
