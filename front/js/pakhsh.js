@@ -1358,6 +1358,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 list.parentNode.insertBefore(note, list);
                 setTimeout(function () { if (note.parentNode) note.parentNode.removeChild(note); }, 4000);
             }
+        }).catch(function () {
+            $id('sendReplyModalBtn').disabled = false;
+            var m = $id('modalReplyMsg');
+            if (m) { m.style.color = '#e74c3c'; m.textContent = 'ارتباط با سرور برای ارسال پاسخ برقرار نشد.'; }
         });
     };
 
@@ -1369,6 +1373,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 return;
             }
             me.loadTickets();
+        }).catch(function () {
+            me.reportMsg('⚠️ بستن تیکت با خطای ارتباطی مواجه شد.', 'error');
         });
     };
 
@@ -1407,6 +1413,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             mb.appendChild(msgBox('تیکت شما با موفقیت ثبت شد و به دست مسئول مربوطه خواهد رسید.', true));
             me.loadTickets();
             restore();
+        }).catch(function () {
+            restore();
+            mb.innerHTML = '';
+            mb.appendChild(msgBox('ارتباط با سرور برای ثبت تیکت برقرار نشد.', false));
         });
     };
 
@@ -2529,6 +2539,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 sm.appendChild(msgBox(faNum(savedCount) + ' قیمت دستی برای «' + cn + '» ثبت شد.', true));
             }
             me.loadModalPrices();
+        }).catch(function () {
+            if (m) { m.style.color = '#e74c3c'; m.textContent = 'ذخیره قیمت‌های دستی انجام نشد؛ دوباره تلاش کنید.'; }
         });
     };
 
