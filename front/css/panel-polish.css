@@ -9,6 +9,47 @@
     border-radius: 14px;
 }
 
+.section-header,
+.section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.section-header h2,
+.section-header h3,
+.section-title h2,
+.section-title h3 {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.list-item,
+.ticket-item,
+.customer-card {
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .025);
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.list-item:hover,
+.ticket-item:hover,
+.customer-card:hover {
+    border-color: rgba(212, 160, 23, .35);
+    background: rgba(212, 160, 23, .07);
+}
+
+.empty-state {
+    border: 1px dashed rgba(255, 255, 255, .14);
+    border-radius: 12px;
+    padding: 24px 16px;
+    color: var(--text-gray, #aaa);
+    text-align: center;
+}
+
 .form-section,
 .filter-section,
 .ticket-filter-section,
@@ -111,7 +152,10 @@ button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
     .panel-section,
-    .data-table tbody tr { animation: none; transition: none; }
+    .data-table tbody tr,
+    .list-item,
+    .ticket-item,
+    .customer-card { animation: none; transition: none; }
 }
 
 @media (max-width: 720px) {
