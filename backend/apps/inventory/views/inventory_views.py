@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 
 from apps.inventory.models import Inventory, InventoryLog
 from apps.inventory.serializers import (
@@ -21,6 +22,7 @@ class InventoryLogViewSet(viewsets.ModelViewSet):
     serializer_class = InventoryLogSerializer
 
     permission_classes = [
+        IsAuthenticated,
         IsAdminOrSecretary
     ]
 
@@ -62,5 +64,6 @@ class InventoryViewSet(viewsets.ModelViewSet):
     serializer_class = InventorySerializer
 
     permission_classes = [
+        IsAuthenticated,
         IsAdminOrSecretary
     ]

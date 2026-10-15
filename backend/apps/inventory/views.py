@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db import models
 
@@ -20,7 +21,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     serializer_class = InventorySerializer
 
 
-    permission_classes = [IsAdminOrSecretary]
+    permission_classes = [IsAuthenticated, IsAdminOrSecretary]
 
 
 
