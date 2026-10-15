@@ -1599,6 +1599,11 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.transactions = res.data.results || res.data || [];
             me.renderBalance();
             me.renderLedgerIfOpen();
+        }).catch(function () {
+            me.transactions = [];
+            me.renderBalance();
+            me.renderLedgerIfOpen();
+            me.reportMsg('⚠️ بارگذاری مانده حساب ناموفق بود؛ دوباره تلاش کنید.', 'error');
         });
     };
 
@@ -2872,6 +2877,11 @@ DistributorPanel.prototype.renderFinancialChart = function (chartData, targetId)
             } else {
                 if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('⚠️ خطا در دریافت گزارش مالی.', false)); }
             }
+        }).catch(function () {
+            me.financialData = null;
+            me.renderFinancialPage();
+            var mb = $id('financialMsg');
+            if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('⚠️ ارتباط با گزارش مالی برقرار نشد؛ دوباره تلاش کنید.', false)); }
         });
     };
 
@@ -3107,6 +3117,10 @@ DistributorPanel.prototype.renderFinancialChart = function (chartData, targetId)
                 me.renderDebtorsReport(null);
                 me.reportMsg('⚠️ خطا در دریافت گزارش بدهکاران.', 'error');
             }
+        }).catch(function () {
+            me.reportState.debtors = [];
+            me.renderDebtorsReport(null);
+            me.reportMsg('⚠️ ارتباط با گزارش بدهکاران برقرار نشد؛ دوباره تلاش کنید.', 'error');
         });
     };
 
@@ -3251,6 +3265,10 @@ DistributorPanel.prototype.renderFinancialChart = function (chartData, targetId)
             me.reportState.generalRows = rows;
             me.renderGeneralReport(rows);
             if (!res.success) me.reportMsg('⚠️ خطا در دریافت گزارش عمومی.', 'error');
+        }).catch(function () {
+            me.reportState.generalRows = [];
+            me.renderGeneralReport([]);
+            me.reportMsg('⚠️ ارتباط با گزارش عمومی برقرار نشد؛ دوباره تلاش کنید.', 'error');
         });
     };
 
