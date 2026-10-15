@@ -8659,6 +8659,7 @@
                 if (q) params.push('search=' + encodeURIComponent(q));
                 params.push('page_size=200');
                 return apiGet('tickets/support-chats/?' + params.join('&')).then(function(res) {
+                    if (!res || !res.success) throw new Error('support chats request failed');
                     let rows = [];
                     if (res && res.success && res.data) {
                         rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
@@ -8667,7 +8668,7 @@
                     updateDailyTicketsBadge();
                 }).catch(function() {
                     dailyTicketsData = [];
-                    if (box) box.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری گفتگوها ناموفق بود.</span><button class="btn-secondary btn-sm" onclick="window.secretaryPanel && window.secretaryPanel.loadDailyTickets ? window.secretaryPanel.loadDailyTickets() : location.reload()">تلاش دوباره</button></div>';
+                    if (box) box.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری گفتگوها ناموفق بود.</span><button class="btn-secondary btn-sm" onclick="loadDailyTickets()">تلاش دوباره</button></div>';
                 });
             }
 
@@ -8810,8 +8811,10 @@
                         showMsg('dailyTicketsMsg', 'گفتگو بسته شد.', 'info');
                         closeDailyTicketView();
                         loadDailyTickets();
+                    } else {
+                        showMsg('dailyTicketsMsg', '⚠️ بستن گفتگو انجام نشد.', 'error');
                     }
-                });
+                }).catch(function() { showMsg('dailyTicketsMsg', '⚠️ ارتباط با سرور برقرار نشد.', 'error'); });
             }
 
             function toggleDailyTicketVoice() {
