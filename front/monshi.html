@@ -8877,7 +8877,7 @@
             showMsg(id, res && res.success ? '✅ ' + ok : '❌ ' + ((res && (res.data?.detail || res.data?.error)) || 'عملیات در دیتابیس انجام نشد.'), res && res.success ? 'success' : 'error');
         }
         document.addEventListener('click', async function (event) {
-            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn');
+            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,.approve-invoice,.reject-invoice');
             if (!target) return;
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -8893,6 +8893,21 @@
             if (target.id === 'sendSmsDialogBtn') {
                 const res = await apiPost('sms/send/', { phone: val('smsRecipient'), subject: val('smsSubject') || 'بدون موضوع', body: val('smsMessage') });
                 resultMessage('smsDialogResult', res, 'پیامک در سامانه ثبت شد.');
+                return;
+            }
+            if (target.id === 'sendMsgBtn') {
+                const phone = document.getElementById('msgCustomerPhone')?.textContent?.trim() || '';
+                const body = document.getElementById('msgContent')?.value?.trim() || '';
+                const res = await apiPost('sms/send/', { phone, subject: 'پیام از زامنی برگر', body });
+                resultMessage('msgModalResult', res, 'پیام در سامانه ثبت شد.');
+                return;
+            }
+            if (target.classList.contains('approve-invoice') || target.classList.contains('reject-invoice')) {
+                const id = target.dataset.id;
+                const action = target.classList.contains('approve-invoice') ? 'confirm' : 'cancel';
+                if (!id || !confirm(action === 'confirm' ? `فاکتور #${id} تایید شود؟` : `فاکتور #${id} رد شود؟`)) return;
+                const res = await apiPost(`orders/${id}/${action}/`, {});
+                resultMessage('invoiceMsg', res, action === 'confirm' ? 'فاکتور در دیتابیس تایید شد.' : 'فاکتور در دیتابیس رد شد.');
                 return;
             }
             const res = await apiPost('sms/send_bulk/', { group: val('bulkGroup'), subject: val('bulkSubject'), body: val('bulkMessage') });
