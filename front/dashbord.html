@@ -3838,6 +3838,8 @@
                     } else {
                         productSelect.innerHTML = '<option value="">خطا در دریافت محصولات</option>';
                     }
+                }).catch(function() {
+                    productSelect.innerHTML = '<option value="">ارتباط با سرور برقرار نشد؛ دوباره فرم را باز کنید</option>';
                 });
             }
             function parseInvoiceNumber(val) {
