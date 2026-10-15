@@ -2068,7 +2068,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (ok) me.renderSettings();
         };
 
-        apiPatch('/accounts/me/', { first_name: first, last_name: last, username: username, email: email, phone: phone }).then(userDone);
+        apiPatch('/accounts/me/', { first_name: first, last_name: last, username: username, email: email, phone: phone })
+            .then(userDone)
+            .catch(function () { userDone({ success: false, data: { detail: 'ارتباط با سرور برقرار نشد.' } }); });
 
         if (this.distributor && this.distributor.id) {
             apiPatch('/distributors/' + this.distributor.id + '/', {
@@ -2076,7 +2078,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 phone: phone,
                 city: city,
                 address: addr
-            }).then(distDone);
+            }).then(distDone)
+                .catch(function () { distDone({ success: false, data: { detail: 'ارتباط با سرور برقرار نشد.' } }); });
         }
     };
 
@@ -2104,6 +2107,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 sm.innerHTML = '';
                 sm.appendChild(msgBox('رمز عبور با موفقیت تغییر کرد.', true));
             }
+        }).catch(function () {
+            ml.textContent = 'ارتباط با سرور برای تغییر رمز برقرار نشد.';
+            ml.style.color = '#e74c3c';
         });
     };
 
@@ -2617,6 +2623,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         var me = this;
         apiPost('/notifications/' + id + '/mark_as_read/', {}).then(function (res) {
             if (res.success) me.loadNotifications();
+            else me.reportMsg('⚠️ خوانده‌شدن اعلان ذخیره نشد.', 'error');
+        }).catch(function () {
+            me.reportMsg('⚠️ ارتباط با سرور برای اعلان برقرار نشد.', 'error');
         });
     };
 
