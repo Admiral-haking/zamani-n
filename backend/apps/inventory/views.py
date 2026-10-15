@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import models
 
 from apps.inventory.models import Inventory
+from apps.common.permissions.permissions import IsAdminOrSecretary
 from .serializers.inventory_serializer import InventorySerializer
 
 
@@ -20,9 +21,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
     serializer_class = InventorySerializer
 
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [IsAdminOrSecretary]
 
 
 
