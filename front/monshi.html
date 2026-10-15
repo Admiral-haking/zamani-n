@@ -2321,6 +2321,7 @@
         .data-table td, .data-table th { padding: 11px 10px; }
         .load-error { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; min-height:90px; padding:18px; color:#f3b1aa; text-align:center; }
         .load-error i { font-size:20px; }
+        .load-error-cell { padding:24px !important; color:#f3b1aa; text-align:center; }
         @media (max-width: 720px) { .panel-section { padding: 12px; } .section-title { align-items: flex-start; flex-direction: column; } .form-row { grid-template-columns: 1fr !important; } .form-actions button, .modal-actions button { flex: 1 1 140px; } }
 </style>
 </head>
@@ -5780,7 +5781,8 @@
                     renderDistributorPurchases();
                 }).catch(() => {
                     currentDistributorPurchases = [];
-                    renderDistributorPurchases();
+                    const body = document.getElementById('distributorPurchaseBody');
+                    if (body) body.innerHTML = '<tr><td colspan="8" class="load-error-cell">بارگذاری تاریخچه خرید ناموفق بود. دوباره تلاش کنید.</td></tr>';
                 });
             }
 
@@ -8353,7 +8355,7 @@
                     updatePublicRegBadge();
                 }).catch(function() {
                     publicRegRows = [];
-                    renderPublicRegList([]);
+                    if (box) box.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری درخواست‌ها ناموفق بود.</span><button class="btn-secondary btn-sm" onclick="loadPublicRegistrations()">تلاش دوباره</button></div>';
                 });
             }
 
