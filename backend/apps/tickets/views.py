@@ -315,6 +315,72 @@ class TicketViewSet(viewsets.ModelViewSet):
                 'messages': [self._public_message(message) for message in messages],
             })
         return Response(data)
+
+    def _support_chat_payload(self, ticket):
+        messages = list(ticket.messages.all())
+        return {
+            'id': ticket.id,
+            'status': ticket.status,
+            'display_name': ticket.guest_name or 'مهمان',
+            'guest_phone': ticket.guest_phone,
+            'subject_display': ticket.title,
+            'created_at': ticket.created_at,
+            'unread_count': 1 if ticket.status == Ticket.Status.OPEN else 0,
+            'messages': [self._public_message(message) for message in messages],
+        }
+
+    def _get_staff_chat(self, pk):
+        if not self.request.user.is_authenticated or self.request.user.role not in ['ADMIN', 'SECRETARY']:
+            return None
+        return Ticket.objects.filter(pk=pk, user__isnull=True).prefetch_related('messages__attachments').first()
+
+    def support_chat_detail(self, request, pk=None):
+        ticket = self._get_staff_chat(pk)
+        if not ticket:
+            return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(self._support_chat_payload(ticket))
+
+    def support_chat_read(self, request, pk=None):
+        ticket = self._get_staff_chat(pk)
+        if not ticket:
+            return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        ticket.status = Ticket.Status.ANSWERED
+        ticket.save(update_fields=['status', 'updated_at'])
+        return Response(self._support_chat_payload(ticket))
+
+    def support_chat_reply(self, request, pk=None):
+        ticket = self._get_staff_chat(pk)
+        if not ticket:
+            return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        text = (request.data.get('text') or '').strip()
+        if not text and not request.FILES.getlist('files'):
+            return Response({'detail': 'متن یا فایل پاسخ الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+        message = TicketMessage.objects.create(
+            ticket=ticket, sender=TicketMessage.Sender.STAFF,
+            sender_name=request.user.get_full_name() or request.user.username,
+            text=text,
+        )
+        for uploaded in request.FILES.getlist('files'):
+            TicketAttachment.objects.create(message=message, file=uploaded)
+        ticket.status = Ticket.Status.ANSWERED
+        ticket.save(update_fields=['status', 'updated_at'])
+        ticket._prefetched_objects_cache = {}
+        return Response(self._support_chat_payload(ticket))
+
+    def support_chat_close(self, request, pk=None):
+        ticket = self._get_staff_chat(pk)
+        if not ticket:
+            return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        ticket.status = Ticket.Status.CLOSED
+        ticket.save(update_fields=['status', 'updated_at'])
+        return Response(self._support_chat_payload(ticket))
+
+    def support_chat_delete(self, request, pk=None):
+        ticket = self._get_staff_chat(pk)
+        if not ticket:
+            return Response({'detail': 'گفتگو پیدا نشد.'}, status=status.HTTP_404_NOT_FOUND)
+        ticket.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     @action(
         detail=False,
         methods=["post"],
