@@ -3646,33 +3646,48 @@
             }
 
             async function loadOwnerTables() {
-                const [customers, distributors, tickets, checks] = await Promise.all([
+                const settled = await Promise.allSettled([
                     apiGet('customers/'), apiGet('distributors/'), apiGet('tickets/'), apiGet('finance/checks/')
                 ]);
-                const failed = [customers, distributors, tickets, checks].find((result) => !result || !result.success);
-                if (failed) {
-                    throw new Error(failed.error || failed.data?.detail || 'دریافت داده‌های پنل ناموفق بود.');
-                }
+                const resultOrFailure = (item) => item.status === 'fulfilled'
+                    ? item.value
+                    : { success: false, error: item.reason?.message || 'ارتباط با سرور برقرار نشد.' };
+                const [customers, distributors, tickets, checks] = settled.map(resultOrFailure);
+                const showFailure = (id, result, table = false) => {
+                    if (result && result.success) return;
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const message = 'بارگذاری این بخش ناموفق بود؛ دوباره تلاش کنید.';
+                    el.innerHTML = table
+                        ? `<tr><td colspan="13" class="load-error-cell"><div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>${message}</span><button class="btn-secondary btn-sm owner-retry">تلاش دوباره</button></div></td></tr>`
+                        : `<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>${message}</span><button class="btn-secondary btn-sm owner-retry">تلاش دوباره</button></div>`;
+                    const retry = el.querySelector('.owner-retry');
+                    if (retry) retry.addEventListener('click', () => loadOwnerTables(), { once: true });
+                };
                 const customerList = document.getElementById('customerList');
-                if (customerList) {
+                if (customerList && customers.success) {
                     const data = rows(customers);
                     customerList.innerHTML = data.length ? data.map((c) => `<div class="list-item"><b>${esc(c.company_name || c.full_name || c.username || 'مشتری')}</b><span>${esc(c.phone || '')}</span></div>`).join('') : '<div class="empty-state">مشتری‌ای ثبت نشده است.</div>';
                 }
                 const distributorBody = document.getElementById('distributorTableBody');
-                if (distributorBody) {
+                if (distributorBody && distributors.success) {
                     const data = rows(distributors);
                     distributorBody.innerHTML = data.length ? data.map((d) => `<tr><td>${esc(d.full_name || d.name || '—')}</td><td>${esc(d.distributor_code || '—')}</td><td>${esc(d.phone || '—')}</td><td>${esc(d.city || '—')}</td><td>${d.is_active ? 'فعال' : 'غیرفعال'}</td></tr>`).join('') : '<tr><td colspan="5">پخش‌کننده‌ای ثبت نشده است.</td></tr>';
                 }
                 const ticketList = document.getElementById('ticketList');
-                if (ticketList) {
+                if (ticketList && tickets.success) {
                     const data = rows(tickets);
                     ticketList.innerHTML = data.length ? data.map((t) => `<div class="list-item api-ticket-row" data-ticket-id="${esc(t.id)}"><div><b>${esc(t.title || 'تیکت')}</b><span>${esc(t.status || '')}</span><p>${esc(t.message || '')}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-primary btn-sm api-view-ticket" data-id="${esc(t.id)}">مشاهده</button><button class="btn-secondary btn-sm api-close-ticket" data-id="${esc(t.id)}">بستن</button></div></div>`).join('') : '<div class="empty-state">تیکتی ثبت نشده است.</div>';
                 }
                 const checksBody = document.getElementById('checksTableBody');
-                if (checksBody) {
+                if (checksBody && checks.success) {
                     const data = rows(checks);
                     checksBody.innerHTML = data.length ? data.map((c) => `<tr data-check-id="${esc(c.id)}"><td>${esc(c.check_number || '—')}</td><td>${esc(c.customer_name || c.customer?.company_name || '—')}</td><td>${Number(c.amount || 0).toLocaleString('fa-IR')}</td><td>${esc(c.due_date || '—')}</td><td>${esc(c.status_label || c.status || '—')}</td><td><button class="btn-success btn-sm api-cash-check" data-id="${esc(c.id)}">نقد شد</button><button class="btn-danger btn-sm api-delete-check" data-id="${esc(c.id)}">حذف</button></td></tr>`).join('') : '<tr><td colspan="13">چکی ثبت نشده است.</td></tr>';
                 }
+                showFailure('customerList', customers);
+                showFailure('distributorTableBody', distributors, true);
+                showFailure('ticketList', tickets);
+                showFailure('checksTableBody', checks, true);
             }
             loadOwnerTables().catch((error) => {
                 console.error('خطا در بارگذاری داده‌های پنل صاحب شرکت:', error);
