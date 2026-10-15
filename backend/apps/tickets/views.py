@@ -335,6 +335,46 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
+        methods=['get'],
+        permission_classes=[IsAdminOrSecretary],
+        url_path='contact-messages',
+    )
+    def contact_messages(self, request):
+        """Compatibility feed for the secretary's public contact inbox."""
+        queryset = Ticket.objects.filter(user__isnull=True).prefetch_related('messages').order_by('-created_at')
+        data = []
+        subject_by_category = {
+            Ticket.Category.ORDER: 'order', Ticket.Category.TECHNICAL: 'support',
+            Ticket.Category.COMPLAINT: 'complaint', Ticket.Category.SUGGESTION: 'suggestion',
+        }
+        for ticket in queryset:
+            data.append({
+                'id': ticket.id,
+                'full_name': ticket.guest_name or 'مهمان',
+                'phone': ticket.guest_phone,
+                'email': ticket.guest_email,
+                'subject': subject_by_category.get(ticket.category, 'other'),
+                'message': ticket.message,
+                'status': 'answered' if ticket.status == Ticket.Status.ANSWERED else 'new',
+                'is_read': ticket.status != Ticket.Status.OPEN,
+                'created_at': ticket.created_at,
+            })
+        return Response(data)
+
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAdminOrSecretary],
+        url_path='mark-read',
+    )
+    def contact_message_mark_read(self, request, pk=None):
+        ticket = self.get_object()
+        ticket.status = Ticket.Status.ANSWERED
+        ticket.save(update_fields=['status', 'updated_at'])
+        return Response({'id': ticket.id, 'status': 'answered'})
+
+    @action(
+        detail=False,
         methods=['post'],
         permission_classes=[AllowAny],
         authentication_classes=[],

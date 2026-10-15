@@ -4046,14 +4046,14 @@
                 const mr = e.target.closest('.contact-mark-read');
                 if (mr) {
                     const id = mr.getAttribute('data-id');
-                    apiPatch('tickets/contact-messages/' + id + '/', { is_read: true, status: 'read' })
+                    apiPost('tickets/' + id + '/mark-read/', {})
                         .then(function(res) { if (res && res.success) loadContactMessages(); });
                     return;
                 }
                 const an = e.target.closest('.contact-answer');
                 if (an) {
                     const id = an.getAttribute('data-id');
-                    apiPatch('tickets/contact-messages/' + id + '/', { status: 'answered' })
+                    apiPost('tickets/' + id + '/mark-read/', {})
                         .then(function(res) { if (res && res.success) loadContactMessages(); });
                     return;
                 }
@@ -4061,7 +4061,7 @@
                 if (del) {
                     const id = del.getAttribute('data-id');
                     if (!confirm('این پیام حذف شود؟')) return;
-                    apiDelete('tickets/contact-messages/' + id + '/')
+                    apiDelete('tickets/' + id + '/')
                         .then(function(res) { if (res && res.success) loadContactMessages(); });
                     return;
                 }
