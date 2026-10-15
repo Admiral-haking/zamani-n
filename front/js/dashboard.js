@@ -42,9 +42,11 @@ class Dashboard {
                 failed.length ? '⚠️ بخشی از اطلاعات داشبورد بارگذاری نشد' : '✅ داشبورد با موفقیت بارگذاری شد',
                 failed.length ? 'warning' : 'success'
             );
+            if (failed.length) this.showLoadRetry(failed.length);
         } catch (error) {
             console.error('❌ خطا در بارگذاری داشبورد:', error);
             this.showToast('❌ خطا در بارگذاری اطلاعات داشبورد', 'error');
+            this.showLoadRetry(1);
         } finally {
             this.isLoading = false;
             this.hideLoader();
@@ -75,6 +77,31 @@ class Dashboard {
         });
 
         return results;
+    }
+
+    showLoadRetry(failedCount) {
+        let banner = document.getElementById('dashboardLoadRetry');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'dashboardLoadRetry';
+            banner.style.cssText = 'position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:10020;display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;background:#332b18;color:#ffe08a;border:1px solid rgba(255,208,80,.45);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px;direction:rtl;';
+            document.body.appendChild(banner);
+        }
+        banner.innerHTML = '<span>بارگذاری ' + Number(failedCount).toLocaleString('fa-IR') + ' بخش ناموفق بود.</span><button type="button" class="btn-primary" style="padding:6px 12px;border:0;cursor:pointer;">تلاش دوباره</button>';
+        const retry = banner.querySelector('button');
+        retry.addEventListener('click', async () => {
+            retry.disabled = true;
+            retry.textContent = 'در حال تلاش...';
+            const results = await this.loadAllData();
+            const failed = results.filter(result => result.status === 'rejected');
+            if (!failed.length) {
+                banner.remove();
+                this.renderDashboard();
+                this.showToast('✅ اطلاعات داشبورد به‌روزرسانی شد', 'success');
+            } else {
+                this.showLoadRetry(failed.length);
+            }
+        });
     }
 
     async loadUserData() {
