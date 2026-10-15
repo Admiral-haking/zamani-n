@@ -7115,15 +7115,20 @@
                     direction: direction
                 };
                 if (typeof apiPost === 'function') {
-                    apiPost('inventory/logs/', payload).then(function() {
+                    showMsg('backupMsg', `⏳ در حال ثبت ورود/خروج در دیتابیس... (${product})`, 'info');
+                    apiPost('inventory/logs/', payload).then(function(res) {
+                        if (!res || !res.success) throw new Error('inventory log was not persisted');
                         backupData[0].synced = true;
                         saveBackupData();
+                        showMsg('backupMsg', `✅ ورود/خروج در دیتابیس ثبت شد. (${product})`, 'success');
                     }).catch(function() {
                         backupData[0].synced = false;
                         saveBackupData();
+                        showMsg('backupMsg', `⚠️ تغییر محلی ذخیره شد اما ثبت در دیتابیس ناموفق بود. دوباره تلاش کنید. (${product})`, 'error');
                     });
+                } else {
+                    showMsg('backupMsg', '⚠️ سرویس اتصال به دیتابیس در دسترس نیست؛ تغییر فقط محلی ذخیره شد.', 'error');
                 }
-                showMsg('backupMsg', `✅ ورود/خروج ثبت و ذخیره شد. (${product})`, 'success');
             }
 
             function unitLabel(unit) {
