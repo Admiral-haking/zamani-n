@@ -3516,6 +3516,66 @@
         </div>
     </div>
 
+    <script src="./js/api.js?v=6"></script>
+    <script>
+        // The owner panel must use the same authenticated API client as the
+        // other panels. Keep all persistence behind API responses; never
+        // report success for a DOM-only change.
+        (async function connectOwnerPanel() {
+            if (!localStorage.getItem('access_token')) {
+                window.location.href = 'log.html';
+                return;
+            }
+
+            const profile = await apiGet('accounts/me/');
+            if (!profile.success) return;
+            const user = profile.data || {};
+            const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '—';
+            const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || '—'; };
+            setText('profileName', name);
+            setText('profileEmail', user.email);
+            setText('profilePhone', user.phone);
+
+            const dashboard = await apiGet('owner/dashboard/');
+            if (dashboard.success && dashboard.data) {
+                const data = dashboard.data;
+                const values = data.summary || data;
+                document.querySelectorAll('[data-dashboard-key]').forEach((el) => {
+                    const key = el.dataset.dashboardKey;
+                    if (values[key] !== undefined) el.textContent = Number(values[key]).toLocaleString('fa-IR');
+                });
+            }
+
+            document.addEventListener('click', async (event) => {
+                const profileButton = event.target.closest('#saveProfileBtn');
+                const passwordButton = event.target.closest('#savePasswordBtn');
+                if (!profileButton && !passwordButton) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+
+                if (profileButton) {
+                    const result = await apiPut('accounts/me/', {
+                        first_name: document.getElementById('editName')?.value.trim() || '',
+                        email: document.getElementById('editEmail')?.value.trim() || '',
+                        phone: document.getElementById('editPhone')?.value.trim() || ''
+                    });
+                    showMsg('profileModalResult', result.success ? '✅ پروفایل در دیتابیس ذخیره شد.' : '❌ ذخیره پروفایل انجام نشد.', result.success ? 'success' : 'error');
+                    if (result.success) setTimeout(() => document.getElementById('profileModal')?.classList.remove('active'), 700);
+                } else {
+                    const oldPassword = document.getElementById('oldPassword')?.value || '';
+                    const newPassword = document.getElementById('newPassword')?.value || '';
+                    const confirm = document.getElementById('confirmPassword')?.value || '';
+                    if (newPassword !== confirm || newPassword.length < 8) {
+                        showMsg('passwordModalResult', '❌ رمز جدید باید حداقل ۸ کاراکتر و تکرار آن یکسان باشد.', 'error');
+                        return;
+                    }
+                    const result = await apiPost('accounts/change-password/', { old_password: oldPassword, new_password: newPassword });
+                    showMsg('passwordModalResult', result.success ? '✅ رمز عبور در دیتابیس تغییر کرد.' : '❌ تغییر رمز انجام نشد.', result.success ? 'success' : 'error');
+                    if (result.success) setTimeout(() => document.getElementById('passwordModal')?.classList.remove('active'), 700);
+                }
+            }, true);
+        })();
+    </script>
     <script>
         (function() {
             // ===== گارد ورود: اگر توکن معتبر نیست، بره صفحه ورود =====
