@@ -10,6 +10,17 @@ function _detectApiBase() {
 }
 
 const API_URL = _detectApiBase();
+const API_TIMEOUT_MS = 20000;
+
+function fetchWithApiTimeout(url, options) {
+    const config = { ...options };
+    if (config.signal) return fetch(url, config);
+
+    const controller = new AbortController();
+    config.signal = controller.signal;
+    const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+    return fetch(url, config).finally(() => clearTimeout(timer));
+}
 
 async function readApiResponse(response) {
     const text = await response.text();
@@ -116,7 +127,7 @@ async function apiRequest(endpoint, options = {}) {
         const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
         const url = `${API_URL}${cleanEndpoint}`;
 
-        const response = await fetch(url, {
+        const response = await fetchWithApiTimeout(url, {
             ...options,
             headers
         });
@@ -130,7 +141,7 @@ async function apiRequest(endpoint, options = {}) {
                 token = getAccessToken();
                 headers["Authorization"] = `Bearer ${token}`;
 
-                const retryResponse = await fetch(url, {
+                const retryResponse = await fetchWithApiTimeout(url, {
                     ...options,
                     headers
                 });
@@ -183,14 +194,17 @@ async function apiRequest(endpoint, options = {}) {
 
     } catch (error) {
         console.error("API Error:", error);
+        const message = error && error.name === 'AbortError'
+            ? 'زمان پاسخ‌گویی سرور تمام شد؛ دوباره تلاش کنید.'
+            : error.message;
         window.dispatchEvent(new CustomEvent('zamani:api-failure', {
-            detail: { endpoint: endpoint, status: 0, error: error.message }
+            detail: { endpoint: endpoint, status: 0, error: message }
         }));
         return {
             success: false,
             status: 0,
             data: null,
-            error: error.message
+            error: message
         };
     }
 }
