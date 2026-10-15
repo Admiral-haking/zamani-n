@@ -1946,6 +1946,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (form) form.style.display = 'none';
             var tb = $id('showAddDiscountBtn');
             if (tb) tb.innerHTML = '<i class="fas fa-plus"></i> تخفیف جدید';
+        }).catch(function () {
+            showErr('ارتباط با سرور برای ثبت تخفیف برقرار نشد.');
         });
     };
 
@@ -1957,6 +1959,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 return;
             }
             me.loadDiscounts();
+        }).catch(function () {
+            var mb = $id('discountFormMsg');
+            if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برای حذف تخفیف برقرار نشد.', false)); }
         });
     };
 
@@ -2150,6 +2155,11 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 list.parentNode.insertBefore(note, list);
                 setTimeout(function () { if (note.parentNode) note.parentNode.removeChild(note); }, 5000);
             }
+        }).catch(function () {
+            if (m) {
+                m.style.color = '#e74c3c';
+                m.textContent = 'ارتباط با سرور برای ثبت پیام برقرار نشد.';
+            }
         });
     };
 
@@ -2281,6 +2291,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (box) box.appendChild(msgBox('پیامک با موفقیت ثبت شد.', true));
             $id('singleSmsMessage').value = '';
             me.loadSmsHistory();
+        }).catch(function () {
+            if (box) { box.innerHTML = ''; box.appendChild(msgBox('ارتباط با سرور برای ثبت پیامک برقرار نشد.', false)); }
         });
     };
 
@@ -2300,6 +2312,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             if (box) box.appendChild(msgBox('پیامک برای ' + faNum(n) + ' مخاطب ثبت شد.', true));
             $id('bulkSmsMessage').value = '';
             me.loadSmsHistory();
+        }).catch(function () {
+            if (box) { box.innerHTML = ''; box.appendChild(msgBox('ارتباط با سرور برای ثبت پیامک گروهی برقرار نشد.', false)); }
         });
     };
 
