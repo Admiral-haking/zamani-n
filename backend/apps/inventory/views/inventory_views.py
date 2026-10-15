@@ -59,7 +59,7 @@ class InventoryLogViewSet(viewsets.ModelViewSet):
 
 class InventoryViewSet(viewsets.ModelViewSet):
 
-    queryset = Inventory.objects.select_related("product")
+    queryset = Inventory.objects.select_related("product").order_by("product__name", "id")
 
     serializer_class = InventorySerializer
 
