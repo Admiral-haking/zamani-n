@@ -11244,6 +11244,7 @@ function addBothToCart(productId, productName) {
             }
             
             function handleSendMessage() {
+                if (handleSendMessage.sending) return;
                 const text = supportChatInput.value.trim();
                 if (!text) {
                     notificationManager.showWarning('⚠️ خالی', 'لطفاً متن پیام خود را وارد کنید.', 2000);
@@ -11255,6 +11256,12 @@ function addBothToCart(productId, productName) {
                 fd.append('kind', 'TEXT');
                 fd.append('text', text);
 
+                handleSendMessage.sending = true;
+                if (supportSendBtn) {
+                    supportSendBtn.disabled = true;
+                    supportSendBtn.dataset.originalHtml = supportSendBtn.innerHTML;
+                    supportSendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                }
                 supportChatInput.value = '';
                 supportChatInput.style.height = 'auto';
 
@@ -11263,7 +11270,14 @@ function addBothToCart(productId, productName) {
                         renderSupportMessage(m);
                         notificationManager.showSuccess('✅ ارسال شد', 'پیام شما برای پشتیبانی ارسال شد.', 2500);
                     } else {
+                        supportChatInput.value = text;
                         notificationManager.showWarning('⚠️ خطا', 'ارسال پیام ناموفق بود. لطفاً دوباره تلاش کنید.', 3000);
+                    }
+                }).finally(function () {
+                    handleSendMessage.sending = false;
+                    if (supportSendBtn) {
+                        supportSendBtn.disabled = false;
+                        supportSendBtn.innerHTML = supportSendBtn.dataset.originalHtml || '<i class="fas fa-paper-plane"></i>';
                     }
                 });
             }
