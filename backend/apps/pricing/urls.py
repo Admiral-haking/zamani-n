@@ -1,54 +1,14 @@
-from django.urls import path, include
-
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import DistributorPriceViewSet, LegacyProductPriceViewSet, CustomerPriceViewSet
-
+from .views import CustomerPriceViewSet, DistributorPriceViewSet, LegacyProductPriceViewSet
 
 
 router = DefaultRouter()
 
+# Prefix routes must be registered before the empty-prefix route.
+router.register("customer-prices", CustomerPriceViewSet, basename="customer-prices")
+router.register("legacy", LegacyProductPriceViewSet, basename="legacy-prices")
+router.register("", DistributorPriceViewSet, basename="prices")
 
-
-router.register(
-
-    r"",
-
-    DistributorPriceViewSet,
-
-    basename="prices"
-
-)
-
-
-
-router.register(
-
-    r"legacy",
-
-    LegacyProductPriceViewSet,
-
-    basename="legacy-prices"
-
-)
-
-
-
-router.register(
-    r"customer-prices",
-    CustomerPriceViewSet,
-    basename="customer-prices",
-)
-
-urlpatterns = [
-
-    path(
-
-        "",
-
-        include(router.urls)
-
-    )
-
-]
-
+urlpatterns = [path("", include(router.urls))]
