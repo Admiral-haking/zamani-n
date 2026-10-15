@@ -63,4 +63,9 @@ button:disabled,
 @media (max-width: 720px) {
     .data-table { min-width: 620px; }
     .panel-section { overflow-x: auto; }
+    .form-row { grid-template-columns: 1fr !important; }
+    .form-actions,
+    .modal-actions { gap: 8px; }
+    .form-actions > button,
+    .modal-actions > button { flex: 1 1 140px; min-height: 40px; }
 }
