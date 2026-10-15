@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     DistributorViewSet,
     DistributorDashboardView,
-    DistributorCustomerViewSet
+    DistributorCustomerViewSet,
+    DistributorPurchaseViewSet,
 )
 
 
@@ -18,6 +19,12 @@ router.register(
     "customers",
     DistributorCustomerViewSet,
     basename="distributor-customers"
+)
+
+router.register(
+    "purchases",
+    DistributorPurchaseViewSet,
+    basename="distributor-purchases",
 )
 
 
