@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ZAMANI BURGER | ورود / ثبت نام - اسلایدر ریسپانسیو</title>
+    <style>
+        /* ---------- RESET & BASE ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, 'Segoe UI', 'Tahoma', 'Vazirmatn', sans-serif;
+            direction: rtl;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        /* پس‌زمینه تار با کیفیت بالا */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('./image/log/back2.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: blur(12px);
+            z-index: -2;
+        }
+
+        /* ---------- کانتینر اصلی ---------- */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            width: 90%;
+            max-width: 1300px;
+            min-height: 85vh;
+            margin: 5vh auto;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* ---------- بخش اسلایدر (چپ در دسکتاپ) ---------- */
+        .slider-section {
+            flex: 1.2;
+            position: relative;
+            overflow: hidden;
+            background: #00000020;
+            border-radius: 12px;
+            margin: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            min-height: 400px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .slide-img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 6s ease;
+            transform: scale(1);
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .slide.active .slide-img {
+            transform: scale(1.08);
+        }
+
+        .slider-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.2));
+            z-index: 3;
+            border-radius: 12px;
+            pointer-events: none;
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 11;
+        }
+
+        .dot.active {
+            background: #ff9800;
+            width: 26px;
+            border-radius: 20px;
+            border-color: rgb(255, 255, 255);
+            box-shadow: 0 0 8px #ff9800;
+        }
+
+        /* ---------- بخش فرم (راست در دسکتاپ) ---------- */
+        .form-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 550px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 38px 32px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 152, 0, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.4);
+            animation: softPulse 2.5s infinite;
+        }
+
+        .logo svg {
+            width: 52px;
+            height: 52px;
+            fill: white;
+        }
+
+        .brand-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .brand-name span {
+            color: #ffb347;
+            text-shadow: 0 0 10px rgba(255, 152, 0, 0.6);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 8px;
+            margin: 25px 0 32px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            padding: 14px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.5px;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 152, 0, 0.2), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 50px;
+        }
+
+        .tab-btn:hover::before {
+            opacity: 1;
+        }
+
+        .tab-btn:hover {
+            color: #ffe0b5;
+            background: rgba(255, 152, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: #1e1e2a;
+            box-shadow: 0 6px 18px rgba(255, 152, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+            font-weight: 800;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            margin-right: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffb347;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1.5px solid #ffb347;
+            border-radius: 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #ffffff;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 245, 220, 0.7);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            border-color: #ffaa33;
+            background: rgba(255, 255, 255, 0.22);
+            box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.25);
+        }
+
+        .form-group input[type="tel"] {
+            text-align: right;
+        }
+
+        .double-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+        .double-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .otp-group {
+            display: flex;
+            gap: 14px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            direction: ltr;
+        }
+        .otp-input {
+            width: 72px;
+            height: 72px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 180, 71, 0.8);
+            border-radius: 20px;
+            color: #ffd966;
+            outline: none;
+            transition: all 0.2s;
+            direction: ltr;
+            font-family: monospace;
+        }
+        .otp-input:focus {
+            border-color: #ffaa33;
+            box-shadow: 0 0 0 4px rgba(255,152,0,0.35);
+            background: rgba(255,255,255,0.25);
+            color: #ffecb3;
+        }
+        
+        .timer-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 14px 20px;
+            border-radius: 50px;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        .timer-text {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffd89a;
+            letter-spacing: 0.5px;
+        }
+        .resend-btn {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid #ffb347;
+            padding: 8px 18px;
+            border-radius: 40px;
+            color: #ffc97a;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: 0.25s;
+            backdrop-filter: blur(4px);
+        }
+        .resend-btn:hover:not(:disabled) {
+            background: #ff9800;
+            color: #1e1e2a;
+            border-color: white;
+            transform: scale(1.02);
+            box-shadow: 0 3px 12px rgba(255,152,0,0.5);
+        }
+        .resend-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .terms-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            margin: 18px 0 12px;
+            padding: 8px 0;
+        }
+        .terms-wrapper input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #ff9800;
+            transform: scale(1.05);
+        }
+        .terms-wrapper label {
+            color: rgba(255, 255, 245, 0.95);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+        .terms-wrapper a {
+            color: #ffcc80;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .terms-wrapper a:hover {
+            color: #ffaa33;
+            text-decoration: underline;
+            text-shadow: 0 0 3px rgba(255,152,0,0.5);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px 22px;
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            border: none;
+            border-radius: 60px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 18px;
+            box-shadow: 0 10px 24px rgba(255, 152, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 32px rgba(255, 152, 0, 0.55);
+            background: linear-gradient(135deg, #ffaa33 0%, #ff6d00 100%);
+        }
+
+        .submit-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
+        }
+
+        .extra-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 0.95rem;
+        }
+
+        .extra-link a {
+            color: rgba(255, 245, 210, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .extra-link a:hover {
+            color: #ffcc80;
+            text-decoration: underline;
+        }
+
+        .orange-hint {
+            color: #ffc47e;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            margin-right: 12px;
+            text-align: center;
+            font-weight: 600;
+            background: rgba(0,0,0,0.2);
+            display: inline-block;
+            width: auto;
+            padding: 6px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+        }
+
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.5); }
+            70% { box-shadow: 0 0 0 16px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+
+        @media (max-width: 850px) {
+            .main-container {
+                flex-direction: column;
+                width: 95%;
+                margin: 20px auto;
+                border-radius: 28px;
+                min-height: auto;
+            }
+            .slider-section {
+                order: 1;
+                height: 280px;
+                min-height: 280px;
+                max-height: 320px;
+                border-radius: 12px;
+                margin: 12px 12px 0 12px;
+                overflow: hidden;
+            }
+            .slide, .slide-img {
+                border-radius: 12px;
+            }
+            .slide-img {
+                object-fit: cover;
+                object-position: center;
+                width: 100%;
+                height: 100%;
+            }
+            .form-section {
+                order: 2;
+                padding: 25px 18px;
+            }
+            .form-card {
+                padding: 28px 20px;
+                max-width: 100%;
+            }
+            .brand-name {
+                font-size: 1.9rem;
+            }
+            .logo {
+                width: 75px;
+                height: 75px;
+            }
+            .logo svg {
+                width: 44px;
+                height: 44px;
+            }
+            .otp-input {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            .double-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .submit-btn {
+                padding: 16px 20px;
+                font-size: 1.15rem;
+            }
+            .tab-btn {
+                padding: 12px 0;
+                font-size: 1.1rem;
+            }
+            .form-label {
+                font-size: 0.95rem;
+            }
+            .timer-text {
+                font-size: 0.95rem;
+            }
+            .resend-btn {
+                font-size: 0.85rem;
+                padding: 6px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .slider-section {
+                height: 240px;
+                min-height: 240px;
+                max-height: 260px;
+            }
+            .form-card {
+                padding: 22px 16px;
+            }
+            .tab-btn {
+                font-size: 0.95rem;
+                padding: 10px 0;
+            }
+            .form-group input {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+            .otp-input {
+                width: 52px;
+                height: 52px;
+                font-size: 1.5rem;
+            }
+            .timer-section {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+                text-align: center;
+            }
+            .terms-wrapper label {
+                font-size: 0.9rem;
+            }
+            .submit-btn {
+                padding: 14px 18px;
+                font-size: 1.05rem;
+            }
+            .orange-hint {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .slider-section {
+                height: 220px;
+                min-height: 220px;
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- بخش اسلایدر -->
+    <div class="slider-section" id="slider">
+        <div class="slider-overlay"></div>
+        <div class="slide active" data-index="0">
+            <img class="slide-img" src="./image/log/logo.jpg" alt="Burger slide 1" loading="eager">
+        </div>
+        <div class="slide" data-index="1">
+            <img class="slide-img" src="./image/log/daftar.png" alt="Burger slide 2" loading="lazy">
+        </div>
+        <div class="slide" data-index="2">
+            <img class="slide-img" src="./image/log/log2.png" alt="Burger slide 3" loading="lazy">
+        </div>
+        <div class="slide" data-index="3">
+            <img class="slide-img" src="./image/log/log-s4.jpg" alt="Burger slide 4" loading="lazy">
+        </div>
+        <div class="slider-controls">
+            <div class="dot active" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+            <div class="dot" data-index="3"></div>
+        </div>
+    </div>
+
+    <!-- بخش فرم -->
+    <div class="form-section">
+        <div class="form-card">
+            <div class="brand">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <h1 class="brand-name">ZAMANI <span>BURGER</span></h1>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="login">ورود</button>
+                <button class="tab-btn" data-tab="register">ثبت نام</button>
+            </div>
+
+            <!-- فرم ورود -->
+            <div id="loginFormContainer">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <span class="form-label">نام کاربری یا شماره تماس</span>
+                        <input type="text" id="loginUsername" placeholder="example_user یا 09123456789" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <span class="form-label">رمز عبور</span>
+                        <input type="password" id="loginPassword" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="submit-btn">ورود به حساب کاربری</button>
+                    <div class="extra-link">
+                        <a href="#">رمز عبور را فراموش کرده‌اید؟</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- فرم ثبت نام -->
+            <div id="registerFormContainer" style="display: none;">
+                <form id="registerForm">
+                    <div class="double-row">
+                        <div class="form-group">
+                            <span class="form-label">نام</span>
+                            <input type="text" id="regFirstName" placeholder="علی" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-label">نام خانوادگی</span>
+                            <input type="text" id="regLastName" placeholder="رضایی" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="double-row">
+                        <div class="form-group">
+                            <span class="form-label">شماره تماس</span>
+                            <input type="tel" id="regPhone" placeholder="09123456789" inputmode="numeric" style="text-align: right;">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-label">کد ملی</span>
+                            <input type="text" id="regNationalId" placeholder="کد ملی ۱۰ رقمی" inputmode="numeric" maxlength="10" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="double-row">
+                        <div class="form-group">
+                            <span class="form-label">نام مغازه</span>
+                            <input type="text" id="regShopName" placeholder="نام مغازه / فروشگاه" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <span class="form-label">کد پستی</span>
+                            <input type="text" id="regPostalCode" placeholder="کد پستی ۱۰ رقمی" inputmode="numeric" maxlength="10" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <span class="form-label">آدرس</span>
+                        <input type="text" id="regAddress" placeholder="آدرس کامل مغازه" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <span class="form-label">کد تایید 4 رقمی</span>
+                        <button type="button" id="sendOtpBtn" class="resend-btn" style="width:100%;margin-bottom:12px;">📲 ارسال کد تایید به شماره موبایل</button>
+                        <div class="otp-group" id="otpContainer" style="direction: ltr;">
+                            <input type="text" maxlength="1" class="otp-input" data-otp="0" pattern="\d*" inputmode="numeric" dir="ltr">
+                            <input type="text" maxlength="1" class="otp-input" data-otp="1" pattern="\d*" inputmode="numeric" dir="ltr">
+                            <input type="text" maxlength="1" class="otp-input" data-otp="2" pattern="\d*" inputmode="numeric" dir="ltr">
+                            <input type="text" maxlength="1" class="otp-input" data-otp="3" pattern="\d*" inputmode="numeric" dir="ltr">
+                        </div>
+                        <div class="timer-section">
+                            <span class="timer-text" id="timerLabel">⏱️ زمان باقیمانده: 02:00</span>
+                            <button type="button" id="resendOtpBtn" class="resend-btn" disabled>ارسال مجدد کد</button>
+                        </div>
+                        <div class="orange-hint" id="otpStatus">📲 ابتدا شماره موبایل را وارد و کد تایید را دریافت کنید</div>
+                    </div>
+
+                    <div class="form-group">
+                        <span class="form-label">کد معرف (اختیاری)</span>
+                        <input type="text" id="regReferralCode" placeholder="در صورت داشتن کد معرف وارد کنید">
+                    </div>
+
+                    <div class="terms-wrapper">
+                        <input type="checkbox" id="termsCheckbox">
+                        <label for="termsCheckbox">
+                            <a href="#" id="termsLink">قوانین و شرایط</a> را می‌پذیرم
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn">ثبت نام در زامنی برگر</button>
+                    <div class="extra-link">
+                        <a href="#" id="termsHelper" style="font-size:0.85rem;">مشاهده قوانین و شرایط</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- اسلایدر ----------
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    let currentIndex = 0;
+    let autoInterval;
+
+    function showSlide(index) {
+        if (index < 0) index = 0;
+        if (index >= slides.length) index = 0;
+        slides.forEach(slide => slide.classList.remove('active'));
+        dots.forEach(dot => dot.classList.remove('active'));
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+        currentIndex = index;
+    }
+
+    function nextSlide() {
+        showSlide(currentIndex + 1);
+    }
+
+    function startAutoSlide() {
+        if (autoInterval) clearInterval(autoInterval);
+        autoInterval = setInterval(nextSlide, 4000);
+    }
+
+    function stopAutoSlide() {
+        clearInterval(autoInterval);
+    }
+
+    dots.forEach((dot, idx) => {
+        dot.addEventListener('click', () => {
+            showSlide(idx);
+            stopAutoSlide();
+            startAutoSlide();
+        });
+    });
+
+    const sliderEl = document.getElementById('slider');
+    sliderEl.addEventListener('mouseenter', stopAutoSlide);
+    sliderEl.addEventListener('mouseleave', startAutoSlide);
+    sliderEl.addEventListener('touchstart', stopAutoSlide);
+    sliderEl.addEventListener('touchend', startAutoSlide);
+    startAutoSlide();
+
+    // ---------- تب ----------
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const loginContainer = document.getElementById('loginFormContainer');
+    const registerContainer = document.getElementById('registerFormContainer');
+
+    function switchTab(tabId) {
+        if (tabId === 'login') {
+            loginContainer.style.display = 'block';
+            registerContainer.style.display = 'none';
+            tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === 'login') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        } else {
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'block';
+            tabBtns.forEach(btn => {
+                if (btn.getAttribute('data-tab') === 'register') btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            // تایمر هنوز شروع نمی‌شود؛ با زدن دکمه «ارسال کد تایید» شروع می‌شود
+            idleOtpTimer();
+        }
+    }
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tab = btn.getAttribute('data-tab');
+            if (tab === 'login') switchTab('login');
+            else switchTab('register');
+        });
+    });
+
+    // ---------- OTP ----------
+    const otpInputs = document.querySelectorAll('.otp-input');
+    const resendBtn = document.getElementById('resendOtpBtn');
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    const timerLabel = document.getElementById('timerLabel');
+    const otpStatus = document.getElementById('otpStatus');
+    let timerInterval = null;
+    let timeLeft = 120;
+    
+    otpInputs.forEach((input, idx) => {
+        input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val && val.length === 1 && /[0-9]/.test(val)) {
+                if (idx < otpInputs.length - 1) otpInputs[idx + 1].focus();
+            }
+            if (val && !/[0-9]/.test(val)) e.target.value = '';
+            // به‌محض کامل شدن ۴ رقم، کد به سرور فرستاده می‌شود
+            if (getOtpValue().length === 4 && typeof window.verifyRegistrationOtp === 'function') {
+                window.verifyRegistrationOtp();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && input.value === '' && idx > 0) otpInputs[idx - 1].focus();
+        });
+    });
+    
+    function getOtpValue() {
+        let code = '';
+        otpInputs.forEach(inp => code += inp.value);
+        return code;
+    }
+    
+    function clearOtpFields() {
+        otpInputs.forEach(inp => inp.value = '');
+        if(otpInputs[0]) otpInputs[0].focus();
+    }
+    
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timeLeft = 120;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            if (timeLeft <= 1) {
+                clearInterval(timerInterval);
+                timerLabel.innerText = '⏱️ زمان پایان یافت';
+                resendBtn.disabled = false;
+                timerInterval = null;
+            } else {
+                timeLeft--;
+                updateTimerDisplay();
+            }
+        }, 1000);
+    }
+    
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerLabel.innerText = `⏱️ زمان باقیمانده: ${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+    
+    function resetOtpTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timeLeft = 120;
+        updateTimerDisplay();
+        resendBtn.disabled = true;
+        clearOtpFields();
+        startTimer();
+    }
+
+    // حالت آماده (بدون شمارش): تا وقتی دکمه ارسال کد زده نشود، تایمر حرکت نمی‌کند
+    function idleOtpTimer() {
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        timeLeft = 120;
+        updateTimerDisplay();
+        resendBtn.disabled = true;
+        clearOtpFields();
+    }
+    
+    // ابزار مشترک برای js/auth.js
+    window.__regOtp = {
+        getValue: getOtpValue,
+        clear: clearOtpFields,
+        resetTimer: resetOtpTimer,
+        startTimer: startTimer
+    };
+    
+    if (sendOtpBtn) {
+        sendOtpBtn.addEventListener('click', () => {
+            if (typeof window.sendRegistrationOtp === 'function') window.sendRegistrationOtp();
+        });
+    }
+    
+    resendBtn.addEventListener('click', () => {
+        if (resendBtn.disabled) return;
+        if (typeof window.sendRegistrationOtp === 'function') window.sendRegistrationOtp();
+    });
+
+    // =====================================================
+    // =================== ورود ===========================
+    // =====================================================
+    // ⚠️ توجه: این فرم ورود به جای alert از auth.js استفاده میکنه
+    // چون auth.js توی صفحه لود شده، پس event listener اضافی نداریم
+    // فقط برای جلوگیری از تداخل، اینجا چیزی نمینویسیم
+    // auth.js خودش رویداد submit رو مدیریت میکنه
+    
+    // =====================================================
+    // =================== ثبت نام ========================
+    // =====================================================
+    // ⚠️ توجه: ثبت نام هم توسط auth.js مدیریت میشه
+    // اینجا فقط OTP و قوانین رو داریم
+    
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const termsLink = document.getElementById('termsLink');
+    const termsHelper = document.getElementById('termsHelper');
+    
+    function showTermsPopup() {
+        alert("📜 قوانین و شرایط ZAMNI BURGER:\n\n1. اطلاعات شخصی شما محفوظ می‌ماند.\n2. استفاده از سرویس به معنی پذیرش قوانین است.\n3. ثبت نام به منزله تایید دریافت کدهای تبلیغاتی می‌باشد.\n4. مسئولیت حفظ امنیت رمز عبور بر عهده کاربر است.");
+    }
+    
+    termsLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showTermsPopup();
+    });
+    if(termsHelper) {
+        termsHelper.addEventListener('click', (e) => {
+            e.preventDefault();
+            showTermsPopup();
+        });
+    }
+    
+    // تنظیم مجدد OTP وقتی تب ثبت نام فعال میشه (بدون شروع شمارش)
+    window.addEventListener('load', () => {
+        if (registerContainer.style.display === 'block') idleOtpTimer();
+    });
+</script>
+
+<!-- ===== اسکریپت‌های اصلی ===== -->
+    <script src="./js/api.js?v=4"></script>
+    <script src="./js/auth.js?v=4"></script>
+
+</body>
+</html>

@@ -1,0 +1,3894 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>پنل پخش‌کننده | Zamani Burger</title>
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css" />
+    <link href="vendor/vazir/font-face.css" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Vazir', 'Segoe UI', Tahoma, sans-serif; }
+        :root {
+            --mustard-yellow: #D4A017;
+            --mustard-yellow-light: #e6b31e;
+            --charcoal-dark: #1a1a1a;
+            --text-light: #f0f0f0;
+            --text-gray: #c0c0c0;
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: rgba(26, 26, 46, 0.85);
+            --gold-gradient: linear-gradient(135deg, #D4A017, #F5C542, #D4A017);
+            --support-green: #4CAF50;
+            --lottery-glow: #ff6b6b;
+        }
+        body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            direction: rtl;
+        }
+        .panel-container {
+            width: 100%;
+            max-width: 1600px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(212, 160, 23, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInPanel 0.6s ease;
+        }
+        @keyframes fadeInPanel {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .panel-header {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, rgba(212, 160, 23, 0.1), rgba(212, 160, 23, 0.03));
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .panel-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .panel-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--mustard-yellow);
+            background: var(--gold-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--charcoal-dark);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.3);
+            flex-shrink: 0;
+        }
+        .panel-welcome h2 {
+            font-size: 18px;
+            color: var(--mustard-yellow);
+            font-weight: 700;
+        }
+        .panel-welcome p {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+        .panel-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .panel-close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .panel-close-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            transform: rotate(90deg);
+        }
+        .panel-body {
+            display: flex;
+            min-height: 600px;
+        }
+        .panel-sidebar {
+            width: 240px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 16px 0;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+        .panel-sidebar::-webkit-scrollbar { width: 3px; }
+        .panel-sidebar::-webkit-scrollbar-thumb { background: var(--mustard-yellow); border-radius: 3px; }
+        .panel-sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            color: var(--text-gray);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            border-right: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .panel-sidebar .menu-item i {
+            width: 20px;
+            font-size: 15px;
+            color: var(--text-gray);
+            transition: 0.3s;
+            flex-shrink: 0;
+        }
+        .panel-sidebar .menu-item:hover {
+            background: rgba(212, 160, 23, 0.08);
+            color: var(--text-light);
+        }
+        .panel-sidebar .menu-item:hover i { color: var(--mustard-yellow); }
+        .panel-sidebar .menu-item.active {
+            background: rgba(212, 160, 23, 0.12);
+            border-right-color: var(--mustard-yellow);
+            color: var(--mustard-yellow);
+        }
+        .panel-sidebar .menu-item.active i { color: var(--mustard-yellow); }
+        .panel-sidebar .menu-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(212, 160, 23, 0.2), transparent);
+            margin: 8px 16px;
+        }
+        .panel-sidebar .menu-item .menu-badge {
+            background: var(--mustard-yellow);
+            color: var(--charcoal-dark);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 20px;
+            margin-right: auto;
+        }
+        .panel-sidebar .menu-item .badge-danger {
+            background: #e74c3c;
+            color: #fff;
+        }
+        .panel-sidebar .menu-item.logout {
+            margin-top: 6px;
+            color: #e74c3c;
+        }
+        .panel-sidebar .menu-item.logout i { color: #e74c3c; }
+        .panel-sidebar .menu-item.logout:hover { background: rgba(231, 76, 60, 0.1); }
+        .panel-content {
+            flex: 1;
+            padding: 20px 28px;
+            overflow-y: auto;
+            max-height: 800px;
+        }
+        .panel-content::-webkit-scrollbar { width: 4px; }
+        .panel-content::-webkit-scrollbar-thumb { background: var(--mustard-yellow); border-radius: 4px; }
+        .panel-content::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); }
+        .panel-section {
+            display: none;
+            animation: fadeSection 0.4s ease;
+        }
+        .panel-section.active { display: block; }
+        @keyframes fadeSection {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-title {
+            font-size: 20px;
+            color: var(--mustard-yellow);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(212, 160, 23, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .section-title i { font-size: 20px; }
+        .section-title .title-actions { margin-right: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+        .section-sub {
+            color: var(--text-gray);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .info-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .info-card:hover {
+            border-color: var(--mustard-yellow);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        .info-card .label {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 4px;
+        }
+        .info-card .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-light);
+            word-break: break-word;
+        }
+        .info-card .value.gold { color: var(--mustard-yellow); }
+        .info-card .value.green { color: #2ecc71; }
+        .info-card .value.red { color: #e74c3c; }
+        .info-card .value.blue { color: #3498db; }
+        .profile-header-card {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(212, 160, 23, 0.12), rgba(255, 255, 255, 0.03));
+            border: 1px solid rgba(212, 160, 23, 0.25);
+            border-radius: 18px;
+            padding: 20px 24px;
+            margin-bottom: 18px;
+        }
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            font-size: 32px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .profile-header-info { display: flex; flex-direction: column; gap: 4px; }
+        .profile-header-name { font-size: 22px; font-weight: 800; color: var(--text-light); }
+        .profile-header-sub { font-size: 13px; color: var(--text-gray); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .role-badge {
+            background: rgba(212, 160, 23, 0.15);
+            color: var(--mustard-yellow);
+            border: 1px solid rgba(212, 160, 23, 0.35);
+            border-radius: 20px;
+            padding: 2px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: var(--gold-gradient);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 30px;
+            color: var(--charcoal-dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 20px rgba(212, 160, 23, 0.4);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--mustard-yellow);
+            padding: 7px 18px;
+            border-radius: 30px;
+            color: var(--mustard-yellow);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+        }
+        .btn-secondary:hover { background: rgba(212, 160, 23, 0.1); }
+        .btn-sm { padding: 4px 14px; font-size: 11px; border-radius: 20px; }
+        .alert-success, .alert-info, .alert-danger {
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .alert-success { background: rgba(39, 174, 96, 0.12); color: #27ae60; border: 1px solid rgba(39, 174, 96, 0.3); }
+        .alert-info { background: rgba(212, 160, 23, 0.12); color: var(--mustard-yellow); border: 1px solid rgba(212, 160, 23, 0.3); }
+        .alert-danger { background: rgba(231, 76, 60, 0.12); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+        .btn-danger {
+            background: #e74c3c;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-danger:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4); }
+        .btn-success {
+            background: #2ecc71;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-success:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4); }
+        .btn-excel {
+            background: #217346;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-excel:hover { transform: scale(1.03); box-shadow: 0 4px 20px rgba(33, 115, 70, 0.4); }
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            -webkit-overflow-scrolling: touch;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 700px;
+        }
+        .data-table th {
+            background: rgba(212, 160, 23, 0.1);
+            color: var(--mustard-yellow);
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            white-space: nowrap;
+        }
+        .data-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-gray);
+        }
+        .data-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        .data-table .total-row td {
+            background: rgba(212, 160, 23, 0.08);
+            font-weight: 700;
+            border-top: 2px solid var(--mustard-yellow);
+            color: var(--mustard-yellow);
+        }
+        .data-table .tx-amount.plus { color: #2ecc71; }
+        .data-table .tx-amount.minus { color: #e74c3c; }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-badge.delivered { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.processing { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .status-badge.shipped { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .status-badge.canceled { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .status-badge.paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.unpaid { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .status-badge.partial { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .status-badge.waiting { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .status-badge.answered { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .status-badge.high { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .status-badge.medium { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .status-badge.low { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .status-badge.urgent { background: rgba(231, 76, 60, 0.3); color: #e74c3c; animation: pulseBadge 1.5s infinite; }
+        @keyframes pulseBadge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 12px 0 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .filter-section label {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+        .filter-section select,
+        .filter-section input[type="date"],
+        .filter-section input[type="text"],
+        .filter-section input[type="number"] {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .filter-section select:focus,
+        .filter-section input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+        }
+        .filter-section select option { background: var(--bg-secondary); }
+        .filter-btn {
+            padding: 6px 20px;
+            border-radius: 20px;
+            border: none;
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .filter-btn:hover { transform: scale(1.05); }
+        .reset-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--mustard-yellow);
+            background: transparent;
+            color: var(--mustard-yellow);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .reset-btn:hover { background: rgba(212, 160, 23, 0.1); }
+        .ticket-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .ticket-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 14px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .ticket-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(212, 160, 23, 0.3);
+        }
+        .ticket-item.unanswered {
+            border-color: #e74c3c;
+        }
+        .ticket-item.from-secretary {
+            border-color: #3498db;
+        }
+        .ticket-item.from-customer {
+            border-color: #2ecc71;
+        }
+        .ticket-item .ticket-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .ticket-item .ticket-title {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .ticket-item .ticket-title i { color: var(--mustard-yellow); margin-left: 8px; }
+        .ticket-item .ticket-meta {
+            font-size: 12px;
+            color: var(--text-gray);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .ticket-item .ticket-meta span { display: flex; align-items: center; gap: 4px; }
+        .ticket-item .ticket-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .ticket-detail {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 16px;
+            display: none;
+        }
+        .ticket-detail.active { display: block; }
+        .ticket-detail .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .ticket-detail .detail-header h4 { color: var(--mustard-yellow); font-size: 17px; }
+        .ticket-detail .detail-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-left: 4px;
+        }
+        .ticket-msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            line-height: 1.6;
+            max-width: 85%;
+        }
+        .ticket-msg.user {
+            background: rgba(212, 160, 23, 0.15);
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            align-self: flex-end;
+            border-radius: 12px 12px 4px 12px;
+        }
+        .ticket-msg.admin {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            align-self: flex-start;
+            border-radius: 12px 12px 12px 4px;
+        }
+        .ticket-msg .msg-meta {
+            font-size: 10px;
+            color: var(--text-gray);
+            margin-top: 6px;
+            display: flex;
+            gap: 12px;
+        }
+        .ticket-detail .detail-reply {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .ticket-detail .detail-reply textarea {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 13px;
+            resize: vertical;
+            min-height: 50px;
+            font-family: inherit;
+        }
+        .ticket-detail .detail-reply textarea:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .ticket-detail .detail-reply button {
+            padding: 10px 20px;
+            background: var(--gold-gradient);
+            border: none;
+            border-radius: 10px;
+            color: var(--charcoal-dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+        .ticket-detail .detail-reply button:hover { transform: scale(1.03); }
+        .ticket-detail .detail-attachments {
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px dashed rgba(212,160,23,0.3);
+        }
+        .ticket-detail .detail-attachments .file-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 4px;
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        .ticket-detail .detail-attachments .file-item i { color: var(--mustard-yellow); }
+        .ticket-form {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 16px;
+            display: none;
+        }
+        .ticket-form.active { display: block; }
+        .ticket-form .form-group { margin-bottom: 14px; }
+        .ticket-form .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+        .ticket-form .form-group input,
+        .ticket-form .form-group select,
+        .ticket-form .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+        .ticket-form .form-group input:focus,
+        .ticket-form .form-group select:focus,
+        .ticket-form .form-group textarea:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .ticket-form .form-group textarea { min-height: 80px; resize: vertical; }
+        .ticket-form .form-group select option { background: var(--bg-secondary); }
+        .ticket-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .ticket-form .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .ticket-form .file-upload-area {
+            border: 2px dashed rgba(212,160,23,0.3);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .ticket-form .file-upload-area:hover {
+            border-color: var(--mustard-yellow);
+            background: rgba(212,160,23,0.05);
+        }
+        .ticket-form .file-upload-area i { font-size: 24px; color: var(--mustard-yellow); display: block; margin-bottom: 4px; }
+        .ticket-form .file-upload-area .file-name { font-size: 12px; color: var(--text-gray); }
+        .customer-search {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .customer-search input {
+            flex: 1;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .customer-search input:focus { outline: none; border-color: var(--mustard-yellow); }
+        .customer-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: 0.3s;
+        }
+        .customer-card:hover {
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .customer-card .customer-info .name { font-size: 16px; font-weight: 600; color: var(--text-light); }
+        .customer-card .customer-info .detail { font-size: 12px; color: var(--text-gray); display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+        .customer-card .customer-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+        .customer-card .customer-badges .tag {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .tag.vip { background: rgba(212,160,23,0.2); color: var(--mustard-yellow); }
+        .tag.wholesale { background: rgba(52,152,219,0.2); color: #3498db; }
+        .tag.complaint { background: rgba(231,76,60,0.2); color: #e74c3c; }
+        .tag.loyal { background: rgba(46,204,113,0.2); color: #2ecc71; }
+        .chart-container {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 20px;
+        }
+        .chart-container .chart-title {
+            color: var(--mustard-yellow);
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            padding: 10px 0;
+        }
+        .bar-chart .bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .bar-chart .bar-item .bar {
+            width: 100%;
+            background: var(--gold-gradient);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: 0.5s ease;
+            position: relative;
+        }
+        .bar-chart .bar-item .bar-label {
+            font-size: 10px;
+            color: var(--text-gray);
+        }
+        .bar-chart .bar-item .bar-value {
+            font-size: 10px;
+            color: var(--mustard-yellow);
+            font-weight: 600;
+        }
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .notif-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border-right: 3px solid var(--mustard-yellow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .notif-item:hover { background: rgba(255, 255, 255, 0.06); }
+        .notif-item .notif-text { font-size: 13px; color: var(--text-light); flex: 1; min-width: 150px; }
+        .notif-item .notif-text i { color: var(--mustard-yellow); margin-left: 8px; }
+        .notif-item .notif-time { font-size: 11px; color: var(--text-gray); white-space: nowrap; flex-shrink: 0; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            border: 2px solid var(--mustard-yellow);
+            padding: 30px 35px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        }
+        .modal-box h3 {
+            color: var(--mustard-yellow);
+            font-size: 22px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .modal-box .form-group { margin-bottom: 16px; }
+        .modal-box .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+        .modal-box .form-group input,
+        .modal-box .form-group textarea,
+        .modal-box .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .modal-box .form-group input:focus,
+        .modal-box .form-group textarea:focus,
+        .modal-box .form-group select:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .modal-box .form-group textarea { min-height: 80px; resize: vertical; }
+        .modal-box .form-group select option { background: var(--bg-secondary); }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .modal-box .modal-actions .btn-primary { flex: 1; justify-content: center; }
+        .modal-box .modal-actions .btn-secondary { flex: 1; justify-content: center; }
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .inventory-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .inventory-card:hover {
+            border-color: var(--mustard-yellow);
+            transform: translateY(-2px);
+        }
+        .inventory-card .number { font-size: 24px; font-weight: 700; color: var(--mustard-yellow); }
+        .inventory-card .label { font-size: 12px; color: var(--text-gray); margin-top: 4px; }
+        .inventory-card .sub-label { font-size: 11px; color: var(--text-gray); margin-top: 2px; }
+
+        .inventory-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .inventory-summary-card {
+            background: linear-gradient(180deg, rgba(212, 160, 23, 0.08), rgba(0, 0, 0, 0.25));
+            border-radius: 14px;
+            padding: 16px 18px;
+            border: 2px solid rgba(212, 160, 23, 0.55);
+            box-shadow: 0 0 0 1px rgba(212, 160, 23, 0.15), 0 4px 18px rgba(0, 0, 0, 0.35);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .inventory-summary-card:hover {
+            border-color: rgba(212, 160, 23, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .inventory-summary-card .summary-product-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .inventory-summary-card .summary-values {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .inventory-summary-card .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .inventory-summary-card .summary-item .summary-label {
+            font-size: 11px;
+            color: var(--text-gray);
+        }
+
+        .inventory-summary-card .summary-item .summary-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--mustard-yellow);
+            direction: ltr;
+        }
+
+        .inventory-summary-card .summary-item .summary-value.package { color: #2ecc71; }
+        .inventory-summary-card .summary-item .summary-value.carton { color: #3498db; }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+            direction: ltr;
+        }
+
+        .pagination-container button {
+            min-width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-gray);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        .pagination-container button:hover:not(:disabled) {
+            background: rgba(212, 160, 23, 0.15);
+            border-color: rgba(212, 160, 23, 0.5);
+            color: var(--text-light);
+        }
+
+        .pagination-container button.active {
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            border-color: var(--mustard-yellow);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(212, 160, 23, 0.3);
+        }
+
+        .pagination-container button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-container .prev-btn,
+        .pagination-container .next-btn {
+            background: #ff9800;
+            color: #fff;
+            border: none;
+            padding: 0 18px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .pagination-container .prev-btn:hover:not(:disabled),
+        .pagination-container .next-btn:hover:not(:disabled) {
+            background: #e68900;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .pagination-container .prev-btn:disabled,
+        .pagination-container .next-btn:disabled {
+            background: #4a4a4a;
+            color: #888;
+        }
+
+        .discount-form-section {
+            background: linear-gradient(145deg, rgba(212, 160, 23, 0.06), rgba(212, 160, 23, 0.02));
+            border-radius: 20px;
+            padding: 24px 26px;
+            border: 1px solid rgba(212, 160, 23, 0.25);
+            margin-bottom: 28px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .discount-form-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--mustard-yellow);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+        }
+
+        .discount-form-header i { font-size: 20px; }
+
+        .discount-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .discount-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .discount-form-group label {
+            font-size: 13px;
+            color: var(--text-gray);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .discount-form-group label i {
+            color: var(--mustard-yellow);
+            font-size: 13px;
+        }
+
+        .discount-form-group select,
+        .discount-form-group input {
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+            transition: 0.3s;
+        }
+
+        .discount-form-group select:focus,
+        .discount-form-group input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.1);
+        }
+
+        .discount-form-group select option { background: var(--bg-secondary); }
+
+        .discount-form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .discount-table-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 20px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .discount-table-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--mustard-yellow);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            flex-wrap: wrap;
+        }
+
+        .discount-table-header i { font-size: 20px; }
+
+        .discount-table-header .discount-count {
+            background: rgba(212, 160, 23, 0.15);
+            color: var(--mustard-yellow);
+            font-size: 12px;
+            padding: 3px 14px;
+            border-radius: 20px;
+            margin-right: auto;
+            font-weight: 500;
+        }
+
+        .discount-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .discount-badge.active {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        .discount-badge.expired {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .discount-badge.upcoming {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+        }
+
+        .discount-code-cell {
+            font-family: 'Courier New', monospace;
+            background: rgba(212, 160, 23, 0.1);
+            color: var(--mustard-yellow);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .discount-percent-cell {
+            font-weight: 700;
+            color: #2ecc71;
+            font-size: 16px;
+        }
+
+        .inventory-control {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .inventory-control button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .inventory-control .btn-add { background: #2ecc71; color: #fff; }
+        .inventory-control .btn-add:hover { transform: scale(1.1); }
+        .inventory-control .btn-remove { background: #e74c3c; color: #fff; }
+        .inventory-control .btn-remove:hover { transform: scale(1.1); }
+        .inventory-control .inventory-input {
+            width: 50px;
+            padding: 4px 6px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text-light);
+            text-align: center;
+            font-size: 13px;
+        }
+        .inventory-control .inventory-input:focus { outline: none; border-color: var(--mustard-yellow); }
+        .inventory-log {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .inventory-log .log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        .inventory-log .log-item .log-date { color: var(--text-gray); }
+        .inventory-log .log-item .log-change.plus { color: #2ecc71; }
+        .inventory-log .log-item .log-change.minus { color: #e74c3c; }
+        .dashboard-detail-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .dashboard-detail-box.active { display: block; }
+        .dashboard-detail-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .dashboard-detail-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .dashboard-detail-box .detail-header .close-detail-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dashboard-detail-box .detail-header .close-detail-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        .dashboard-detail-box .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .dashboard-detail-box .detail-list::-webkit-scrollbar { width: 3px; }
+        .dashboard-detail-box .detail-list::-webkit-scrollbar-thumb { background: var(--mustard-yellow); border-radius: 3px; }
+        .detail-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .detail-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(212, 160, 23, 0.2);
+        }
+        .detail-item .item-name {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .detail-item .item-info {
+            font-size: 12px;
+            color: var(--text-gray);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .detail-item .item-info .highlight { color: var(--mustard-yellow); }
+        .detail-item .item-info .green { color: #2ecc71; }
+        .detail-item .item-info .red { color: #e74c3c; }
+        .detail-item .item-badge {
+            font-size: 10px;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .detail-item .item-badge.success { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .detail-item .item-badge.warning { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .detail-item .item-badge.danger { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+        .detail-item .item-badge.info { background: rgba(52, 152, 219, 0.2); color: #3498db; }
+        .open-ticket-list {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .open-ticket-list.active { display: block; }
+        .open-ticket-list .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .open-ticket-list .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .distributor-history-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .distributor-history-box.active { display: block; }
+        .distributor-history-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .distributor-history-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .daily-backup-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .daily-backup-box.active { display: block; }
+        .daily-backup-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .daily-backup-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .operation-msg {
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin: 8px 0;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .operation-msg.success {
+            background: rgba(46, 204, 113, 0.15);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+        }
+        .operation-msg.error {
+            background: rgba(231, 76, 60, 0.15);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+        .operation-msg.info {
+            background: rgba(52, 152, 219, 0.15);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            color: #3498db;
+        }
+        .operation-msg.warning {
+            background: rgba(241, 196, 15, 0.15);
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            color: #f1c40f;
+        }
+        .msg-modal .modal-box { max-width: 550px; }
+        .msg-modal .recipient-info {
+            background: rgba(212,160,23,0.08);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(212,160,23,0.2);
+        }
+        .msg-modal .recipient-info span { color: var(--mustard-yellow); font-weight: 600; }
+        .profile-modal .modal-box { max-width: 550px; }
+        .sms-modal .modal-box { max-width: 550px; }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper input {
+            flex: 1;
+            padding-left: 40px;
+        }
+        .password-wrapper .toggle-password {
+            position: absolute;
+            left: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+        }
+        .password-wrapper .toggle-password:hover {
+            color: var(--mustard-yellow);
+        }
+        .add-customer-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 16px;
+        }
+        .add-customer-form.active { display: block; }
+        .add-customer-form .form-group { margin-bottom: 14px; }
+        .add-customer-form .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+        .add-customer-form .form-group input,
+        .add-customer-form .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .add-customer-form .form-group input:focus,
+        .add-customer-form .form-group select:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .add-customer-form .form-group select option { background: var(--bg-secondary); }
+        .add-customer-form .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .price-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+        }
+        .price-grid-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .price-grid-row.filled { border-color: rgba(212, 160, 23, 0.35); }
+        .price-grid-name {
+            flex: 1;
+            min-width: 150px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .price-grid-name small { color: var(--text-gray); font-size: 11px; }
+        .price-grid-input {
+            width: 160px;
+            flex: 0 1 160px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .price-grid-input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .add-distributor-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 16px;
+        }
+        .add-distributor-form.active { display: block; }
+        .add-distributor-form .form-group { margin-bottom: 14px; }
+        .add-distributor-form .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+        .add-distributor-form .form-group input,
+        .add-distributor-form .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .add-distributor-form .form-group input:focus,
+        .add-distributor-form .form-group select:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .add-distributor-form .form-group select option { background: var(--bg-secondary); }
+        .add-distributor-form .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .balance-box {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            display: none;
+            animation: fadeSection 0.4s ease;
+        }
+        .balance-box.active { display: block; }
+        .balance-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .balance-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .balance-box .detail-header .close-balance-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .balance-box .detail-header .close-balance-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        .check-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 20px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-top: 16px;
+        }
+        .check-form.active { display: block; }
+        .check-form .form-group { margin-bottom: 14px; }
+        .check-form .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 6px;
+        }
+        .check-form .form-group input,
+        .check-form .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .check-form .form-group input:focus,
+        .check-form .form-group select:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .check-form .form-group input[type="file"] {
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .check-form .form-group input[type="file"]::-webkit-file-upload-button {
+            background: var(--gold-gradient);
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: var(--charcoal-dark);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .check-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .check-form .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .status-badge.cashed { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .status-badge.uncashed { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .debtor-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .debtor-box.active { display: block; }
+        .debtor-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .debtor-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .debtor-box .detail-header .close-debtor-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .debtor-box .detail-header .close-debtor-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        .settlement-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .settlement-box.active { display: block; }
+        .settlement-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .settlement-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .settlement-box .detail-header .close-settlement-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .settlement-box .detail-header .close-settlement-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        .financial-charts-wrapper {
+            margin-top: 0;
+        }
+        .profile-detail-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .profile-detail-box.active { display: block; }
+        .profile-detail-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .profile-detail-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-detail-box .detail-header .close-profile-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-detail-box .detail-header .close-profile-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .backup-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0 16px;
+        }
+        .backup-actions .btn-backup {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .backup-actions .btn-backup.daily { background: #3498db; color: #fff; }
+        .backup-actions .btn-backup.weekly { background: #9b59b6; color: #fff; }
+        .backup-actions .btn-backup.monthly { background: #e67e22; color: #fff; }
+        .backup-actions .btn-backup.yearly { background: #e74c3c; color: #fff; }
+        .backup-actions .btn-backup:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .backup-actions .btn-backup.excel { background: #217346; color: #fff; }
+        .backup-actions .btn-backup.excel:hover { background: #1a5e3a; }
+
+        .backup-table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            -webkit-overflow-scrolling: touch;
+            margin-top: 12px;
+        }
+        .backup-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 600px;
+        }
+        .backup-table th {
+            background: rgba(212, 160, 23, 0.1);
+            color: var(--mustard-yellow);
+            padding: 8px 12px;
+            text-align: right;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            white-space: nowrap;
+        }
+        .backup-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-gray);
+        }
+        .backup-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        .backup-table .total-row td {
+            background: rgba(212, 160, 23, 0.08);
+            font-weight: 700;
+            border-top: 2px solid var(--mustard-yellow);
+            color: var(--mustard-yellow);
+        }
+        .backup-table .change-in { color: #2ecc71; }
+        .backup-table .change-out { color: #e74c3c; }
+
+        .sms-dialog {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .sms-dialog.active { display: block; }
+        .sms-dialog .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .sms-dialog .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sms-dialog .detail-header .close-sms-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sms-dialog .detail-header .close-sms-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .reminder-table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            -webkit-overflow-scrolling: touch;
+            margin-top: 12px;
+        }
+        .reminder-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 600px;
+        }
+        .reminder-table th {
+            background: rgba(212, 160, 23, 0.1);
+            color: var(--mustard-yellow);
+            padding: 8px 12px;
+            text-align: right;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            white-space: nowrap;
+        }
+        .reminder-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-gray);
+        }
+        .reminder-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .report-filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin: 12px 0 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .report-filter-section label {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+        .report-filter-section input[type="date"] {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .report-filter-section input[type="date"]:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+        }
+
+        /* ===== استایل‌های جدید برای پرونده اشخاص و بدهکاران ===== */
+        .report-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 12px;
+        }
+        .report-tabs .tab-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(212,160,23,0.3);
+            background: transparent;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .report-tabs .tab-btn:hover {
+            background: rgba(212,160,23,0.1);
+            color: var(--text-light);
+        }
+        .report-tabs .tab-btn.active {
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            border-color: var(--mustard-yellow);
+        }
+        .report-tab-content {
+            display: none;
+            animation: fadeSection 0.4s ease;
+        }
+        .report-tab-content.active { display: block; }
+
+        .person-search-box {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .person-search-box input {
+            flex: 1;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .person-search-box input:focus { outline: none; border-color: var(--mustard-yellow); }
+
+        .person-detail-box .detail-header, .debtor-detail-box .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .person-detail-box .detail-header h4, .debtor-detail-box .detail-header h4 {
+            color: var(--mustard-yellow);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .person-detail-box .close-detail-btn, .debtor-detail-box .close-detail-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-gray);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .person-detail-box .close-detail-btn:hover, .debtor-detail-box .close-detail-btn:hover {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        .report-advanced-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 12px 0 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .report-advanced-filter label { font-size: 13px; color: var(--text-gray); }
+        .report-advanced-filter select, .report-advanced-filter input {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .report-advanced-filter select:focus, .report-advanced-filter input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+        }
+        .report-advanced-filter select option { background: var(--bg-secondary); }
+        .pagination-info { font-size: 12px; color: var(--text-gray); margin-right: 8px; }
+        .jdate-wrap { position: relative; display: inline-flex; align-items: center; }
+        .jdate-wrap .jdate-input {
+            padding: 7px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+            min-width: 132px;
+            cursor: pointer;
+            direction: rtl;
+        }
+        .jdate-wrap .jdate-input:focus { outline: none; border-color: var(--mustard-yellow); }
+        .jdate-wrap .jcal-icon {
+            cursor: pointer;
+            margin-left: -30px;
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            position: relative;
+            z-index: 2;
+        }
+        .jcal-pop {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            z-index: 999;
+            width: 252px;
+            background: #232323;
+            border: 1px solid rgba(212, 160, 23, 0.35);
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+        }
+        .jcal-pop.open { display: block; }
+        .jcal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .jcal-title { color: var(--mustard-yellow); font-size: 13px; font-weight: 600; }
+        .jcal-nav button {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            color: var(--text-light);
+            border-radius: 6px;
+            width: 26px; height: 26px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        .jcal-nav button:hover { background: rgba(212, 160, 23, 0.25); }
+        .jcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .jcal-grid .jcal-head { text-align: center; color: var(--text-gray); font-size: 11px; padding: 3px 0; }
+        .jcal-day {
+            background: rgba(255, 255, 255, 0.04);
+            border: none;
+            color: var(--text-light);
+            border-radius: 6px;
+            height: 28px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .jcal-day:hover { background: rgba(212, 160, 23, 0.35); color: #fff; }
+        .jcal-day.today { background: var(--gold-gradient); color: var(--charcoal-dark); font-weight: 700; }
+        .data-table .red { color: #e74c3c; }
+        .data-table .green { color: #2ecc71; }
+        #financialChart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            min-height: 190px;
+            padding: 10px 0;
+        }
+        #financialChart .bar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 0;
+        }
+        #financialChart .bar-item .bar {
+            width: 100%;
+            background: var(--gold-gradient);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+        }
+        #financialChart .bar-item .bar-label { font-size: 10px; color: var(--text-gray); }
+        #financialChart .bar-item .bar-value { font-size: 10px; color: var(--mustard-yellow); font-weight: 600; }
+
+        .person-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .person-card:hover {
+            border-color: var(--mustard-yellow);
+            background: rgba(255, 255, 255, 0.06);
+        }
+        .person-card .person-info .name { font-size: 16px; font-weight: 600; color: var(--text-light); }
+        .person-card .person-info .detail { font-size: 12px; color: var(--text-gray); display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+
+        .person-detail-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            animation: fadeSection 0.4s ease;
+        }
+        .person-detail-box.active { display: block; }
+
+        .person-sub-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 10px;
+        }
+        .person-sub-tabs .sub-tab-btn {
+            padding: 6px 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(212,160,23,0.2);
+            background: transparent;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 12px;
+        }
+        .person-sub-tabs .sub-tab-btn:hover {
+            background: rgba(212,160,23,0.1);
+            color: var(--text-light);
+        }
+        .person-sub-tabs .sub-tab-btn.active {
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            border-color: var(--mustard-yellow);
+        }
+        .person-sub-content {
+            display: none;
+            animation: fadeSection 0.4s ease;
+        }
+        .person-sub-content.active { display: block; }
+
+        .debtor-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: 0.3s;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .debtor-card:hover {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+        .debtor-card .debtor-info .name { font-size: 16px; font-weight: 600; color: #e74c3c; }
+        .debtor-card .debtor-info .detail { font-size: 12px; color: var(--text-gray); display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+        .debtor-card .debtor-amount { font-size: 18px; font-weight: 700; color: #e74c3c; }
+
+        .debtor-detail-box {
+            display: none;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-top: 16px;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            animation: fadeSection 0.4s ease;
+        }
+        .debtor-detail-box.active { display: block; }
+
+        .profile-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 12px;
+        }
+        .profile-tabs .tab-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(212,160,23,0.3);
+            background: transparent;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .profile-tabs .tab-btn:hover {
+            background: rgba(212,160,23,0.1);
+            color: var(--text-light);
+        }
+        .profile-tabs .tab-btn.active {
+            background: var(--gold-gradient);
+            color: var(--charcoal-dark);
+            border-color: var(--mustard-yellow);
+        }
+        .profile-tab-content {
+            display: none;
+            animation: fadeSection 0.4s ease;
+        }
+        .profile-tab-content.active { display: block; }
+        .profile-field {
+            display: flex;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .profile-field .field-label {
+            width: 140px;
+            flex-shrink: 0;
+            color: var(--text-gray);
+            font-size: 13px;
+        }
+        .profile-field .field-value {
+            flex: 1;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+        .profile-field .field-value .clickable {
+            color: var(--mustard-yellow);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .profile-field .field-value .clickable:hover {
+            color: var(--mustard-yellow-light);
+        }
+        .points-detail-box {
+            display: none;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            border: 1px solid rgba(212,160,23,0.2);
+        }
+        .points-detail-box.active { display: block; }
+        .balance-history-box {
+            display: none;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            border: 1px solid rgba(212,160,23,0.2);
+        }
+        .balance-history-box.active { display: block; }
+
+        .order-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .order-item .order-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .order-item .order-info .order-title {
+            font-size: 14px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .order-item .order-info .order-meta {
+            font-size: 12px;
+            color: var(--text-gray);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .order-item .order-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .product-select-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 10px 14px;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .product-select-item select, .product-select-item input {
+            padding: 6px 10px;
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .product-select-item select:focus, .product-select-item input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+        }
+        .product-select-item select option { background: #1a1a2e; color: var(--text-light); }
+        .product-select-item .product-price {
+            color: var(--mustard-yellow);
+            font-weight: 600;
+            font-size: 13px;
+            min-width: 80px;
+        }
+        .product-select-item .remove-product-btn {
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .invoice-detail-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(212,160,23,0.2);
+            margin-top: 16px;
+            display: none;
+        }
+        .invoice-detail-box.active { display: block; }
+
+        /* ===== استایل‌های جدید برای چک‌ها ===== */
+        .checks-section {
+            margin-top: 20px;
+        }
+        .checks-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .checks-filters label {
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+        .checks-filters input[type="date"],
+        .checks-filters input[type="text"] {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .checks-filters input:focus {
+            outline: none;
+            border-color: var(--mustard-yellow);
+        }
+
+        .clickable-status {
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-block;
+        }
+        .clickable-status:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 992px) {
+            .panel-sidebar { width: 200px; }
+            .panel-sidebar .menu-item { padding: 8px 14px; font-size: 12px; }
+            .panel-content { padding: 16px 20px; max-height: 600px; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .panel-container { border-radius: 20px; }
+            .panel-body { flex-direction: column; }
+            .panel-sidebar {
+                width: 100%;
+                border-left: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                display: flex;
+                flex-wrap: wrap;
+                padding: 6px 8px;
+                gap: 2px;
+                overflow-x: auto;
+                max-height: 200px;
+            }
+            .panel-sidebar .menu-item {
+                padding: 6px 12px;
+                border-right: none;
+                border-bottom: 2px solid transparent;
+                flex: 0 0 auto;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+            .panel-sidebar .menu-item.active { border-bottom-color: var(--mustard-yellow); border-right: none; }
+            .panel-sidebar .menu-divider { display: none; }
+            .panel-content { padding: 14px 16px; max-height: none; overflow-y: visible; }
+            .panel-header { padding: 12px 16px; flex-direction: row; flex-wrap: wrap; }
+            .panel-avatar { width: 40px; height: 40px; font-size: 16px; }
+            .panel-welcome h2 { font-size: 15px; }
+            .info-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .filter-section { flex-direction: column; align-items: stretch; }
+            .filter-section select, .filter-section input { width: 100%; }
+            .ticket-form .form-row { grid-template-columns: 1fr; }
+            .data-table { min-width: 500px; font-size: 12px; }
+            .customer-card { flex-direction: column; align-items: stretch; }
+            .bar-chart { height: 150px; }
+            .modal-box { padding: 20px; }
+            .inventory-grid { grid-template-columns: 1fr 1fr; }
+            .check-form .form-row { grid-template-columns: 1fr; }
+            .backup-actions { flex-direction: column; align-items: stretch; }
+            .backup-actions .btn-backup { justify-content: center; }
+            .backup-table { min-width: 400px; font-size: 10px; }
+            .report-filter-section { flex-direction: column; align-items: stretch; }
+            .report-filter-section input[type="date"] { width: 100%; }
+            .product-select-item { flex-direction: column; align-items: stretch; }
+            .product-select-item select, .product-select-item input { width: 100%; }
+            .order-item { flex-direction: column; align-items: stretch; }
+            .profile-field { flex-direction: column; gap: 4px; }
+            .profile-field .field-label { width: 100%; }
+            .person-card, .debtor-card { flex-direction: column; align-items: stretch; }
+            .report-tabs { justify-content: center; }
+            .person-sub-tabs { justify-content: center; }
+            .add-customer-form .form-row { grid-template-columns: 1fr; }
+            .check-form .form-row { grid-template-columns: 1fr; }
+            .check-form .form-actions, .add-customer-form .form-actions,
+            .discount-form-actions, .modal-box .modal-actions { flex-wrap: wrap; }
+            .modal-box .modal-actions .btn-primary, .modal-box .modal-actions .btn-secondary { flex: 1 1 140px; }
+            .pagination-container { flex-wrap: wrap; }
+            #financialChart { overflow-x: auto; }
+            #financialChart .bar-item { min-width: 44px; }
+            .bar-chart { overflow-x: auto; }
+            .bar-chart .bar-item { min-width: 40px; }
+            .customer-card .btn-primary, .customer-card .btn-secondary { flex: 1 1 120px; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .panel-container { border-radius: 16px; }
+            .panel-header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .panel-header-left { justify-content: center; }
+            .panel-header-right { justify-content: space-between; flex-wrap: wrap; }
+            .panel-content { padding: 12px; }
+            .info-grid { grid-template-columns: 1fr; }
+            .info-card .value { font-size: 15px; }
+            .section-title { font-size: 17px; }
+            .panel-sidebar .menu-item { font-size: 10px; padding: 4px 8px; }
+            .panel-sidebar .menu-item i { font-size: 12px; width: 14px; }
+            .data-table { min-width: 400px; font-size: 10px; }
+            .data-table th, .data-table td { padding: 6px 8px; }
+            .ticket-item { flex-direction: column; align-items: stretch; }
+            .ticket-detail .detail-reply { flex-direction: column; }
+            .ticket-detail .detail-reply button { width: 100%; justify-content: center; }
+            .modal-box { padding: 16px; }
+            .modal-box h3 { font-size: 18px; }
+            .bar-chart { height: 120px; gap: 4px; }
+            .bar-chart .bar-item .bar-value { font-size: 8px; }
+            .inventory-grid { grid-template-columns: 1fr; }
+            .customer-search input { min-width: 100%; }
+            .backup-table { min-width: 320px; font-size: 9px; }
+            .backup-table th, .backup-table td { padding: 4px 6px; }
+            .reminder-table { min-width: 320px; font-size: 9px; }
+            .reminder-table th, .reminder-table td { padding: 4px 6px; }
+            .person-search-box input { min-width: 100%; }
+            .person-search-box .btn-primary, .customer-search .btn-primary { flex: 1 1 100%; justify-content: center; }
+            .discount-form-grid { grid-template-columns: 1fr; }
+            .price-grid { max-height: 320px; }
+            .price-grid-name { min-width: 100%; }
+            .price-grid-input { flex: 1 1 100%; width: 100%; }
+            .profile-header-card { flex-direction: column; align-items: stretch; text-align: center; }
+            .profile-avatar { width: 56px; height: 56px; font-size: 24px; margin: 0 auto; }
+            .profile-header-sub { justify-content: center; }
+            .sms-dialog { padding: 16px; }
+            .pagination-container button { padding: 6px 10px; font-size: 12px; }
+            .section-title .title-actions { width: 100%; }
+            .section-title .title-actions .btn-primary, .section-title .title-actions .btn-secondary { flex: 1; justify-content: center; }
+            .filter-section .filter-btn, .filter-section .reset-btn,
+            .report-filter-section .filter-btn, .report-filter-section .reset-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panel-container">
+        <div class="panel-header" style="display:none;">
+            <div class="panel-header-left">
+                <div class="panel-avatar">پ</div>
+                <div class="panel-welcome">
+                    <h2>پنل پخش‌کننده | Zamani Burger</h2>
+                    <p>مدیریت فروش، مشتریان و ارتباطات</p>
+                </div>
+            </div>
+            <div class="panel-header-right">
+                <button class="panel-close-btn" id="closePanelBtn"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <div class="panel-sidebar" id="mainSidebar">
+                <div class="menu-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> داشبورد</div>
+                <div class="menu-item" data-section="purchase"><i class="fas fa-shopping-bag"></i> خرید از شرکت</div>
+                <div class="menu-item" data-section="sales"><i class="fas fa-cash-register"></i> سفارش مشتریان</div>
+                <div class="menu-item" data-section="settlement"><i class="fas fa-handshake"></i> مانده حساب</div>
+                <div class="menu-item" data-section="customers"><i class="fas fa-users"></i> مدیریت مشتریان</div>
+                <div class="menu-item" data-section="tickets"><i class="fas fa-ticket-alt"></i> سیستم تیکتینگ <span class="menu-badge badge-danger" id="ticketBadge">۳</span></div>
+                <div class="menu-item" data-section="notifications"><i class="fas fa-bell"></i> اعلان‌ها <span class="menu-badge badge-danger" id="notifBadge" style="display:none;">۰</span></div>
+                <div class="menu-item" data-section="communication"><i class="fas fa-comment-dots"></i> ارتباط با مشتریان</div>
+                <!-- حذف شد: ارتباط با صاحب شرکت -->
+                <div class="menu-item" data-section="checks"><i class="fas fa-money-check"></i> چک‌های مشتریان</div>
+                <div class="menu-item" data-section="reports"><i class="fas fa-chart-line"></i> گزارشات</div>
+                <div class="menu-item" data-section="settings"><i class="fas fa-cog"></i> تنظیمات پروفایل</div>
+                <div class="menu-item" data-section="discounts"><i class="fas fa-tags"></i> تخفیف‌ها</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</div>
+            </div>
+
+            <div class="panel-content">
+                <!-- ====== داشبورد ====== -->
+                <div class="panel-section active" id="section-dashboard">
+                    <div class="section-title"><i class="fas fa-chart-pie"></i> داشبورد مدیریتی</div>
+                    <div class="section-sub">خلاصه وضعیت مالی، انبار و فروش</div>
+
+                    <div class="info-grid">
+                        <div class="info-card" id="cardDebtors"><div class="label">مانده حساب مشتریان بدهکار</div><div class="value red" id="debtorBalance">۰ تومان</div></div>
+                        <div class="info-card" id="cardTodaySales"><div class="label">فروش امروز</div><div class="value gold" id="todaySales">۰ تومان</div></div>
+                        <div class="info-card" id="cardWeekSales"><div class="label">فروش هفتگی</div><div class="value gold" id="weekSales">۰ تومان</div></div>
+                        <div class="info-card" id="cardMonthSales"><div class="label">فروش ماهانه</div><div class="value gold" id="monthSales">۰ تومان</div></div>
+                        <div class="info-card" id="cardYearSales"><div class="label">بدهکاری به شرکت</div><div class="value red" id="debtToCompanyCard">۰ تومان</div></div>
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <h4 style="color:var(--mustard-yellow);font-size:16px;"><i class="fas fa-warehouse"></i> وضعیت انبار شرکت</h4>
+                        <div class="inventory-summary-grid" id="companyInventoryGrid">
+                            <div style="grid-column:1 / -1;text-align:center;color:var(--text-gray);padding:18px;font-size:13px;">در حال بارگذاری...</div>
+                        </div>
+                    </div>
+
+                    <!-- ===== محصولات در حال اتمام ===== -->
+                    <div style="margin-bottom:20px;">
+                        <h4 style="color:var(--mustard-yellow);font-size:16px;">⚠️ محصولات در حال اتمام</h4>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead><tr><th>ردیف</th><th>نام محصول</th><th>موجودی (بسته / کارتن)</th><th>وضعیت</th></tr></thead>
+                                <tbody id="lowStockBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====== خرید از شرکت ====== -->
+                <div class="panel-section" id="section-purchase">
+                    <div class="section-title">
+                        <i class="fas fa-shopping-bag"></i> خرید از شرکت
+                        <div class="title-actions">
+                            <button class="btn-primary btn-sm" id="newPurchaseBtn"><i class="fas fa-plus"></i> ثبت سفارش جدید</button>
+                        </div>
+                    </div>
+                    <div class="section-sub">ثبت سفارش خرید از شرکت و مشاهده فاکتور</div>
+
+                    <!-- فیلترهای خرید از شرکت -->
+                    <div class="filter-section">
+                        <label>جستجو بر اساس نام محصول:</label>
+                        <input type="text" id="purchaseProductSearch" placeholder="نام محصول..." />
+                        <label>از تاریخ:</label>
+                        <input type="date" id="purchaseFromDateFilter" />
+                        <label>تا تاریخ:</label>
+                        <input type="date" id="purchaseToDateFilter" />
+                        <button class="filter-btn" id="applyPurchaseFilterBtn">اعمال فیلتر</button>
+                        <button class="reset-btn" id="resetPurchaseFilterBtn">بازنشانی</button>
+                    </div>
+
+                    <div id="purchaseForm" style="display:none;background:rgba(255,255,255,0.03);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,0.06);margin-bottom:16px;">
+                        <h4 style="color:var(--mustard-yellow);margin-bottom:14px;font-size:16px;">🛒 ثبت سفارش خرید از شرکت</h4>
+                        <div id="purchaseProductsContainer">
+                            <div class="product-select-item">
+                                <select class="purchase-product-select" style="flex:1;">
+                                    <option value="همبرگر ۱۰۰ گرمی ۹۰٪" data-price="129000">همبرگر ۱۰۰ گرمی ۹۰٪ - ۱۲۹,۰۰۰ تومان</option>
+                                    <option value="همبرگر ۱۲۵ گرمی ۹۰٪" data-price="149000">همبرگر ۱۲۵ گرمی ۹۰٪ - ۱۴۹,۰۰۰ تومان</option>
+                                    <option value="همبرگر ۱۵۰ گرمی ۹۰٪" data-price="169000">همبرگر ۱۵۰ گرمی ۹۰٪ - ۱۶۹,۰۰۰ تومان</option>
+                                    <option value="همبرگر ۱۸۰ گرمی ۶۰٪" data-price="189000">همبرگر ۱۸۰ گرمی ۶۰٪ - ۱۸۹,۰۰۰ تومان</option>
+                                    <option value="همبرگر ۱۰۰ گرمی ۶۰٪" data-price="109000">همبرگر ۱۰۰ گرمی ۶۰٪ - ۱۰۹,۰۰۰ تومان</option>
+                                    <option value="همبرگر ۱۲۵ گرمی ۶۰٪" data-price="129000">همبرگر ۱۲۵ گرمی ۶۰٪ - ۱۲۹,۰۰۰ تومان</option>
+                                    <option value="استیک ۶۰٪" data-price="199000">استیک ۶۰٪ - ۱۹۹,۰۰۰ تومان</option>
+                                    <option value="استیک ۹۰٪" data-price="299000">استیک ۹۰٪ - ۲۹۹,۰۰۰ تومان</option>
+                                    <option value="استیک ویژه" data-price="379000">استیک ویژه - ۳۷۹,۰۰۰ تومان</option>
+                                    <option value="رست بیف" data-price="249000">رست بیف - ۲۴۹,۰۰۰ تومان</option>
+                                </select>
+                                <input type="number" class="purchase-qty" value="1" min="1" style="width:80px;" />
+                                <span class="product-price">۱۲۹,۰۰۰ تومان</span>
+                                <button class="remove-product-btn" style="background:#e74c3c;border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;">×</button>
+                            </div>
+                        </div>
+                        <button class="btn-secondary btn-sm" id="addPurchaseProductBtn"><i class="fas fa-plus"></i> افزودن محصول</button>
+                        <div style="margin:16px 0;padding:12px;background:rgba(212,160,23,0.08);border-radius:10px;border:1px solid rgba(212,160,23,0.2);">
+                            <span style="font-weight:600;color:var(--mustard-yellow);">جمع کل: </span>
+                            <span id="purchaseTotalPrice" style="font-size:18px;font-weight:700;color:var(--mustard-yellow);">۰ تومان</span>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" id="submitPurchaseBtn"><i class="fas fa-paper-plane"></i> ثبت سفارش</button>
+                            <button class="btn-secondary" id="cancelPurchaseBtn">انصراف</button>
+                        </div>
+                        <div id="purchaseMsg" style="margin-top:12px;"></div>
+                    </div>
+
+                    <h4 style="color:var(--mustard-yellow);font-size:16px;">📋 تاریخچه سفارشات خرید از شرکت</h4>
+                    <div class="table-wrap">
+                        <table class="data-table" id="purchaseHistoryTable">
+                            <thead>
+                                <tr><th>ردیف</th><th>شماره سفارش</th><th>تاریخ</th><th>محصولات</th><th>مبلغ فاکتور</th><th>پرداخت شده</th><th>مانده حساب</th><th>وضعیت</th><th>فاکتور</th></tr>
+                            </thead>
+                            <tbody id="purchaseHistoryBody">
+                                <tr><td>۱</td><td>#C-۱۰۲۴۵</td><td>۱۴۰۳/۰۳/۲۲</td><td>همبرگر ۱۰۰ گرمی ۹۰٪ (۲۰ عدد)</td><td>۲,۵۸۰,۰۰۰</td><td>۲,۰۰۰,۰۰۰</td><td>۵۸۰,۰۰۰</td><td><span class="status-badge delivered">تحویل داده شده</span></td><td><button class="btn-secondary btn-sm view-purchase-invoice" data-id="C-10245">مشاهده فاکتور</button></td></tr>
+                                <tr><td>۲</td><td>#C-۱۰۲۴۴</td><td>۱۴۰۳/۰۳/۲۰</td><td>استیک ویژه (۵ عدد)</td><td>۱,۸۹۵,۰۰۰</td><td>۱,۰۰۰,۰۰۰</td><td>۸۹۵,۰۰۰</td><td><span class="status-badge waiting">در انتظار تایید</span></td><td><button class="btn-secondary btn-sm view-purchase-invoice" data-id="C-10244">مشاهده فاکتور</button></td></tr>
+                                <tr><td>۳</td><td>#C-۱۰۲۴۳</td><td>۱۴۰۳/۰۳/۱۸</td><td>همبرگر ۱۲۵ گرمی ۹۰٪ (۱۵ عدد)</td><td>۲,۲۳۵,۰۰۰</td><td>۲,۲۳۵,۰۰۰</td><td>۰</td><td><span class="status-badge shipped">ارسال شده</span></td><td><button class="btn-secondary btn-sm view-purchase-invoice" data-id="C-10243">مشاهده فاکتور</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="invoice-detail-box" id="purchaseInvoiceBox">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-file-invoice" style="color:var(--mustard-yellow);"></i> فاکتور خرید از شرکت</h4>
+                            <button class="close-detail-btn" data-target="purchaseInvoiceBox"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div id="purchaseInvoiceContent"></div>
+                    </div>
+                </div>
+
+                <!-- ====== سفارش مشتریان ====== -->
+                <div class="panel-section" id="section-sales">
+                    <div class="section-title">
+                        <i class="fas fa-cash-register"></i> سفارش مشتریان
+                    </div>
+                    <div class="section-sub">مشاهده و پیگیری سفارش‌های ثبت‌شده مشتریان</div>
+
+                    <!-- فیلترهای جستجو -->
+                    <div class="filter-section">
+                        <label>جستجو بر اساس شماره فاکتور:</label>
+                        <input type="text" id="saleSearchInvoice" placeholder="شماره فاکتور..." />
+                        <label>جستجو بر اساس نام:</label>
+                        <input type="text" id="saleSearchName" placeholder="نام مشتری..." />
+                        <label>از تاریخ:</label>
+                        <input type="date" id="saleFromDate" />
+                        <label>تا تاریخ:</label>
+                        <input type="date" id="saleToDate" />
+                        <button class="filter-btn" id="applySaleFilter">اعمال فیلتر</button>
+                        <button class="reset-btn" id="resetSaleFilter">بازنشانی</button>
+                    </div>
+
+                    <h4 style="color:var(--mustard-yellow);font-size:16px;">📋 تاریخچه سفارش مشتریان</h4>
+                    <div class="table-wrap">
+                        <table class="data-table" id="salesHistoryTable">
+                            <thead>
+                                <tr><th>ردیف</th><th>شماره فاکتور</th><th>مشتری</th><th>تاریخ</th><th>محصولات</th><th>مبلغ فاکتور</th><th>پرداخت شده</th><th>تخفیف</th><th>مانده حساب</th><th>وضعیت</th><th>چاپ</th></tr>
+                            </thead>
+                            <tbody id="salesHistoryBody">
+                                <tr><td>۱</td><td>#S-۱۰۲۴۵</td><td>مهدی زمانی</td><td>۱۴۰۳/۰۳/۲۲</td><td>همبرگر ۱۰۰ گرمی ۹۰٪ (۲ عدد)</td><td>۲۵۸,۰۰۰</td><td>۲۵۸,۰۰۰</td><td>۰</td><td>۰</td><td><span class="status-badge paid">پرداخت کامل</span></td><td><button class="btn-secondary btn-sm">چاپ</button></td></tr>
+                                <tr><td>۲</td><td>#S-۱۰۲۴۴</td><td>سارا احمدی</td><td>۱۴۰۳/۰۳/۲۰</td><td>استیک ویژه (۱ عدد)</td><td>۳۷۹,۰۰۰</td><td>۳۰۰,۰۰۰</td><td>۵۰,۰۰۰</td><td>۷۹,۰۰۰</td><td><span class="status-badge partial">نیمه‌تمام</span></td><td><button class="btn-secondary btn-sm">چاپ</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ====== مانده حساب ====== -->
+                <div class="panel-section" id="section-settlement">
+                    <div class="section-title"><i class="fas fa-handshake"></i> مانده حساب</div>
+                    <div class="section-sub">مشاهده مانده حساب مشتریان و شرکت</div>
+
+                    <div class="info-grid">
+                        <div class="info-card" id="cardSettlementDebt"><div class="label">مانده حساب مشتریان به شما</div><div class="value red" id="customerDebtToDistributor">۰ تومان</div></div>
+                        <div class="info-card" id="cardSettlementCompanyDebt"><div class="label">مانده حساب شما به شرکت</div><div class="value red" id="debtToCompany">۰ تومان</div></div>
+                    </div>
+
+                    <!-- جستجو بر اساس نام محصول -->
+                    <div class="filter-section" style="margin-top:16px;">
+                        <label>جستجو بر اساس نام محصول:</label>
+                        <input type="text" id="balanceProductSearch" placeholder="نام محصول..." />
+                        <button class="filter-btn" id="applyBalanceProductFilter">اعمال</button>
+                        <button class="reset-btn" id="resetBalanceProductFilter">بازنشانی</button>
+                    </div>
+
+                    <!-- جدول تراکنش‌های مشتریان -->
+                    <div class="balance-box" id="customerBalanceBox">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-users" style="color:var(--mustard-yellow);"></i> تراکنش‌های مشتریان</h4>
+                            <button class="close-balance-btn" id="closeCustomerBalanceBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="filter-section">
+                            <label>جستجو بر اساس نام خانوادگی:</label>
+                            <input type="text" id="customerBalanceSearch" placeholder="نام / نام خانوادگی مشتری..." />
+                            <label>از تاریخ:</label>
+                            <input type="date" id="customerBalanceFromDate" />
+                            <label>تا تاریخ:</label>
+                            <input type="date" id="customerBalanceToDate" />
+                            <button class="filter-btn" id="applyCustomerBalanceFilter">اعمال</button>
+                            <button class="reset-btn" id="resetCustomerBalanceFilter">بازنشانی</button>
+                        </div>
+                        <div id="customerBalanceSummary" style="margin-bottom:10px;"></div>
+                        <div class="table-wrap">
+                            <table class="data-table" style="min-width:1000px;">
+                                <thead>
+                                    <tr>
+                                        <th>ردیف</th>
+                                        <th>تاریخ</th>
+                                        <th>نام مشتری بدهکار</th>
+                                        <th>شماره فاکتور</th>
+                                        <th>شرح</th>
+                                        <th>بدهکار</th>
+                                        <th>بستانکار</th>
+                                        <th>مانده</th>
+                                        <th>وضعیت</th>
+                                        <th>چاپ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customerBalanceBody">
+                                    <tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- جدول تراکنش‌های شرکت -->
+                    <div class="balance-box" id="companyBalanceBox">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-building" style="color:var(--mustard-yellow);"></i> تراکنش‌های شرکت</h4>
+                            <button class="close-balance-btn" id="closeCompanyBalanceBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="filter-section">
+                            <label>جستجو بر اساس نام:</label>
+                            <input type="text" id="companyBalanceSearch" placeholder="نام شرکت..." />
+                            <label>از تاریخ:</label>
+                            <input type="date" id="companyBalanceFromDate" />
+                            <label>تا تاریخ:</label>
+                            <input type="date" id="companyBalanceToDate" />
+                            <button class="filter-btn" id="applyCompanyBalanceFilter">اعمال</button>
+                            <button class="reset-btn" id="resetCompanyBalanceFilter">بازنشانی</button>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" style="min-width:1000px;">
+                                <thead>
+                                    <tr>
+                                        <th>ردیف</th>
+                                        <th>تاریخ</th>
+                                        <th>نام شرکت</th>
+                                        <th>شماره فاکتور</th>
+                                        <th>شرح</th>
+                                        <th>بدهکار</th>
+                                        <th>بستانکار</th>
+                                        <th>مانده</th>
+                                        <th>وضعیت</th>
+                                        <th>چاپ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="companyBalanceBody">
+                                    <tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="settlementMsg" style="margin-top:12px;"></div>
+                </div>
+
+                <!-- ====== مدیریت مشتریان ====== -->
+                <div class="panel-section" id="section-customers">
+                    <div class="section-title">
+                        <i class="fas fa-users"></i> مدیریت مشتریان
+                        <div class="title-actions">
+                            <button class="btn-primary btn-sm" id="showAddCustomerBtn"><i class="fas fa-plus"></i> افزودن مشتری جدید</button>
+                        </div>
+                    </div>
+                    <div class="section-sub">جستجو، مشاهده پروفایل، تاریخچه سفارشات، تیکت‌ها و پرداخت‌ها</div>
+
+                    <div class="add-customer-form" id="addCustomerForm">
+                        <h4 style="color:var(--mustard-yellow);margin-bottom:14px;font-size:16px;"><i class="fas fa-user-plus"></i> افزودن مشتری جدید</h4>
+                        <div class="form-row">
+                            <div class="form-group"><label>نام کامل *</label><input type="text" id="newCustomerName" placeholder="نام مشتری..." /></div>
+                            <div class="form-group"><label>نام مغازه (اختیاری)</label><input type="text" id="newCustomerShopName" placeholder="نام مغازه / فروشگاه..." /></div>
+                            <div class="form-group"><label>نام کاربری *</label><input type="text" id="newCustomerUsername" placeholder="نام کاربری..." /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>رمز عبور *</label>
+                                <div class="password-wrapper">
+                                    <input type="password" id="newCustomerPassword" placeholder="رمز عبور..." />
+                                    <button class="toggle-password" data-target="newCustomerPassword"><i class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group"><label>شماره تماس *</label><input type="text" id="newCustomerPhone" placeholder="۰۹۱۲۳۴۵۶۷۸۹" /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>کد ملی</label><input type="text" id="newCustomerNationalId" placeholder="کد ملی..." /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>آدرس</label><input type="text" id="newCustomerAddress" placeholder="آدرس کامل..." /></div>
+                            <div class="form-group"><label>کد پستی</label><input type="text" id="newCustomerPostalCode" placeholder="کد پستی..." /></div>
+                        </div>
+
+                        <h5 style="color:var(--mustard-yellow);margin:16px 0 8px;font-size:14px;">🛒 تعیین محصولات و قیمت‌گذاری</h5>
+                        <div class="product-list-grid" id="productListGrid">
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۰۰ گرمی ۹۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۰۰ گرمی ۹۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۰۰ گرمی ۹۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۰۰ گرمی ۹۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۲۵ گرمی ۹۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۲۵ گرمی ۹۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۲۵ گرمی ۹۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۲۵ گرمی ۹۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۵۰ گرمی ۹۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۵۰ گرمی ۹۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۵۰ گرمی ۹۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۵۰ گرمی ۹۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۸۰ گرمی ۶۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۸۰ گرمی ۶۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۸۰ گرمی ۶۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۸۰ گرمی ۶۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۰۰ گرمی ۶۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۰۰ گرمی ۶۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۰۰ گرمی ۶۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۰۰ گرمی ۶۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">همبرگر ۱۲۵ گرمی ۶۰٪</span><input type="number" class="product-price-input" data-product="همبرگر ۱۲۵ گرمی ۶۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="همبرگر ۱۲۵ گرمی ۶۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="همبرگر ۱۲۵ گرمی ۶۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">استیک ۶۰٪</span><input type="number" class="product-price-input" data-product="استیک ۶۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="استیک ۶۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="استیک ۶۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">استیک ۹۰٪</span><input type="number" class="product-price-input" data-product="استیک ۹۰٪" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="استیک ۹۰٪" /> تخفیف</label><input type="number" class="product-discount-input" data-product="استیک ۹۰٪" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">استیک ویژه</span><input type="number" class="product-price-input" data-product="استیک ویژه" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="استیک ویژه" /> تخفیف</label><input type="number" class="product-discount-input" data-product="استیک ویژه" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                            <div class="product-item-row"><span class="product-name">رست بیف</span><input type="number" class="product-price-input" data-product="رست بیف" placeholder="قیمت" value="" /><span class="discount-wrap"><label class="discount-toggle"><input type="checkbox" class="product-discount-toggle" data-product="رست بیف" /> تخفیف</label><input type="number" class="product-discount-input" data-product="رست بیف" placeholder="قیمت با تخفیف" value="" disabled /></span></div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-primary" id="saveNewCustomerBtn"><i class="fas fa-save"></i> ذخیره مشتری</button>
+                            <button class="btn-secondary" id="cancelAddCustomerBtn">انصراف</button>
+                        </div>
+                        <div id="addCustomerMsg" style="margin-top:12px;"></div>
+                    </div>
+
+                    <div class="customer-search">
+                        <input type="text" id="customerSearchInput" placeholder="جستجوی مشتری (نام، شماره، ایمیل...)..." />
+                        <button class="btn-primary" id="searchCustomerBtn"><i class="fas fa-search"></i> جستجو</button>
+                    </div>
+                    <div id="customerList">
+                        <div style="text-align:center;padding:40px;color:var(--text-gray);">
+                            <i class="fas fa-spinner fa-spin" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+                            در حال بارگذاری مشتریان...
+                        </div>
+                    </div>
+
+                    <!-- ===== پروفایل مشتری به صورت داخلی ===== -->
+                    <div class="customer-profile-inline" id="customerProfileInline">
+                        <div class="profile-header">
+                            <h3 id="profileInlineTitle"><i class="fas fa-user-circle"></i> پروفایل مشتری</h3>
+                            <button class="close-detail-btn" id="closeProfileInlineBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="profile-body" id="profileInlineBody">
+                            <!-- با JS پر می‌شود -->
+                        </div>
+                        <div class="profile-actions">
+                            <button class="btn-primary btn-sm" id="sendMessageInlineBtn"><i class="fas fa-envelope"></i> ارسال پیام</button>
+                            <button class="btn-secondary btn-sm" id="viewFullProfileBtn"><i class="fas fa-external-link-alt"></i> مشاهده کامل</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-detail-box" id="customerProfileBox">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-user-circle" style="color:var(--mustard-yellow);"></i> پروفایل کامل مشتری</h4>
+                            <button class="close-profile-btn" id="closeProfileBtn"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="profile-tabs">
+                            <button class="tab-btn active" data-tab="profile-info">اطلاعات شخصی</button>
+                            <button class="tab-btn" data-tab="profile-ledger">دفتر حساب</button>
+                            <button class="tab-btn" data-tab="profile-checks">چک‌ها</button>
+                        </div>
+                        <div class="profile-tab-content active" id="profile-info"><div id="customerProfileContent"></div></div>
+                        <div class="profile-tab-content" id="profile-ledger">
+                            <div style="margin-bottom:12px;">
+                                <h5 style="color:var(--mustard-yellow);font-size:14px;">💰 مانده حساب کل</h5>
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">
+                                    <input type="date" id="ledgerFromDate" />
+                                    <input type="date" id="ledgerToDate" />
+                                    <button class="filter-btn" id="applyLedgerFilter">فیلتر</button>
+                                    <button class="reset-btn" id="resetLedgerFilter">بازنشانی</button>
+                                </div>
+                                <div id="ledgerBalanceDisplay" style="font-size:18px;color:var(--mustard-yellow);">۰ تومان</div>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <h5 style="color:var(--mustard-yellow);font-size:14px;">📋 فاکتورها</h5>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:600px;" id="ledgerInvoicesTable">
+                                        <thead><tr><th>شماره</th><th>تاریخ</th><th>مبلغ کل</th><th>پرداخت شده</th><th>مانده</th><th>وضعیت</th></tr></thead>
+                                        <tbody id="ledgerInvoicesBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-tab-content" id="profile-checks">
+                            <div style="margin-bottom:12px;">
+                                <h5 style="color:var(--mustard-yellow);font-size:14px;">💳 چک‌های دریافتی</h5>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:600px;" id="checksReceivedTable">
+                                        <thead><tr><th>#</th><th>شماره چک</th><th>مبلغ</th><th>تاریخ دریافت</th><th>تاریخ سررسید</th><th>وضعیت</th></tr></thead>
+                                        <tbody id="checksReceivedBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 style="color:var(--mustard-yellow);font-size:14px;">💳 چک‌های پرداختی</h5>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:600px;" id="checksPaidTable">
+                                        <thead><tr><th>#</th><th>شماره چک</th><th>مبلغ</th><th>تاریخ پرداخت</th><th>گیرنده</th><th>وضعیت</th></tr></thead>
+                                        <tbody id="checksPaidBody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+</div></div><div class="panel-section" id="section-tickets">
+                    <div class="section-title">
+                        <i class="fas fa-ticket-alt"></i> سیستم تیکتینگ
+                        <div class="title-actions">
+                            <button class="btn-primary btn-sm" id="newTicketBtn"><i class="fas fa-plus"></i> تیکت جدید</button>
+                        </div>
+                    </div>
+                    <div class="section-sub">مدیریت تیکت‌ها با مشتریان، صاحب شرکت و منشی</div>
+
+                    <div class="filter-section">
+                        <label>نوع فرستنده:</label>
+                        <select id="ticketTypeFilter">
+                            <option value="all">همه</option>
+                            <option value="customer">مشتری</option>
+                            <option value="secretary">منشی</option>
+                            <option value="owner">صاحب شرکت</option>
+                        </select>
+                        <label>از تاریخ:</label>
+                        <input type="date" id="ticketFromDate" />
+                        <label>تا تاریخ:</label>
+                        <input type="date" id="ticketToDate" />
+                        <label>جستجو بر اساس نام:</label>
+                        <input type="text" id="ticketSearchName" placeholder="نام فرستنده..." />
+                        <label>وضعیت:</label>
+                        <select id="ticketStatusFilter">
+                            <option value="all">همه</option>
+                            <option value="answered">پاسخ داده شده</option>
+                            <option value="unanswered">پاسخ داده نشده</option>
+                        </select>
+                        <button class="filter-btn" id="applyTicketFilter">اعمال</button>
+                        <button class="reset-btn" id="resetTicketFilter">بازنشانی</button>
+                    </div>
+
+                    <!-- تاریخچه تیکت‌های هر فرد -->
+                    <div style="margin-bottom:16px;">
+                        <button class="btn-secondary btn-sm" id="toggleTicketHistoryBtn"><i class="fas fa-history"></i> نمایش تاریخچه تیکت‌های هر فرد</button>
+                        <div id="ticketHistoryContainer" style="display:none;margin-top:12px;background:rgba(255,255,255,0.03);border-radius:14px;padding:16px;border:1px solid rgba(255,255,255,0.06);">
+                            <h4 style="color:var(--mustard-yellow);font-size:15px;margin-bottom:10px;">📜 تاریخچه تیکت‌های هر فرد</h4>
+                            <div class="table-wrap">
+                                <table class="data-table" style="min-width:700px;" id="ticketHistoryTable">
+                                    <thead><tr><th>نام</th><th>موضوع</th><th>تاریخ</th><th>وضعیت</th><th>تعداد پیام</th><th>عملیات</th></tr></thead>
+                                    <tbody id="ticketHistoryBody">
+                                        <tr><td>مهدی زمانی</td><td>درخواست رمز عبور</td><td>۱۴۰۳/۰۳/۲۲</td><td><span class="status-badge pending">پاسخ داده نشده</span></td><td>۱</td><td><button class="btn-primary btn-sm view-ticket-history" data-name="مهدی زمانی">مشاهده تاریخچه</button></td></tr>
+                                        <tr><td>سارا احمدی</td><td>سوال درباره قیمت</td><td>۱۴۰۳/۰۳/۲۱</td><td><span class="status-badge answered">پاسخ داده شده</span></td><td>۳</td><td><button class="btn-primary btn-sm view-ticket-history" data-name="سارا احمدی">مشاهده تاریخچه</button></td></tr>
+                                        <tr><td>علی رضایی</td><td>گزارش مشکل سفارش</td><td>۱۴۰۳/۰۳/۲۰</td><td><span class="status-badge pending">پاسخ داده نشده</span></td><td>۲</td><td><button class="btn-primary btn-sm view-ticket-history" data-name="علی رضایی">مشاهده تاریخچه</button></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- باکس نمایش تاریخچه پیام‌های یک فرد -->
+                    <div class="ticket-detail" id="ticketHistoryDetail">
+                        <div class="detail-header">
+                            <h4 id="ticketHistoryTitle"><i class="fas fa-history"></i> تاریخچه پیام‌های مهدی زمانی</h4>
+                            <button class="btn-secondary btn-sm" id="closeTicketHistoryDetailBtn">بستن</button>
+                        </div>
+                        <div class="detail-messages" id="ticketHistoryMessages"></div>
+                    </div>
+
+                    <div class="ticket-form" id="ticketForm">
+                        <h4 style="color:var(--mustard-yellow);margin-bottom:14px;font-size:16px;"><i class="fas fa-pen"></i> تیکت جدید</h4>
+                        <div class="form-group"><label>موضوع *</label><input type="text" id="ticketSubjectInput" placeholder="موضوع..." /></div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>فرستنده به *</label>
+                                <select id="ticketRecipient">
+                                    <option value="customer">مشتری</option>
+                                    <option value="owner">صاحب شرکت</option>
+                                    <option value="secretary">منشی</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>متن تیکت *</label><textarea id="ticketMessageInput" placeholder="متن تیکت..."></textarea></div>
+                        <div class="form-actions">
+                            <button class="btn-primary" id="submitTicketBtn"><i class="fas fa-paper-plane"></i> ارسال</button>
+                            <button class="btn-secondary" id="cancelTicketBtn">انصراف</button>
+                        </div>
+                        <div id="ticketFormMsg"></div>
+                    </div>
+
+                    <div class="ticket-list" id="ticketList">
+                        <div class="ticket-item from-customer unanswered" data-ticket="1" data-type="customer" data-status="unanswered">
+                            <div class="ticket-info">
+                                <div class="ticket-title"><i class="fas fa-tag"></i> درخواست رمز عبور - مهدی زمانی</div>
+                                <div class="ticket-meta"><span><i class="fas fa-user"></i> مشتری</span><span><i class="fas fa-clock"></i> ۱۴۰۳/۰۳/۲۲</span><span class="status-badge pending">پاسخ داده نشده</span></div>
+                            </div>
+                            <div class="ticket-actions"><button class="btn-secondary btn-sm view-ticket" data-id="1">مشاهده</button><button class="btn-primary btn-sm answer-ticket" data-id="1">پاسخ</button></div>
+                        </div>
+                        <div class="ticket-item from-owner" data-ticket="2" data-type="owner" data-status="answered">
+                            <div class="ticket-info">
+                                <div class="ticket-title"><i class="fas fa-tag"></i> گزارش مالی ماهانه - صاحب شرکت</div>
+                                <div class="ticket-meta"><span><i class="fas fa-user"></i> صاحب شرکت</span><span><i class="fas fa-clock"></i> ۱۴۰۳/۰۳/۲۱</span><span class="status-badge answered">پاسخ داده شده</span></div>
+                            </div>
+                            <div class="ticket-actions"><button class="btn-secondary btn-sm view-ticket" data-id="2">مشاهده</button></div>
+                        </div>
+                        <div class="ticket-item from-secretary unanswered" data-ticket="3" data-type="secretary" data-status="unanswered">
+                            <div class="ticket-info">
+                                <div class="ticket-title"><i class="fas fa-tag"></i> هماهنگی سفارش - منشی</div>
+                                <div class="ticket-meta"><span><i class="fas fa-user"></i> منشی</span><span><i class="fas fa-clock"></i> ۱۴۰۳/۰۳/۲۰</span><span class="status-badge pending">پاسخ داده نشده</span></div>
+                            </div>
+                            <div class="ticket-actions"><button class="btn-secondary btn-sm view-ticket" data-id="3">مشاهده</button><button class="btn-primary btn-sm answer-ticket" data-id="3">پاسخ</button></div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-detail" id="ticketDetail">
+                        <div class="detail-header">
+                            <h4 id="detailTitle"><i class="fas fa-ticket-alt"></i> عنوان تیکت</h4>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <button class="btn-secondary btn-sm" id="referTicketBtn"><i class="fas fa-share"></i> ارجاع</button>
+                                <button class="btn-secondary btn-sm" id="closeDetailBtn">بستن</button>
+                            </div>
+                        </div>
+                        <div class="detail-messages" id="detailMessages"></div>
+                        <div class="detail-reply">
+                            <textarea id="replyInput" placeholder="پاسخ..." rows="2"></textarea>
+                            <button id="sendReplyBtn"><i class="fas fa-paper-plane"></i> ارسال</button>
+                        </div>
+                        <div id="replyMsg" style="margin-top:8px;"></div>
+                    </div>
+                </div>
+
+                <!-- ====== اعلان‌ها ====== -->
+                <div class="panel-section" id="section-notifications">
+                    <div class="section-title"><i class="fas fa-bell"></i> اعلان‌ها</div>
+                    <div class="section-sub">اطلاع‌رسانی خریدهای نسیه و رویدادهای مهم مشتریان شما</div>
+                    <div class="notif-list" id="notifList">
+                        <div style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</div>
+                    </div>
+                </div>
+
+                <!-- ====== ارتباط با مشتریان ====== -->
+                <div class="panel-section" id="section-communication">
+                    <div class="section-title"><i class="fas fa-comment-dots"></i> ارتباط با مشتریان</div>
+                    <div class="section-sub">ارسال پیامک تکی و گروهی، تنظیم یادآوری</div>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                        <button class="btn-primary" id="sendSingleSmsBtn"><i class="fas fa-sms"></i> پیامک تکی</button>
+                        <button class="btn-primary" id="sendBulkSmsBtn"><i class="fas fa-users"></i> پیامک گروهی</button>
+                        <button class="btn-secondary" id="setReminderBtn"><i class="fas fa-clock"></i> تنظیم یادآوری</button>
+                    </div>
+
+                    <div id="communicationMsg" style="margin-bottom:12px;"></div>
+
+                    <div class="sms-dialog" id="singleSmsDialog">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-sms" style="color:var(--mustard-yellow);"></i> ارسال پیامک تکی</h4>
+                            <button class="close-sms-btn" id="closeSingleSmsDialog"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="form-group"><label>شماره مقصد *</label><input type="text" id="singleSmsRecipient" placeholder="۰۹۱۲۳۴۵۶۷۸۹" /></div>
+                        <div class="form-group"><label>موضوع</label><input type="text" id="singleSmsSubject" value="پیام از پخش‌کننده" /></div>
+                        <div class="form-group"><label>متن پیامک *</label><textarea id="singleSmsMessage" rows="4"></textarea></div>
+                        <div class="form-actions"><button class="btn-primary" id="sendSingleSmsBtnAction"><i class="fas fa-paper-plane"></i> ارسال</button><button class="btn-secondary" id="cancelSingleSmsDialog">انصراف</button></div>
+                        <div id="singleSmsResult"></div>
+                    </div>
+
+                    <div class="sms-dialog" id="bulkSmsDialog">
+                        <div class="detail-header">
+                            <h4><i class="fas fa-users" style="color:var(--mustard-yellow);"></i> ارسال پیامک گروهی</h4>
+                            <button class="close-sms-btn" id="closeBulkSmsDialog"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="form-group">
+                            <label>گروه مخاطبان</label>
+                            <select id="bulkGroupSelect">
+                                <option value="all">همه مشتریان</option>
+                                <option value="active">فعال</option>
+                                <option value="inactive">غیرفعال</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>موضوع</label><input type="text" id="bulkSmsSubject" value="پیام ویژه از پخش‌کننده" /></div>
+                        <div class="form-group"><label>متن پیامک *</label><textarea id="bulkSmsMessage" rows="4"></textarea></div>
+                        <div class="form-actions"><button class="btn-primary" id="sendBulkSmsBtnAction"><i class="fas fa-paper-plane"></i> ارسال گروهی</button><button class="btn-secondary" id="cancelBulkSmsDialog">انصراف</button></div>
+                        <div id="bulkSmsResult"></div>
+                    </div>
+
+                    <div id="reminderTableWrap" style="display:none;">
+                        <div class="discount-form-section" style="margin-top:0;">
+                            <div class="discount-form-header"><i class="fas fa-clock"></i> ثبت یادآوری جدید</div>
+                            <div class="discount-form-grid">
+                                <div class="discount-form-group"><label>مشتری *</label><select id="reminderCustomerSelect"><option value="">انتخاب مشتری...</option></select></div>
+                                <div class="discount-form-group"><label>عنوان *</label><input type="text" id="reminderTitle" placeholder="مثلاً پیگیری تسویه فاکتور" /></div>
+                                <div class="discount-form-group"><label>زمان یادآوری *</label><input type="datetime-local" id="reminderAt" /></div>
+                                <div class="discount-form-group"><label>متن یادآوری</label><input type="text" id="reminderMessage" placeholder="توضیح کوتاه..." /></div>
+                            </div>
+                            <div class="discount-form-actions">
+                                <button class="btn-primary" id="saveReminderBtn"><i class="fas fa-save"></i> ذخیره یادآوری</button>
+                            </div>
+                            <div id="reminderFormMsg" style="margin-top:10px;"></div>
+                        </div>
+                        <div class="reminder-table-wrap" style="margin-top:14px;">
+                            <table class="reminder-table">
+                                <thead><tr><th>#</th><th>مشتری</th><th>شماره تماس</th><th>عنوان</th><th>زمان یادآوری</th><th>وضعیت</th><th>عملیات</th></tr></thead>
+                                <tbody id="reminderTableBody">
+                                    <tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text-gray);">یادآوری ثبت نشده است.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:18px;">
+                        <h4 style="color:var(--mustard-yellow);font-size:14px;margin-bottom:8px;"><i class="fas fa-history"></i> تاریخچه پیامک‌ها</h4>
+                        <div class="table-wrap">
+                            <table class="data-table" style="min-width:700px;">
+                                <thead><tr><th>#</th><th>شماره مقصد</th><th>مشتری</th><th>موضوع</th><th>متن</th><th>وضعیت</th><th>تاریخ</th></tr></thead>
+                                <tbody id="smsHistoryBody">
+                                    <tr><td colspan="7" style="text-align:center;padding:16px;color:var(--text-gray);">پیامکی ثبت نشده است.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====== چک‌های مشتریان ====== -->
+                <div class="panel-section" id="section-checks">
+                    <div class="section-title">
+                        <i class="fas fa-money-check-alt"></i> مدیریت چک‌ها
+                        <div class="title-actions">
+                            <button class="btn-primary btn-sm" id="showAddCheckBtn"><i class="fas fa-plus"></i> افزودن چک جدید</button>
+                        </div>
+                    </div>
+                    <div class="section-sub">ثبت و مدیریت چک‌های دریافتی، نقد شدن چک و پیگیری</div>
+
+                    <div class="check-form" id="addCheckForm">
+                        <h4 style="color:var(--mustard-yellow);margin-bottom:14px;font-size:16px;"><i class="fas fa-pen"></i> ثبت چک جدید</h4>
+                        <div class="form-row">
+                            <div class="form-group"><label>نام و نام خانوادگی *</label><input type="text" id="checkName" placeholder="نام و نام خانوادگی صاحب چک..." /></div>
+                            <div class="form-group"><label>شماره تماس *</label><input type="text" id="checkPhone" placeholder="۰۹۱۲۳۴۵۶۷۸۹" /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>کد ملی *</label><input type="text" id="checkNationalId" placeholder="کد ملی..." /></div>
+                            <div class="form-group"><label>مبلغ چک (به عدد تومان) *</label><input type="number" id="checkAmount" placeholder="مبلغ به تومان..." /></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>تاریخ دریافت چک *</label><input type="date" id="checkReceiveDate" /></div>
+                            <div class="form-group"><label>تاریخ سررسید چک *</label><input type="date" id="checkDueDate" /></div>
+                        </div>
+                        <div class="form-group">
+                            <label>ضمیمه (تصویر یا فایل چک)</label>
+                            <input type="file" id="checkFile" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg" />
+                            <div id="checkFileList" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"></div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" id="saveCheckBtn"><i class="fas fa-save"></i> ذخیره چک</button>
+                            <button class="btn-secondary" id="cancelAddCheckBtn">انصراف</button>
+                        </div>
+                        <div id="addCheckMsg" style="margin-top:12px;"></div>
+                    </div>
+
+                    <div class="customer-search">
+                        <input type="text" id="checkSearchInput" placeholder="جستجو بر اساس نام مشتری..." />
+                        <button class="btn-primary" id="searchCheckBtn"><i class="fas fa-search"></i> جستجو</button>
+                    </div>
+
+                    <div class="table-wrap" style="margin-top:16px;">
+                        <table class="data-table" id="checksTable">
+                            <thead><tr><th>#</th><th>مشتری</th><th>شماره تماس</th><th>کد ملی</th><th>شماره چک</th><th>بانک</th><th>مبلغ (تومان)</th><th>تاریخ دریافت</th><th>تاریخ سررسید</th><th>فایل‌ها</th><th>وضعیت</th><th>ثبت توسط</th><th>عملیات</th></tr></thead>
+                            <tbody id="checksTableBody"><tr><td colspan="13" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-container" id="checksPagination"></div>
+                    <div id="checksMsg" style="margin-top:12px;"></div>
+                </div>
+
+                <!-- ====== گزارشات با پرونده اشخاص و بدهکاران ====== -->
+                <div class="panel-section" id="section-reports">
+                    <div class="section-title"><i class="fas fa-chart-line"></i> گزارشات</div>
+                    <div class="section-sub">مشاهده تمامی گزارشات تحلیلی با جزئیات کامل</div>
+
+                    <div class="report-tabs">
+                        <button class="tab-btn active" data-tab="report-person">📋 پرونده اشخاص</button>
+                        <button class="tab-btn" data-tab="report-debtors">💰 لیست بدهکاران</button>
+                        <button class="tab-btn" data-tab="report-general">📊 گزارشات عمومی</button>
+                        <button class="tab-btn" data-tab="report-financial">💰 گزارش مالی</button>
+                    </div>
+
+                    <div id="reportMsg" style="margin-bottom:12px;"></div>
+
+                    <!-- ===== تب پرونده اشخاص ===== -->
+                    <div class="report-tab-content active" id="report-person">
+                        <div class="section-sub">جستجوی اشخاص و مشاهده کامل پرونده شامل خریدها، اقلام سفارشی، فاکتورها و چک‌ها</div>
+                        
+                        <div class="person-search-box">
+                            <input type="text" id="personSearchInput" placeholder="جستجوی شخص (نام، شماره تماس، کد ملی)..." />
+                            <button class="btn-primary" id="searchPersonBtn"><i class="fas fa-search"></i> جستجو</button>
+                        </div>
+
+                        <div id="personList">
+                            <div style="text-align:center;padding:40px;color:var(--text-gray);">در حال بارگذاری...</div>
+                        </div>
+                        <div id="personListMsg" style="margin-top:8px;"></div>
+
+                        <!-- باکس جزئیات پرونده شخص -->
+                        <div class="person-detail-box" id="personDetailBox">
+                            <div class="detail-header">
+                                <h4 id="personDetailTitle"><i class="fas fa-folder-open" style="color:var(--mustard-yellow);"></i> پرونده کامل</h4>
+                                <button class="close-detail-btn" id="closePersonDetail"><i class="fas fa-times"></i></button>
+                            </div>
+
+                            <div class="person-sub-tabs">
+                                <button class="sub-tab-btn active" data-subtab="person-info-tab">📋 اطلاعات شخص</button>
+                                <button class="sub-tab-btn" data-subtab="person-purchases-tab">🛒 خریدها</button>
+                                <button class="sub-tab-btn" data-subtab="person-items-tab">📦 اقلام سفارشی</button>
+                                <button class="sub-tab-btn" data-subtab="person-invoices-tab">📄 فاکتورها</button>
+                                <button class="sub-tab-btn" data-subtab="person-checks-tab">💳 چک‌ها</button>
+                            </div>
+
+                            <div class="person-sub-content active" id="person-info-tab">
+                                <div id="personInfoContent"></div>
+                            </div>
+
+                            <div class="person-sub-content" id="person-purchases-tab">
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">
+                                    <input type="date" id="purchaseFromDate" />
+                                    <input type="date" id="purchaseToDate" />
+                                    <button class="filter-btn" id="applyPurchaseFilter">فیلتر</button>
+                                    <button class="reset-btn" id="resetPurchaseFilter">بازنشانی</button>
+                                </div>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:700px;" id="purchasesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>شماره سفارش</th>
+                                                <th>تاریخ</th>
+                                                <th>تعداد اقلام</th>
+                                                <th>مبلغ کل</th>
+                                                <th>وضعیت</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="purchasesBody">
+                                            <tr><td>#۱۰۲۴۵</td><td>۱۴۰۳/۰۳/۲۲</td><td>۵</td><td>۱,۲۵۰,۰۰۰</td><td><span class="status-badge paid">تکمیل شده</span></td></tr>
+                                            <tr><td>#۱۰۲۴۴</td><td>۱۴۰۳/۰۳/۲۰</td><td>۳</td><td>۵۰۰,۰۰۰</td><td><span class="status-badge partial">نیمه‌تمام</span></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="person-sub-content" id="person-items-tab">
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">
+                                    <input type="date" id="itemsFromDate" />
+                                    <input type="date" id="itemsToDate" />
+                                    <button class="filter-btn" id="applyItemsFilter">فیلتر</button>
+                                    <button class="reset-btn" id="resetItemsFilter">بازنشانی</button>
+                                </div>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:700px;" id="itemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>شماره سفارش</th>
+                                                <th>نام محصول</th>
+                                                <th>تعداد</th>
+                                                <th>قیمت واحد</th>
+                                                <th>قیمت کل</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="itemsBody">
+                                            <tr><td>#۱۰۲۴۵</td><td>همبرگر ۱۰۰ گرمی ۹۰٪</td><td>۳</td><td>۱۲۹,۰۰۰</td><td>۳۸۷,۰۰۰</td></tr>
+                                            <tr><td>#۱۰۲۴۵</td><td>استیک ویژه</td><td>۲</td><td>۳۷۹,۰۰۰</td><td>۷۵۸,۰۰۰</td></tr>
+                                            <tr><td>#۱۰۲۴۴</td><td>همبرگر ۱۲۵ گرمی ۹۰٪</td><td>۲</td><td>۱۴۹,۰۰۰</td><td>۲۹۸,۰۰۰</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="person-sub-content" id="person-invoices-tab">
+                                <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;">
+                                    <input type="text" id="personInvoiceSearch" placeholder="جستجوی شماره فاکتور..." style="flex:1;min-width:160px;padding:8px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text-light);" />
+                                    <input type="text" id="personProductSearch" placeholder="جستجوی محصول..." style="flex:1;min-width:160px;padding:8px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text-light);" />
+                                    <input type="date" id="invoicePersonFromDate" />
+                                    <input type="date" id="invoicePersonToDate" />
+                                    <button class="filter-btn" id="applyInvoicePersonFilter">فیلتر</button>
+                                    <button class="reset-btn" id="resetInvoicePersonFilter">بازنشانی</button>
+                                </div>
+                                <div class="table-wrap">
+                                    <table class="data-table" style="min-width:900px;" id="personInvoicesTable">
+                                        <thead>
+                                            <tr>
+                                                <th>ردیف</th>
+                                                <th>شماره فاکتور</th>
+                                                <th>محصولات</th>
+                                                <th>تاریخ</th>
+                                                <th>مبلغ کل</th>
+                                                <th>پرداخت شده</th>
+                                                <th>مانده</th>
+                                                <th>روش پرداخت</th>
+                                                <th>وضعیت</th>
+                                                <th>چاپ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="personInvoicesBody">
+                                            <tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text-gray);">فاکتوری ثبت نشده است.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="person-sub-content" id="person-checks-tab">
+                                <div style="margin-bottom:12px;">
+                                    <h5 style="color:var(--mustard-yellow);font-size:14px;">💳 چک‌های دریافتی</h5>
+                                    <div class="table-wrap">
+                                        <table class="data-table" style="min-width:600px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>شماره چک</th>
+                                                    <th>مبلغ</th>
+                                                    <th>تاریخ دریافت</th>
+                                                    <th>تاریخ سررسید</th>
+                                                    <th>وضعیت</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="personChecksReceived">
+                                                <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-gray);">چکی ثبت نشده است.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 style="color:var(--mustard-yellow);font-size:14px;">💳 چک‌های پرداختی</h5>
+                                    <div class="table-wrap">
+                                        <table class="data-table" style="min-width:600px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>شماره چک</th>
+                                                    <th>مبلغ</th>
+                                                    <th>تاریخ پرداخت</th>
+                                                    <th>گیرنده</th>
+                                                    <th>وضعیت</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="personChecksPaid">
+                                                <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-gray);">چک پرداختی ثبت نشده است.</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== تب لیست بدهکاران ===== -->
+                    <div class="report-tab-content" id="report-debtors">
+                        <div class="section-sub">لیست کامل بدهکاران با اطلاعات دقیق حسابداری و فاکتورها</div>
+
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                            <input type="text" id="debtorSearchInput" placeholder="جستجوی بدهکار (نام، نام خانوادگی، تلفن)..." style="flex:1;min-width:180px;padding:10px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text-light);" />
+                            <button class="filter-btn" id="applyDebtorSearch">جستجو</button>
+                            <button class="reset-btn" id="resetDebtorSearch">بازنشانی</button>
+                            <input type="date" id="debtorFromDate" />
+                            <input type="date" id="debtorToDate" />
+                            <button class="filter-btn" id="applyDebtorFilter">فیلتر</button>
+                            <button class="reset-btn" id="resetDebtorFilter">بازنشانی</button>
+                        </div>
+
+                        <div id="debtorList">
+                            <div style="text-align:center;padding:40px;color:var(--text-gray);">در حال بارگذاری...</div>
+                        </div>
+                        <div class="pagination-container" id="debtorPagination"></div>
+
+                        <div class="debtor-detail-box" id="debtorDetailBox">
+                            <div class="detail-header">
+                                <h4 id="debtorDetailTitle"><i class="fas fa-exclamation-triangle" style="color:#e74c3c;"></i> جزئیات حسابداری</h4>
+                                <button class="close-detail-btn" id="closeDebtorDetail"><i class="fas fa-times"></i></button>
+                            </div>
+
+                            <div id="debtorInfoContent" style="margin-bottom:16px;"></div>
+
+                            <h5 style="color:var(--mustard-yellow);font-size:14px;margin-bottom:8px;">📋 فاکتورهای معوق</h5>
+                            <div class="table-wrap">
+                                <table class="data-table" style="min-width:800px;" id="debtorInvoicesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>شماره فاکتور</th>
+                                            <th>تاریخ</th>
+                                            <th>مبلغ کل</th>
+                                            <th>پرداخت شده</th>
+                                            <th>مانده بدهی</th>
+                                            <th>روش پرداخت</th>
+                                            <th>وضعیت</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="debtorInvoicesBody">
+                                        <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-gray);">فاکتور معوقی یافت نشد.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== تب گزارشات عمومی ===== -->
+                    <div class="report-tab-content" id="report-general">
+                        <div class="report-filter-section">
+                            <label>از تاریخ:</label>
+                            <input type="date" id="reportFromDate" />
+                            <label>تا تاریخ:</label>
+                            <input type="date" id="reportToDate" />
+                            <label>محصول:</label>
+                            <select id="reportProductFilter"><option value="all">همه کالاها</option></select>
+                            <label>شماره فاکتور:</label>
+                            <input type="text" id="reportInvoiceNumber" placeholder="شماره یا کد پیگیری..." style="min-width:140px;" />
+                            <label>نوع فروش:</label>
+                            <select id="reportSaleType">
+                                <option value="all">همه</option>
+                                <option value="customer">مشتریان من</option>
+                                <option value="distributor">واسطه‌ای</option>
+                            </select>
+                            <button class="filter-btn" id="applyReportFilter">اعمال فیلتر</button>
+                            <button class="reset-btn" id="resetReportFilter">بازنشانی</button>
+                            <button class="btn-primary btn-sm" id="exportReportExcel"><i class="fas fa-file-excel"></i> خروجی</button>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-card" id="reportDailySales"><div class="label">فروش روزانه</div><div class="value gold">۰ تومان</div></div>
+                            <div class="info-card" id="reportWeeklySales"><div class="label">فروش هفتگی</div><div class="value gold">۰ تومان</div></div>
+                            <div class="info-card" id="reportMonthlySales"><div class="label">فروش ماهانه</div><div class="value gold">۰ تومان</div></div>
+                            <div class="info-card" id="reportYearlySales"><div class="label">فروش سالانه</div><div class="value gold">۰ تومان</div></div>
+                        </div>
+
+                        <h4 style="color:var(--mustard-yellow);font-size:16px;">📊 گزارش فروش به مشتریان</h4>
+                        <div class="table-wrap">
+                            <table class="data-table" id="reportSalesTable">
+                                <thead><tr><th>ردیف</th><th>شماره فاکتور</th><th>مشتری</th><th>تاریخ</th><th>مبلغ کل</th><th>مانده حساب</th><th>وضعیت</th><th>چاپ</th></tr></thead>
+                                <tbody>
+                                    <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h4 style="color:var(--mustard-yellow);font-size:16px;margin-top:16px;">📦 گزارش خرید از شرکت</h4>
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead><tr><th>ردیف</th><th>شماره سفارش</th><th>تاریخ</th><th>مبلغ کل</th><th>مانده حساب</th><th>وضعیت</th><th>چاپ</th></tr></thead>
+                                <tbody id="purchaseReportBody">
+                                    <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ===== تب گزارش مالی ===== -->
+                    <div class="report-tab-content" id="report-financial">
+                        <div class="section-sub">گزارش کامل مالی — فروش، تخفیف‌ها، مانده حساب، بدهکاران و تسویه با شرکت</div>
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <span>📊 نمودار فروش</span>
+                                <select id="financialChartFilter" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;padding:4px 12px;font-size:13px;margin-right:12px;">
+                                    <option value="daily">روزانه</option>
+                                    <option value="weekly">هفتگی</option>
+                                    <option value="monthly">ماهانه</option>
+                                    <option value="yearly">سالانه</option>
+                                </select>
+                            </div>
+                            <div class="bar-chart" id="financialChart">
+                                <div class="bar-item"><div class="bar" style="height:0%;"></div><div class="bar-value">۰</div><div class="bar-label">-</div></div>
+                            </div>
+                        </div>
+
+                        <div class="filter-section">
+                            <label>بازه زمانی:</label>
+                            <select id="financialPeriod">
+                                <option value="today">امروز</option>
+                                <option value="week">هفته جاری</option>
+                                <option value="month" selected>ماه جاری</option>
+                                <option value="year">سال جاری</option>
+                                <option value="custom">دلخواه</option>
+                            </select>
+                            <input type="date" id="financialFrom" />
+                            <input type="date" id="financialTo" />
+                            <input type="text" id="financeCustomerSearch" placeholder="جستجوی نام / تلفن مشتری..." style="min-width:170px;" />
+                            <input type="text" id="financeInvoiceSearch" placeholder="جستجوی شماره فاکتور..." style="min-width:150px;" />
+                            <button class="filter-btn" id="applyFinancialFilter">اعمال</button>
+                            <button class="reset-btn" id="resetFinancialFilter">بازنشانی</button>
+                            <button class="btn-primary btn-sm" id="exportFinancialBtn"><i class="fas fa-file-excel"></i> خروجی</button>
+                        </div>
+                        <div id="financialMsg" style="margin-bottom:12px;"></div>
+
+                        <div class="info-grid">
+                            <div class="info-card" id="cardTotalSales"><div class="label">فروش کل</div><div class="value green">۰ تومان</div></div>
+                            <div class="info-card" id="cardDiscounts"><div class="label">تخفیف‌ها</div><div class="value red">۰ تومان</div></div>
+                            <div class="info-card" id="cardBalanceFinancial"><div class="label">مانده حساب</div><div class="value gold">۰ تومان</div></div>
+                        </div>
+
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                            <button class="btn-primary" id="viewDebtorsBtn"><i class="fas fa-exclamation-triangle"></i> گزارش بدهکاران</button>
+                            <button class="btn-primary" id="viewDistributorSettlementBtn"><i class="fas fa-handshake"></i> تسویه من با شرکت</button>
+                        </div>
+
+                        <div class="debtor-box" id="debtorBox">
+                            <div class="detail-header">
+                                <h4><i class="fas fa-exclamation-triangle" style="color:var(--mustard-yellow);"></i> لیست کامل بدهکاران</h4>
+                                <button class="close-debtor-btn" id="closeDebtorBtn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table" style="min-width:700px;">
+                                    <thead><tr><th>#</th><th>نام و نام خانوادگی</th><th>شماره تماس</th><th>مبلغ بدهی (تومان)</th><th>تعداد سفارشات</th><th>تعداد تیکت‌های باز</th><th>وضعیت</th></tr></thead>
+                                    <tbody id="debtorTableBody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="settlement-box" id="settlementBox">
+                            <div class="detail-header">
+                                <h4><i class="fas fa-handshake" style="color:var(--mustard-yellow);"></i> تسویه من با شرکت</h4>
+                                <button class="close-settlement-btn" id="closeSettlementBtn"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table" style="min-width:800px;">
+                                    <thead><tr><th>#</th><th>نام پخش‌کننده</th><th>شهر</th><th>مبلغ کل (تومان)</th><th>تسویه شده</th><th>مانده حساب (تومان)</th><th>تاریخ آخرین تسویه</th><th>وضعیت</th></tr></thead>
+                                    <tbody id="settlementTableBody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="debtorMsg" style="margin-bottom:12px;"></div>
+
+                        <div class="table-wrap">
+                            <table class="data-table" id="financialTable">
+                                <thead><tr><th>#</th><th>شماره فاکتور</th><th>تاریخ</th><th>شرح</th><th>مبلغ کل</th><th>پرداخت شده</th><th>مانده حساب</th><th>روش پرداخت</th><th>وضعیت</th><th>رسید</th></tr></thead>
+                                <tbody id="financialTableBody"><tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ====== تنظیمات پروفایل ====== -->
+                <div class="panel-section" id="section-settings">
+                    <div class="section-title"><i class="fas fa-cog"></i> تنظیمات پروفایل</div>
+                    <div class="section-sub">مشخصات حساب، تغییر نام کاربری و رمز عبور</div>
+
+                    <div class="profile-header-card">
+                        <div class="profile-avatar" id="profileAvatar">—</div>
+                        <div class="profile-header-info">
+                            <div class="profile-header-name" id="profileFullName">—</div>
+                            <div class="profile-header-sub"><span id="profileUsername" dir="ltr">@—</span><span class="role-badge">پخش‌کننده</span></div>
+                            <div class="profile-header-sub" id="profileCityLine">—</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card"><div class="label">نام کاربری</div><div class="value" id="profileUsernameCard" dir="ltr" style="font-size:16px;">—</div></div>
+                        <div class="info-card"><div class="label">نام</div><div class="value" id="profileName">—</div></div>
+                        <div class="info-card"><div class="label">ایمیل</div><div class="value" id="profileEmail" style="font-size:15px;">—</div></div>
+                        <div class="info-card"><div class="label">شماره تماس</div><div class="value" id="profilePhone">—</div></div>
+                        <div class="info-card"><div class="label">شهر</div><div class="value" id="profileCity">—</div></div>
+                        <div class="info-card"><div class="label">آدرس</div><div class="value" id="profileAddress" style="font-size:14px;">—</div></div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;">
+                        <button class="btn-primary" id="editProfileBtn"><i class="fas fa-edit"></i> ویرایش پروفایل</button>
+                        <button class="btn-secondary" id="changePasswordBtn"><i class="fas fa-lock"></i> تغییر رمز</button>
+                    </div>
+                    <div id="settingsMsg" style="margin-top:16px;"></div>
+                </div>
+
+                <!-- ====== تخفیف‌ها ====== -->
+                <div class="panel-section" id="section-discounts">
+                    <div class="section-title">
+                        <i class="fas fa-tags"></i> مدیریت تخفیف‌ها
+                        <div class="title-actions">
+                            <button class="btn-primary btn-sm" id="showAddDiscountBtn"><i class="fas fa-plus"></i> تخفیف جدید</button>
+                        </div>
+                    </div>
+                    <div class="section-sub">ایجاد و مدیریت کدهای تخفیف برای محصولات مختلف</div>
+
+                    <div class="discount-form-section" id="discountForm" style="display: none;">
+                        <div class="discount-form-header">
+                            <i class="fas fa-plus-circle"></i> ثبت تخفیف جدید
+                        </div>
+                        <div class="discount-form-grid">
+                            <div class="discount-form-group">
+                                <label><i class="fas fa-utensils"></i> انتخاب محصول</label>
+                                <select id="discountProduct">
+                                    <option value="">انتخاب محصول...</option>
+                                </select>
+                            </div>
+                            <div class="discount-form-group">
+                                <label><i class="fas fa-percent"></i> درصد تخفیف</label>
+                                <input type="number" id="discountPercent" min="1" max="100" placeholder="مثال: ۲۰" />
+                            </div>
+                            <div class="discount-form-group">
+                                <label><i class="fas fa-calendar-alt"></i> تاریخ شروع</label>
+                                <input type="date" id="discountStartDate" />
+                            </div>
+                            <div class="discount-form-group">
+                                <label><i class="fas fa-calendar-times"></i> تاریخ انقضا</label>
+                                <input type="date" id="discountEndDate" />
+                            </div>
+                            <div class="discount-form-group">
+                                <label><i class="fas fa-tag"></i> کد تخفیف</label>
+                                <input type="text" id="discountCode" placeholder="مثال: OFF20" style="direction: ltr; text-align: left;" />
+                            </div>
+                        </div>
+                        <div class="discount-form-actions">
+                            <button class="btn-primary" id="saveDiscountBtn"><i class="fas fa-check"></i> اعمال تخفیف</button>
+                            <button class="btn-secondary" id="cancelDiscountBtn">انصراف</button>
+                        </div>
+                        <div id="discountFormMsg" style="margin-top:12px;"></div>
+                    </div>
+
+                    <div class="discount-table-section">
+                        <div class="discount-table-header">
+                            <i class="fas fa-list"></i> لیست تخفیف‌ها
+                            <span class="discount-count" id="discountCount">۰ مورد</span>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="data-table" id="discountsTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>محصول</th>
+                                        <th>درصد تخفیف</th>
+                                        <th>کد تخفیف</th>
+                                        <th>تاریخ شروع</th>
+                                        <th>تاریخ انقضا</th>
+                                        <th>وضعیت</th>
+                                        <th>عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="discountsTableBody">
+                                    <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-gray);">در حال بارگذاری...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination-container" id="discountPagination"></div>
+                    </div>
+                    <div id="discountMsg" style="margin-top:12px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال‌ها -->
+    <div class="modal-overlay" id="ticketReplyModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-reply"></i> پاسخ به تیکت</h3>
+            <div class="form-group"><label>متن پاسخ *</label><textarea id="replyModalText" rows="4"></textarea></div>
+            <div class="modal-actions"><button class="btn-primary" id="sendReplyModalBtn"><i class="fas fa-paper-plane"></i> ارسال</button><button class="btn-secondary" id="cancelReplyModalBtn">انصراف</button></div>
+            <div id="modalReplyMsg"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay msg-modal" id="customerMsgModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-envelope"></i> ارسال پیام به مشتری</h3>
+            <div class="recipient-info"><span>👤</span> <span id="msgCustomerName">مهدی زمانی</span> | <span id="msgCustomerPhone">۰۹۲۲۱۲۳۳۲۱۸</span></div>
+            <div class="form-group"><label>موضوع</label><input type="text" id="msgSubject" value="پیام از پخش‌کننده" /></div>
+            <div class="form-group"><label>متن پیام *</label><textarea id="msgContent" rows="4"></textarea></div>
+            <div class="form-group"><label>نوع ارسال</label>
+                <select id="msgType"><option value="sms">پیامک</option><option value="ticket">تیکت</option><option value="both">هر دو</option></select>
+            </div>
+            <div class="modal-actions"><button class="btn-primary" id="sendMsgBtn"><i class="fas fa-paper-plane"></i> ارسال</button><button class="btn-secondary" id="cancelMsgBtn">انصراف</button></div>
+            <div id="msgModalResult"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay profile-modal" id="profileModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-user-edit"></i> ویرایش پروفایل</h3>
+            <div class="form-group"><label>نام کامل</label><input type="text" id="editName" placeholder="نام کامل..." /></div>
+            <div class="form-group"><label>نام کاربری *</label><input type="text" id="editUsername" placeholder="نام کاربری..." style="direction:ltr;text-align:left;" /></div>
+            <div class="form-group"><label>ایمیل</label><input type="email" id="editEmail" placeholder="ایمیل..." /></div>
+            <div class="form-group"><label>شماره تماس</label><input type="text" id="editPhone" placeholder="۰۹..." /></div>
+            <div class="form-group"><label>شهر</label><input type="text" id="editCity" placeholder="شهر..." /></div>
+            <div class="form-group"><label>آدرس</label><textarea id="editAddress" rows="2"></textarea></div>
+            <div class="modal-actions"><button class="btn-primary" id="saveProfileBtn"><i class="fas fa-save"></i> ذخیره</button><button class="btn-secondary" id="cancelProfileBtn">انصراف</button></div>
+            <div id="profileModalResult"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay profile-modal" id="passwordModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-lock"></i> تغییر رمز عبور</h3>
+            <div class="form-group">
+                <label>رمز فعلی</label>
+                <div class="password-wrapper"><input type="password" id="oldPassword" /><button class="toggle-password" data-target="oldPassword"><i class="fas fa-eye"></i></button></div>
+            </div>
+            <div class="form-group">
+                <label>رمز جدید</label>
+                <div class="password-wrapper"><input type="password" id="newPassword" /><button class="toggle-password" data-target="newPassword"><i class="fas fa-eye"></i></button></div>
+            </div>
+            <div class="form-group">
+                <label>تکرار رمز جدید</label>
+                <div class="password-wrapper"><input type="password" id="confirmPassword" /><button class="toggle-password" data-target="confirmPassword"><i class="fas fa-eye"></i></button></div>
+            </div>
+            <div class="modal-actions"><button class="btn-primary" id="savePasswordBtn"><i class="fas fa-save"></i> تغییر</button><button class="btn-secondary" id="cancelPasswordBtn">انصراف</button></div>
+            <div id="passwordModalResult"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="setPriceModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-tag"></i> ثبت قیمت دستی برای مشتری</h3>
+            <div class="form-group"><label>مشتری</label><input type="text" id="priceCustomerName" disabled style="opacity:0.7;" /></div>
+            <div style="margin:6px 0 10px;font-size:12px;color:var(--text-gray);line-height:1.7;">«قیمت» و در صورت نیاز «قیمت با تخفیف» را وارد کنید. اگر فقط قیمت وارد شود، خط‌خورده = قیمت پایه شرکت و قیمت فروش = همان قیمت خواهد بود. خالی‌گذاشتن یک ردیف، قیمت دستی آن محصول را حذف می‌کند.</div>
+            <div id="modalPriceGrid" style="display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;padding:4px;"></div>
+            <div class="modal-actions"><button class="btn-primary" id="savePriceModalBtn"><i class="fas fa-save"></i> ثبت قیمت‌ها</button><button class="btn-secondary" id="cancelPriceModalBtn">انصراف</button></div>
+            <div id="priceModalResult"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="debtModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> بدهی مشتری</h3>
+            <div id="debtContent"></div>
+            <div class="modal-actions"><button class="btn-secondary" id="closeDebtModal">بستن</button></div>
+        </div>
+    </div>
+
+        <script>
+        // منطق پنل پخش‌کننده (منو، داشبورد، خرید، سفارش، تیکت، چک، تخفیف و پروفایل)
+        // به js/pakhsh.js منتقل شده است.
+    </script>
+
+<!-- ===== اسکریپت‌ها ===== -->
+<script src="js/api.js?v=5"></script>
+<script src="js/auth.js?v=5"></script>
+<script src="js/pakhsh.js?v=6"></script>
+
+    <script>
+        (function() {
+            const token = localStorage.getItem('access_token');
+            const user = JSON.parse(localStorage.getItem('zamaniCurrentUser') || '{}');
+
+            if (!token || user.role !== 'DISTRIBUTOR') {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                localStorage.removeItem('zamaniCurrentUser');
+                localStorage.removeItem('zamaniUserLoggedIn');
+                window.location.href = 'log.html';
+            }
+        })();
+    </script>
+
+</body>
+</html>
