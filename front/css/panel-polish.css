@@ -86,9 +86,17 @@
 }
 
 .modal-box {
+    width: min(100%, 720px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
     border: 1px solid rgba(212, 160, 23, .28);
     border-radius: 16px;
     box-shadow: 0 18px 55px rgba(0, 0, 0, .42);
+}
+
+.modal-overlay {
+    padding: 16px;
+    overflow-y: auto;
 }
 
 .data-table {
