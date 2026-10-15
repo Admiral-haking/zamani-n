@@ -43,4 +43,7 @@ def _unique_phone(user):
         ).exists()
         if not phone_taken_customer and not phone_taken_distributor:
             return user.phone
-    return f"TMP-{uuid4().hex[:10]}"
+    # Distributor.phone is limited to 11 characters. Keep the generated
+    # placeholder within that limit so automatic seed/user creation cannot
+    # fail on the distributor profile.
+    return f"T{uuid4().hex[:10]}"
