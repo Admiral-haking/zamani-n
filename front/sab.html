@@ -4425,20 +4425,6 @@
                 document.getElementById('smsDialog').classList.remove('active');
             });
 
-            document.getElementById('sendSmsDialogBtn').addEventListener('click', function() {
-                const recipient = document.getElementById('smsRecipient').value.trim();
-                const message = document.getElementById('smsMessage').value.trim();
-                const subject = document.getElementById('smsSubject').value.trim() || 'بدون موضوع';
-                if (!recipient || !message) {
-                    showMsg('smsDialogResult', '⚠️ لطفاً شماره مقصد و متن پیامک را وارد کنید.', 'error');
-                    return;
-                }
-                showMsg('smsDialogResult', `✅ پیامک با موفقیت ارسال شد.<br>به: ${recipient}<br>موضوع: ${subject}<br>متن: ${message}`, 'success');
-                setTimeout(() => {
-                    document.getElementById('smsDialog').classList.remove('active');
-                }, 2000);
-            });
-
             document.getElementById('setReminderBtn').addEventListener('click', function() {
                 const wrap = document.getElementById('reminderTableWrap');
                 wrap.style.display = wrap.style.display === 'none' ? 'block' : 'none';
@@ -4460,19 +4446,6 @@
 
             document.getElementById('bulkTime').addEventListener('change', function() {
                 document.getElementById('bulkScheduleGroup').style.display = this.value === 'scheduled' ? 'block' : 'none';
-            });
-
-            document.getElementById('sendBulkBtn').addEventListener('click', function() {
-                const message = document.getElementById('bulkMessage').value.trim();
-                if (!message) {
-                    showMsg('bulkModalResult', '⚠️ لطفاً متن پیامک را وارد کنید.', 'error');
-                    return;
-                }
-                showMsg('bulkModalResult', '✅ پیامک انبوه با موفقیت ارسال شد.', 'success');
-                setTimeout(() => {
-                    document.getElementById('bulkSmsModal').classList.remove('active');
-                    document.body.style.overflow = '';
-                }, 2000);
             });
 
             document.getElementById('cancelBulkBtn').addEventListener('click', function() {
