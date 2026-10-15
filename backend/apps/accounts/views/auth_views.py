@@ -61,6 +61,10 @@ class BaseAccountCreateView(APIView):
 
         distributor_id = data.pop("distributor_id", None)
         company_name = data.pop("company_name", "")
+        national_code = data.pop("national_code", "")
+        address = data.pop("address", "")
+        postal_code = data.pop("postal_code", "")
+        tag = data.pop("tag", "")
         password = data.pop("password")
 
         if self.role == User.Role.CUSTOMER and distributor_id is None \
@@ -75,6 +79,7 @@ class BaseAccountCreateView(APIView):
             first_name=data.get("first_name") or "",
             last_name=data.get("last_name") or "",
             role=self.role,
+            national_code=national_code or None,
         )
         user.set_password(password)
         user.save()
@@ -95,6 +100,14 @@ class BaseAccountCreateView(APIView):
                 customer.phone = data["phone"]
             if company_name:
                 customer.company_name = company_name
+            if national_code:
+                customer.national_id = national_code
+            if address:
+                customer.address = address
+            if postal_code:
+                customer.postal_code = postal_code
+            if tag:
+                customer.tag = tag
             if self.role == User.Role.CUSTOMER and distributor_id is not None:
                 customer.distributor_id = distributor_id
             customer.save()

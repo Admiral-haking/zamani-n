@@ -195,6 +195,11 @@ class AccountCreateSerializer(serializers.ModelSerializer):
         help_text="فقط برای مشتری: نام کسب‌وکار",
     )
 
+    national_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    address = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    postal_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    tag = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
     password = serializers.CharField(write_only=True, min_length=8)
 
     class Meta:
@@ -209,6 +214,10 @@ class AccountCreateSerializer(serializers.ModelSerializer):
             "last_name",
             "distributor_id",
             "company_name",
+            "national_code",
+            "address",
+            "postal_code",
+            "tag",
         )
 
     def validate_username(self, value):

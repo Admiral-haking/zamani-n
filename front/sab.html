@@ -3729,10 +3729,15 @@
                     showApiResult('addCustomerMsg', result, 'مشتری در دیتابیس ذخیره شد.');
                 } else if (distributorButton) {
                     const parts = value('newDistributorName').split(/\s+/);
+                    const phone = value('newDistributorPhone');
+                    if (!phone) {
+                        showMsg('addDistributorMsg', '❌ شماره تماس پخش‌کننده الزامی است.', 'error');
+                        return;
+                    }
                     const result = await apiPost('accounts/users/create-distributor/', {
                         first_name: parts.shift() || '', last_name: parts.join(' '),
                         username: value('newDistributorUsername'), password: value('newDistributorPassword'),
-                        phone: value('newDistributorPhone') || null
+                        phone
                     });
                     showApiResult('addDistributorMsg', result, 'پخش‌کننده در دیتابیس ذخیره شد.');
                 } else if (checkButton) {
