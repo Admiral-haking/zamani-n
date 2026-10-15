@@ -1659,9 +1659,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/finance/transactions/?page_size=200').then(function (res) {
             if (!res.success) {
                 console.warn('transactions', errMsg(res));
-                me.transactions = [];
                 me.renderBalance();
                 me.renderLedgerIfOpen();
+                renderPanelLoadError('customerBalanceBody', 'بارگذاری تراکنش‌های مانده حساب ناموفق بود.', function () { me.loadTransactions(); });
                 me.reportMsg('⚠️ بارگذاری مانده حساب ناموفق بود؛ دوباره تلاش کنید.', 'error');
                 return;
             }
@@ -1669,9 +1669,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             me.renderBalance();
             me.renderLedgerIfOpen();
         }).catch(function () {
-            me.transactions = [];
             me.renderBalance();
             me.renderLedgerIfOpen();
+            renderPanelLoadError('customerBalanceBody', 'ارتباط با تراکنش‌های مانده حساب برقرار نشد.', function () { me.loadTransactions(); });
             me.reportMsg('⚠️ بارگذاری مانده حساب ناموفق بود؛ دوباره تلاش کنید.', 'error');
         });
     };
