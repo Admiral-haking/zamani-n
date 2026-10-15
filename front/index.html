@@ -11399,10 +11399,13 @@ function addBothToCart(productId, productName) {
                     let refresh = '';
                     try { refresh = localStorage.getItem('refresh_token') || ''; } catch (e) { refresh = ''; }
                     if (!refresh) return call('');
+                    const refreshController = new AbortController();
+                    const refreshTimer = setTimeout(function () { refreshController.abort(); }, SUPPORT_API_TIMEOUT_MS);
                     return fetch(__SITE_API + '/accounts/refresh/', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ refresh: refresh })
+                        body: JSON.stringify({ refresh: refresh }),
+                        signal: refreshController.signal
                     }).then(function (r) { return r.json().catch(function () { return null; }); })
                         .then(function (d) {
                             if (d && d.access) {
@@ -11411,7 +11414,8 @@ function addBothToCart(productId, productName) {
                             }
                             return call('');
                         })
-                        .catch(function () { return call(''); });
+                        .catch(function () { return call(''); })
+                        .finally(function () { clearTimeout(refreshTimer); });
                 });
             }
 
