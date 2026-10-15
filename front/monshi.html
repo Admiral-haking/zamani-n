@@ -4418,6 +4418,14 @@
                 }).join('');
             }
 
+            function renderCustomerListError() {
+                const container = document.getElementById('customerList');
+                if (!container) return;
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-gray);"><i class="fas fa-exclamation-triangle" style="font-size:40px;display:block;margin-bottom:12px;color:#e74c3c;"></i><p>دریافت فهرست مشتریان انجام نشد.</p><button type="button" class="btn-secondary btn-sm" id="retryCustomerList"><i class="fas fa-redo"></i> تلاش دوباره</button></div>';
+                const retry = document.getElementById('retryCustomerList');
+                if (retry) retry.addEventListener('click', loadCustomers);
+            }
+
             function loadCustomers() {
                 if (typeof apiGet !== 'function') return Promise.resolve();
                 return apiGet('customers/?page_size=100').then(res => {
@@ -4430,7 +4438,7 @@
                     renderCustomerList(rows, '');
                 }).catch(() => {
                     customersData = {};
-                    renderCustomerList([], '');
+                    renderCustomerListError();
                 });
             }
 
@@ -6137,10 +6145,10 @@
                         reportPageState.customers = reportList(res.data);
                         renderPersonList(reportPageState.customers);
                     } else {
-                        renderPersonList([]);
+                        if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-gray);"><i class="fas fa-exclamation-triangle" style="font-size:40px;display:block;margin-bottom:12px;color:#e74c3c;"></i>دریافت فهرست مشتریان ناموفق بود.</div>';
                     }
                 }).catch(function() {
-                    renderPersonList([]);
+                    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-gray);"><i class="fas fa-exclamation-triangle" style="font-size:40px;display:block;margin-bottom:12px;color:#e74c3c;"></i>ارتباط با سرور برای دریافت مشتریان برقرار نشد.</div>';
                 });
             }
 
