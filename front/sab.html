@@ -3584,15 +3584,68 @@
                 const ticketList = document.getElementById('ticketList');
                 if (ticketList) {
                     const data = rows(tickets);
-                    ticketList.innerHTML = data.length ? data.map((t) => `<div class="list-item"><b>${esc(t.title || 'تیکت')}</b><span>${esc(t.status || '')}</span><p>${esc(t.message || '')}</p></div>`).join('') : '<div class="empty-state">تیکتی ثبت نشده است.</div>';
+                    ticketList.innerHTML = data.length ? data.map((t) => `<div class="list-item api-ticket-row" data-ticket-id="${esc(t.id)}"><div><b>${esc(t.title || 'تیکت')}</b><span>${esc(t.status || '')}</span><p>${esc(t.message || '')}</p></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn-primary btn-sm api-view-ticket" data-id="${esc(t.id)}">مشاهده</button><button class="btn-secondary btn-sm api-close-ticket" data-id="${esc(t.id)}">بستن</button></div></div>`).join('') : '<div class="empty-state">تیکتی ثبت نشده است.</div>';
                 }
                 const checksBody = document.getElementById('checksTableBody');
                 if (checksBody) {
                     const data = rows(checks);
-                    checksBody.innerHTML = data.length ? data.map((c) => `<tr><td>${esc(c.check_number || '—')}</td><td>${esc(c.customer_name || '—')}</td><td>${Number(c.amount || 0).toLocaleString('fa-IR')}</td><td>${esc(c.due_date || '—')}</td><td>${esc(c.status_label || c.status || '—')}</td></tr>`).join('') : '<tr><td colspan="13">چکی ثبت نشده است.</td></tr>';
+                    checksBody.innerHTML = data.length ? data.map((c) => `<tr data-check-id="${esc(c.id)}"><td>${esc(c.check_number || '—')}</td><td>${esc(c.customer_name || c.customer?.company_name || '—')}</td><td>${Number(c.amount || 0).toLocaleString('fa-IR')}</td><td>${esc(c.due_date || '—')}</td><td>${esc(c.status_label || c.status || '—')}</td><td><button class="btn-success btn-sm api-cash-check" data-id="${esc(c.id)}">نقد شد</button><button class="btn-danger btn-sm api-delete-check" data-id="${esc(c.id)}">حذف</button></td></tr>`).join('') : '<tr><td colspan="13">چکی ثبت نشده است.</td></tr>';
                 }
             }
             loadOwnerTables().catch((error) => console.error('خطا در بارگذاری داده‌های پنل صاحب شرکت:', error));
+
+            let activeApiTicketId = null;
+            document.addEventListener('click', async (event) => {
+                const view = event.target.closest('.api-view-ticket');
+                const close = event.target.closest('.api-close-ticket');
+                const reply = event.target.closest('#sendReplyBtn');
+                const note = event.target.closest('#saveNoteBtn');
+                const cash = event.target.closest('.api-cash-check');
+                const del = event.target.closest('.api-delete-check');
+                if (!view && !close && !reply && !note && !cash && !del) return;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                if (view) {
+                    activeApiTicketId = view.dataset.id;
+                    const result = await apiGet(`tickets/${activeApiTicketId}/`);
+                    if (!result.success) return showMsg('replyMsg', `❌ ${result.data?.detail || 'بارگذاری تیکت انجام نشد.'}`, 'error');
+                    const ticket = result.data;
+                    document.getElementById('detailTitle').textContent = ticket.title || 'تیکت';
+                    document.getElementById('detailMessages').innerHTML = `<div class="ticket-msg customer">${esc(ticket.message || '')}</div>${ticket.admin_reply ? `<div class="ticket-msg admin">${esc(ticket.admin_reply)}</div>` : ''}`;
+                    document.getElementById('ticketDetail').classList.add('active');
+                    return;
+                }
+                if (close) {
+                    if (!confirm('آیا تیکت بسته شود؟')) return;
+                    const result = await apiPost(`tickets/${close.dataset.id}/close/`, {});
+                    showMsg('replyMsg', result.success ? '✅ تیکت بسته شد.' : `❌ ${result.data?.detail || 'بستن تیکت انجام نشد.'}`, result.success ? 'success' : 'error');
+                    if (result.success) loadOwnerTables();
+                    return;
+                }
+                if (reply || note) {
+                    if (!activeApiTicketId) return showMsg('replyMsg', '❌ ابتدا یک تیکت را باز کنید.', 'error');
+                    const field = reply ? 'replyInput' : 'ticketNoteInput';
+                    const text = document.getElementById(field)?.value.trim();
+                    if (!text) return showMsg(reply ? 'replyMsg' : 'noteMsg', '⚠️ متن الزامی است.', 'error');
+                    const result = await apiPost(`tickets/${activeApiTicketId}/${reply ? 'reply' : 'add_note'}/`, reply ? { reply_message: text } : { note: text });
+                    showMsg(reply ? 'replyMsg' : 'noteMsg', result.success ? '✅ در دیتابیس ذخیره شد.' : `❌ ${result.data?.detail || result.data?.error || 'ذخیره انجام نشد.'}`, result.success ? 'success' : 'error');
+                    if (result.success) { document.getElementById(field).value = ''; if (reply) loadOwnerTables(); }
+                    return;
+                }
+                if (cash) {
+                    if (!confirm('آیا این چک نقد شده است؟')) return;
+                    const result = await apiPost(`finance/checks/${cash.dataset.id}/cash_check/`, {});
+                    showMsg('checksMsg', result.success ? '✅ چک در دیتابیس نقد شد.' : `❌ ${result.data?.detail || result.data?.error || 'عملیات انجام نشد.'}`, result.success ? 'success' : 'error');
+                    if (result.success) loadOwnerTables();
+                    return;
+                }
+                if (del) {
+                    if (!confirm('آیا این چک حذف شود؟')) return;
+                    const result = await apiRequest(`finance/checks/${del.dataset.id}/`, { method: 'DELETE' });
+                    showMsg('checksMsg', result.success ? '✅ چک حذف شد.' : `❌ ${result.data?.detail || 'حذف انجام نشد.'}`, result.success ? 'success' : 'error');
+                    if (result.success) loadOwnerTables();
+                }
+            }, true);
 
             document.addEventListener('click', async (event) => {
                 const customerButton = event.target.closest('#saveNewCustomerBtn');
