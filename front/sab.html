@@ -3643,6 +3643,19 @@
                 if (incomeBody) incomeBody.innerHTML = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.id)}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="4">درآمدی ثبت نشده است.</td></tr>';
                 const transactionBody = document.getElementById('transactionTableBody');
                 if (transactionBody) transactionBody.innerHTML = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.id)}</td><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="4">تراکنشی ثبت نشده است.</td></tr>';
+            } else {
+                const retryDashboard = () => location.reload();
+                ['balanceDetailBody', 'ordersTodayTableBody', 'incomeTableBody', 'transactionTableBody'].forEach((id) => {
+                    const body = document.getElementById(id);
+                    if (!body) return;
+                    body.innerHTML = `<tr><td colspan="10" class="load-error-cell"><div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری اطلاعات داشبورد ناموفق بود.</span><button type="button" class="btn-secondary btn-sm operational-retry">تلاش دوباره</button></div></td></tr>`;
+                    const retry = body.querySelector('.operational-retry');
+                    if (retry) retry.addEventListener('click', retryDashboard, { once: true });
+                });
+                const chart = document.getElementById('salesChart');
+                if (chart) chart.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>نمودار فروش بارگذاری نشد.</span><button type="button" class="btn-secondary btn-sm operational-retry">تلاش دوباره</button></div>';
+                const chartRetry = chart?.querySelector('.operational-retry');
+                if (chartRetry) chartRetry.addEventListener('click', retryDashboard, { once: true });
             }
 
             async function loadOwnerTables() {
