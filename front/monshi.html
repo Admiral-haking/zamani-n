@@ -6782,7 +6782,11 @@
             function loadInventoryFromServer() {
                 if (typeof apiGet !== 'function') return;
                 apiGet('inventory/?page_size=500').then(function(res) {
-                    if (!res || !res.success) return;
+                    if (!res || !res.success) {
+                        showMsg('inventoryMsg', '⚠️ موجودی سرور دریافت نشد؛ اطلاعات محلی نمایش داده شد.', 'error');
+                        renderInventory();
+                        return;
+                    }
                     const rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
                     rows.forEach(function(row) {
                         if (row.product_name) serverInventoryByName[row.product_name] = row;
@@ -6797,9 +6801,16 @@
                     });
                     localStorage.setItem('zokInventory', JSON.stringify(inventoryProducts));
                     renderInventory();
+                }).catch(function () {
+                    showMsg('inventoryMsg', '⚠️ موجودی سرور دریافت نشد؛ اطلاعات محلی نمایش داده شد.', 'error');
+                    renderInventory();
                 });
                 apiGet('inventory/logs/?page_size=500').then(function(res) {
-                    if (!res || !res.success) return;
+                    if (!res || !res.success) {
+                        showMsg('inventoryMsg', '⚠️ تاریخچه انبار از سرور دریافت نشد.', 'error');
+                        renderBackupTable();
+                        return;
+                    }
                     const rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
                     backupData = rows.map(function(row) {
                         const created = row.created_at ? new Date(row.created_at) : new Date();
@@ -6821,6 +6832,9 @@
                     backupIdCounter = backupData.reduce((max, entry) => Math.max(max, Number(entry.id) || 0), 0) + 1;
                     saveBackupData();
                     currentBackupPage = 1;
+                    renderBackupTable();
+                }).catch(function () {
+                    showMsg('inventoryMsg', '⚠️ تاریخچه انبار از سرور دریافت نشد.', 'error');
                     renderBackupTable();
                 });
             }
