@@ -89,7 +89,7 @@ class Dashboard {
         }
         banner.innerHTML = '<span>بارگذاری ' + Number(failedCount).toLocaleString('fa-IR') + ' بخش ناموفق بود.</span><button type="button" class="btn-primary" style="padding:6px 12px;border:0;cursor:pointer;">تلاش دوباره</button>';
         const retry = banner.querySelector('button');
-        retry.addEventListener('click', async () => {
+        retry.onclick = async () => {
             retry.disabled = true;
             retry.textContent = 'در حال تلاش...';
             const results = await this.loadAllData();
@@ -101,7 +101,7 @@ class Dashboard {
             } else {
                 this.showLoadRetry(failed.length);
             }
-        });
+        };
     }
 
     async loadUserData() {
