@@ -7769,21 +7769,22 @@
                         if (target && target.cloud && typeof apiDelete === 'function') {
                             apiDelete('products/discounts/' + id + '/').then(function(res) {
                                 const serverOk = res && res.success !== false;
-                                discountsData = discountsData.filter(d => d.id !== id);
-                                saveDiscounts();
-                                renderDiscountsTable();
-                                showMsg('discountMsg', serverOk ? '✅ تخفیف از سرور حذف شد.' : '⚠️ خطا در حذف از سرور؛ فقط از لیست محلی حذف شد.', serverOk ? 'success' : 'error');
+                                if (serverOk) {
+                                    discountsData = discountsData.filter(d => d.id !== id);
+                                    saveDiscounts();
+                                    renderDiscountsTable();
+                                    showMsg('discountMsg', '✅ تخفیف از سرور حذف شد.', 'success');
+                                } else {
+                                    showMsg('discountMsg', '⚠️ حذف در دیتابیس انجام نشد؛ رکورد محلی نگه داشته شد.', 'error');
+                                }
                             }).catch(function() {
-                                discountsData = discountsData.filter(d => d.id !== id);
-                                saveDiscounts();
-                                renderDiscountsTable();
-                                showMsg('discountMsg', '⚠️ خطا در حذف، فقط از لیست محلی حذف شد.', 'error');
+                                showMsg('discountMsg', '⚠️ ارتباط با دیتابیس برقرار نشد؛ تخفیف حذف نشد.', 'error');
                             });
                         } else {
                             discountsData = discountsData.filter(d => d.id !== id);
                             saveDiscounts();
                             renderDiscountsTable();
-                            showMsg('discountMsg', '✅ تخفیف با موفقیت حذف شد.', 'success');
+                            showMsg('discountMsg', '⚠️ اتصال دیتابیس در دسترس نبود؛ فقط نسخه محلی حذف شد.', 'error');
                         }
                     });
                 });
