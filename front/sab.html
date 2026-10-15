@@ -3649,6 +3649,10 @@
                 const [customers, distributors, tickets, checks] = await Promise.all([
                     apiGet('customers/'), apiGet('distributors/'), apiGet('tickets/'), apiGet('finance/checks/')
                 ]);
+                const failed = [customers, distributors, tickets, checks].find((result) => !result || !result.success);
+                if (failed) {
+                    throw new Error(failed.error || failed.data?.detail || 'دریافت داده‌های پنل ناموفق بود.');
+                }
                 const customerList = document.getElementById('customerList');
                 if (customerList) {
                     const data = rows(customers);
