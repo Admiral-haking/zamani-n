@@ -40,6 +40,8 @@ class SmsViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         qs = SmsMessage.objects.select_related('customer', 'customer__user', 'sender')
+        if not user.is_authenticated:
+            return qs.none()
         if user.role in ['ADMIN', 'SECRETARY']:
             return qs.all()
         if user.role == 'DISTRIBUTOR':

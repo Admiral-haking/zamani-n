@@ -60,6 +60,8 @@ class DistributorPriceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         user = self.request.user
+        if not user.is_authenticated:
+            return DistributorPrice.objects.none()
 
         base = DistributorPrice.objects.select_related("distributor", "product")
 

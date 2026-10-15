@@ -77,7 +77,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
 
         user = self.request.user
-
+        if not user.is_authenticated:
+            return Payment.objects.none()
 
 
         if user.role in [
