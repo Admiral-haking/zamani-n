@@ -6,7 +6,7 @@
       "root": "backend",
       "framework": "django",
       "entrypoint": "config/wsgi.py",
-      "buildCommand": "python manage.py migrate --noinput"
+      "buildCommand": "python manage.py migrate --noinput && if [ -n \"$SEED_ADMIN_PASSWORD\" ]; then python scripts/create_users.py; fi"
     }
   },
   "rewrites": [

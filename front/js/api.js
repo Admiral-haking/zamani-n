@@ -64,7 +64,7 @@ async function refreshAccessToken() {
         } else {
             console.error('❌ Refresh token failed:', data);
             clearTokens();
-            if (!window.location.pathname.includes('log.html') && 
+            if (!window.location.pathname.includes('log.html') &&
                 !window.location.pathname.includes('index.html')) {
                 window.location.href = 'log.html';
             }
@@ -73,7 +73,7 @@ async function refreshAccessToken() {
     } catch (error) {
         console.error('❌ Refresh token error:', error);
         clearTokens();
-        if (!window.location.pathname.includes('log.html') && 
+        if (!window.location.pathname.includes('log.html') &&
             !window.location.pathname.includes('index.html')) {
             window.location.href = 'log.html';
         }
@@ -87,7 +87,7 @@ async function refreshAccessToken() {
 
 async function apiRequest(endpoint, options = {}) {
     let token = getAccessToken();
-    
+
     const headers = { ...options.headers };
 
     // برای آپلود فایل (FormData) هدر Content-Type را مرورگر خودش تعیین می‌کند
@@ -102,7 +102,7 @@ async function apiRequest(endpoint, options = {}) {
     try {
         const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
         const url = `${API_URL}${cleanEndpoint}`;
-        
+
         const response = await fetch(url, {
             ...options,
             headers
@@ -112,11 +112,11 @@ async function apiRequest(endpoint, options = {}) {
         if (response.status === 401) {
             console.warn('⚠️ Token expired, attempting refresh...');
             const refreshed = await refreshAccessToken();
-            
+
             if (refreshed) {
                 token = getAccessToken();
                 headers["Authorization"] = `Bearer ${token}`;
-                
+
                 const retryResponse = await fetch(url, {
                     ...options,
                     headers
@@ -134,7 +134,8 @@ async function apiRequest(endpoint, options = {}) {
                 };
             } else {
                 clearTokens();
-                if (!window.location.pathname.includes('log.html') && 
+                window.dispatchEvent(new CustomEvent('zamani:auth-required'));
+                if (!window.location.pathname.includes('log.html') &&
                     !window.location.pathname.includes('index.html')) {
                     window.location.href = 'log.html';
                 }
