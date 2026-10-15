@@ -946,14 +946,15 @@ class Dashboard {
         }
 
         apiGet('products/discounts/?active=true').then(res => {
-            let list = [];
-            if (res && res.success) {
-                list = Array.isArray(res.data) ? res.data :
-                       (res.data && Array.isArray(res.data.results) ? res.data.results : []);
+            if (!res || !res.success) {
+                this.renderCouponsError(container);
+                return;
             }
+            const list = Array.isArray(res.data) ? res.data :
+                (res.data && Array.isArray(res.data.results) ? res.data.results : []);
             this.renderCouponsList(container, list);
         }).catch(() => {
-            this.renderCouponsEmpty(container);
+            this.renderCouponsError(container);
         });
     }
 
@@ -1024,6 +1025,18 @@ class Dashboard {
         `;
         const badge = document.querySelector('.menu-item[data-section="coupons"] .menu-badge');
         if (badge) badge.textContent = 0;
+    }
+
+    renderCouponsError(container) {
+        container.innerHTML = `
+            <div class="load-error" style="grid-column:1/-1;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>بارگذاری کوپن‌ها ناموفق بود.</span>
+                <button type="button" class="btn-secondary btn-sm coupon-retry-btn">تلاش دوباره</button>
+            </div>
+        `;
+        const retry = container.querySelector('.coupon-retry-btn');
+        if (retry) retry.addEventListener('click', () => this.renderCoupons());
     }
 
     // ========================================
@@ -1191,6 +1204,7 @@ class Dashboard {
                 </div>
             `;
         }
+
     }
 
     // ========================================
