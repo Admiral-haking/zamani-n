@@ -3544,6 +3544,22 @@
                     const key = el.dataset.dashboardKey;
                     if (values[key] !== undefined) el.textContent = Number(values[key]).toLocaleString('fa-IR');
                 });
+                const setNumber = (id, value) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = Number(value || 0).toLocaleString('fa-IR');
+                };
+                const setCard = (id, value) => {
+                    const el = document.querySelector(`#${id} .value`);
+                    if (el) el.textContent = Number(value || 0).toLocaleString('fa-IR');
+                };
+                setNumber('ordersTodayCount', data.orders?.today);
+                setNumber('newCustomersCount', data.users?.customers);
+                setNumber('transactionsCount', data.orders?.total);
+                setCard('cardOrdersToday', data.orders?.today);
+                setCard('cardNewCustomers', data.users?.customers);
+                setCard('cardTransactions', data.orders?.total);
+                const revenue = document.querySelector('#cardIncomeToday .value');
+                if (revenue) revenue.textContent = Number(data.finance?.today_revenue || 0).toLocaleString('fa-IR') + ' تومان';
             }
 
             const value = (id) => document.getElementById(id)?.value.trim() || '';
