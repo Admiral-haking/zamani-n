@@ -576,6 +576,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             } else {
                 if (mb) mb.appendChild(msgBox(errMsg(res), false));
             }
+        }).catch(function () {
+            var mb = $id('purchaseMsg');
+            if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برقرار نشد؛ سفارش ثبت نشد.', false)); }
         });
     };
 
@@ -2198,6 +2201,8 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             $id('reminderAt').value = '';
             $id('reminderMessage').value = '';
             me.loadReminders();
+        }).catch(function () {
+            showErr('ارتباط با سرور برقرار نشد؛ یادآوری ثبت نشد.');
         });
     };
 
@@ -2205,14 +2210,16 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         var me = this;
         apiPost('/reminders/' + id + '/' + (done ? 'done' : 'undone') + '/', {}).then(function (res) {
             if (res.success) me.loadReminders();
-        });
+            else me.reportMsg('⚠️ تغییر وضعیت یادآوری ذخیره نشد.', 'error');
+        }).catch(function () { me.reportMsg('⚠️ ارتباط با سرور برقرار نشد.', 'error'); });
     };
 
     DistributorPanel.prototype.deleteReminder = function (id) {
         var me = this;
         apiDelete('/reminders/' + id + '/').then(function (res) {
             if (res.success) me.loadReminders();
-        });
+            else me.reportMsg('⚠️ حذف یادآوری انجام نشد.', 'error');
+        }).catch(function () { me.reportMsg('⚠️ ارتباط با سرور برقرار نشد.', 'error'); });
     };
 
     DistributorPanel.prototype.sendSingleSms = function () {
@@ -2351,6 +2358,9 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 listed[pid] = true;
                 products = products.concat([{ id: r.product, name: r.product_name, base_price: r.base_price }]);
             }
+        }).catch(function () {
+            m.style.color = '#e74c3c';
+            m.textContent = 'ارتباط با سرور برقرار نشد؛ پیام ثبت نشد.';
         });
         if (!products.length) {
             box.innerHTML = '<div style="opacity:0.6;font-size:12px;padding:8px;">محصولی موجود نیست.</div>';
