@@ -3569,7 +3569,12 @@
                 if (target) pendingOwnerActions.push(target);
             }, true);
 
-            const profile = await apiGet('accounts/me/');
+            let profile = { success: false, data: {} };
+            try {
+                profile = await apiGet('accounts/me/');
+            } catch (error) {
+                console.error('خطا در بارگذاری پروفایل پنل صاحب شرکت:', error);
+            }
             const user = profile.data || {};
             const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.username || '—';
             const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value || '—'; };
@@ -3577,7 +3582,12 @@
             setText('profileEmail', user.email);
             setText('profilePhone', user.phone);
 
-            const dashboard = await apiGet('owner/dashboard/');
+            let dashboard = { success: false, data: null };
+            try {
+                dashboard = await apiGet('owner/dashboard/');
+            } catch (error) {
+                console.error('خطا در بارگذاری خلاصه داشبورد صاحب شرکت:', error);
+            }
             if (dashboard.success && dashboard.data) {
                 const data = dashboard.data;
                 const values = data.summary || data;
@@ -3610,7 +3620,12 @@
 
             // جزئیات عملیاتی (سفارش‌ها، نمودار و تیکت‌های اخیر) از همان منبع
             // داشبورد backend خوانده می‌شود تا جدول‌ها بعد از refresh خالی نمانند.
-            const operational = await apiGet('dashboard/');
+            let operational = { success: false, data: null };
+            try {
+                operational = await apiGet('dashboard/');
+            } catch (error) {
+                console.error('خطا در بارگذاری داده‌های عملیاتی پنل صاحب شرکت:', error);
+            }
             if (operational.success && operational.data) {
                 const live = operational.data;
                 const orderRows = live.recent_orders || [];
