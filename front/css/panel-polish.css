@@ -1,0 +1,66 @@
+/* Shared panel layout polish. Page-specific styles remain in each panel. */
+.panel-section {
+    animation: panel-section-in .18s ease-out;
+}
+
+.panel-section > .section-header,
+.panel-section > .section-title,
+.panel-section > .section-card {
+    border-radius: 14px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.data-table tbody tr {
+    transition: background-color .15s ease;
+}
+
+.data-table tbody tr:hover {
+    background: rgba(212, 160, 23, .08);
+}
+
+.load-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-height: 58px;
+    padding: 12px 16px;
+    border: 1px solid rgba(231, 76, 60, .35);
+    border-radius: 12px;
+    background: rgba(231, 76, 60, .09);
+    color: #ffb4aa;
+}
+
+.load-error-cell {
+    padding: 10px !important;
+}
+
+button:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled {
+    cursor: not-allowed;
+    opacity: .58;
+}
+
+@keyframes panel-section-in {
+    from { opacity: .65; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 720px) {
+    .data-table { min-width: 620px; }
+    .panel-section { overflow-x: auto; }
+}
