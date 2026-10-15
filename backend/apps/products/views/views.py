@@ -94,12 +94,12 @@ class ProductViewSet(viewsets.ModelViewSet):
 # ========================================
 # API پرفروش‌ترین محصولات (فقط برای کاربران لاگین‌کرده)
 # ========================================
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
 @extend_schema(
     responses={200: OpenApiTypes.OBJECT},
     tags=["Products"],
 )
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_best_sellers(request):
     """
     دریافت پرفروش‌ترین محصولات:
