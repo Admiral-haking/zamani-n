@@ -27,7 +27,7 @@ class TicketViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
 
     def get_permissions(self):
-        if self.action == 'guest_request':
+        if self.action in ['guest_request', 'contact_messages_submit', 'support_chats_send', 'support_chats_mine']:
             return [AllowAny()]
         if self.action in ['reply', 'close']:
             return [IsAuthenticated()]
@@ -332,3 +332,90 @@ class TicketViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+        url_path='contact-messages/submit',
+    )
+    def contact_messages_submit(self, request):
+        """Public contact form; persist it as a guest ticket for staff."""
+        name = (request.data.get('full_name') or '').strip()
+        message = (request.data.get('message') or '').strip()
+        phone = (request.data.get('phone') or '').strip()
+        subject = (request.data.get('subject') or 'other').strip()
+        email = (request.data.get('email') or '').strip()
+        if not name or not message:
+            return Response({'detail': 'نام و متن پیام الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+        category = {
+            'order': Ticket.Category.ORDER,
+            'support': Ticket.Category.TECHNICAL,
+            'complaint': Ticket.Category.COMPLAINT,
+            'suggestion': Ticket.Category.SUGGESTION,
+        }.get(subject, Ticket.Category.GENERAL)
+        ticket = Ticket.objects.create(
+            user=None, guest_name=name, guest_phone=phone, guest_email=email,
+            title=f'پیام تماس: {subject}', message=message, category=category,
+        )
+        self._create_initial_message(ticket, TicketMessage.Sender.GUEST, name)
+        return Response({'id': ticket.id, 'message': 'پیام شما ثبت شد.'}, status=status.HTTP_201_CREATED)
+
+    def _public_message(self, message):
+        return {
+            'id': message.id,
+            'sender': message.sender,
+            'sender_name': message.sender_name,
+            'text': message.text,
+            'created_at': message.created_at,
+            'attachments': [
+                {'id': item.id, 'name': item.file.name.rsplit('/', 1)[-1], 'url': item.file.url}
+                for item in message.attachments.all()
+            ],
+        }
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+        url_path='support-chats/mine',
+    )
+    def support_chats_mine(self, request):
+        key = (request.query_params.get('guest_key') or '').strip()
+        if not key:
+            return Response({'chat': None})
+        ticket = Ticket.objects.filter(guest_key=key).prefetch_related('messages').first()
+        if not ticket:
+            return Response({'chat': None})
+        return Response({'chat': {'id': ticket.id, 'status': ticket.status, 'messages': [self._public_message(m) for m in ticket.messages.all()]}})
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny],
+        authentication_classes=[],
+        url_path='support-chats/send',
+    )
+    def support_chats_send(self, request):
+        key = (request.data.get('guest_key') or '').strip()
+        text = (request.data.get('text') or '').strip()
+        name = (request.data.get('guest_name') or '').strip()
+        phone = (request.data.get('guest_phone') or '').strip()
+        if not key or not text:
+            return Response({'detail': 'شناسه مهمان و متن پیام الزامی است.'}, status=status.HTTP_400_BAD_REQUEST)
+        ticket = Ticket.objects.filter(guest_key=key).first()
+        if not ticket:
+            ticket = Ticket.objects.create(
+                user=None, guest_key=key, guest_name=name, guest_phone=phone,
+                title='گفتگوی پشتیبانی آنلاین', message=text,
+                category=Ticket.Category.GENERAL,
+            )
+            sender = TicketMessage.Sender.GUEST
+        else:
+            sender = TicketMessage.Sender.GUEST
+        msg = TicketMessage.objects.create(ticket=ticket, sender=sender, sender_name=name or ticket.guest_name or 'مهمان', text=text)
+        for uploaded in request.FILES.getlist('files'):
+            TicketAttachment.objects.create(message=msg, file=uploaded)
+        return Response({'chat_id': ticket.id, 'message': self._public_message(msg)}, status=status.HTTP_201_CREATED)

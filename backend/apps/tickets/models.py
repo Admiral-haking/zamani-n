@@ -77,6 +77,8 @@ class Ticket(models.Model):
 
     guest_name = models.CharField(max_length=150, blank=True, default="")
     guest_phone = models.CharField(max_length=15, blank=True, default="")
+    guest_email = models.EmailField(max_length=254, blank=True, default="")
+    guest_key = models.CharField(max_length=120, blank=True, default="", db_index=True)
 
     title = models.CharField(max_length=200)
     message = models.TextField()

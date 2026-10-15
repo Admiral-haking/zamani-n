@@ -2416,6 +2416,18 @@
                 width: 100%;
             }
         }
+        /* Clean, consistent cards and forms */
+        .panel-section { border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 18px; margin-bottom: 18px; background: rgba(19,21,38,.72); box-shadow: 0 10px 28px rgba(0,0,0,.12); }
+        .section-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .info-card, .customer-card, .inventory-card, .ticket-item, .check-card { border-radius: 14px; border: 1px solid rgba(255,255,255,.08); transition: transform .18s ease, border-color .18s ease; }
+        .info-card:hover, .customer-card:hover, .inventory-card:hover, .ticket-item:hover, .check-card:hover { transform: translateY(-2px); border-color: rgba(212,175,55,.42); }
+        .ticket-form, .check-form, .add-customer-form, .add-distributor-form { border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 18px; background: rgba(255,255,255,.025); }
+        .form-actions, .modal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .btn-primary, .btn-secondary, .btn-success, .btn-danger { min-height: 42px; border-radius: 10px; }
+        .data-table { border-collapse: separate; border-spacing: 0 6px; }
+        .data-table tbody tr { background: rgba(255,255,255,.025); }
+        .data-table td, .data-table th { padding: 11px 10px; }
+        @media (max-width: 720px) { .panel-section { padding: 12px; } .section-title { align-items: flex-start; flex-direction: column; } .form-row { grid-template-columns: 1fr !important; } .form-actions button, .modal-actions button { flex: 1 1 140px; } }
     </style>
 </head>
 
