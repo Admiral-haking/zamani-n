@@ -1605,6 +1605,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         apiGet('/finance/transactions/?page_size=200').then(function (res) {
             if (!res.success) {
                 console.warn('transactions', errMsg(res));
+                me.transactions = [];
+                me.renderBalance();
+                me.renderLedgerIfOpen();
+                me.reportMsg('⚠️ بارگذاری مانده حساب ناموفق بود؛ دوباره تلاش کنید.', 'error');
                 return;
             }
             me.transactions = res.data.results || res.data || [];
@@ -2120,7 +2124,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.loadReminders = function () {
         var me = this;
         apiGet('/reminders/').then(function (res) {
-            if (!res.success) return;
+            if (!res.success) {
+                renderPanelLoadError('reminderTableBody', errMsg(res), function () { me.loadReminders(); });
+                return;
+            }
             me.reminders = res.data.results || res.data || [];
             me.renderReminders();
         }).catch(function () {
@@ -2236,7 +2243,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.loadSmsHistory = function () {
         var me = this;
         apiGet('/sms/?page_size=50').then(function (res) {
-            if (!res.success) return;
+            if (!res.success) {
+                renderPanelLoadError('smsHistoryBody', errMsg(res), function () { me.loadSmsHistory(); });
+                return;
+            }
             me.smsHistory = res.data.results || res.data || [];
             me.renderSmsHistory();
         }).catch(function () {
@@ -2485,12 +2495,15 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
     DistributorPanel.prototype.loadNotifications = function () {
         var me = this;
         apiGet('/notifications/?page_size=50').then(function (res) {
-            if (!res.success) return;
+            if (!res.success) {
+                renderPanelLoadError('notifList', errMsg(res), function () { me.loadNotifications(); });
+                return;
+            }
             me.notifications = res.data.results || res.data || [];
             me.renderNotifications();
             me.renderNotifBadge();
         }).catch(function () {
-            renderPanelLoadError('notificationsList', 'بارگذاری اعلان‌ها ناموفق بود.', function () { me.loadNotifications(); });
+            renderPanelLoadError('notifList', 'بارگذاری اعلان‌ها ناموفق بود.', function () { me.loadNotifications(); });
         });
     };
 
