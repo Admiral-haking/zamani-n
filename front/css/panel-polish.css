@@ -9,6 +9,47 @@
     border-radius: 14px;
 }
 
+.form-section,
+.filter-section,
+.ticket-filter-section,
+.cheque-filter-section,
+.report-filter-section,
+.financial-card,
+.discount-form-section,
+.discount-table-section,
+.inventory-entry-form,
+.inventory-history-section,
+.inventory-summary-section {
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .025);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+
+.form-group label,
+.discount-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: rgba(255, 255, 255, .78);
+    font-size: 12px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea,
+.discount-form-group input,
+.discount-form-group select,
+.discount-form-group textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.modal-box {
+    border: 1px solid rgba(212, 160, 23, .28);
+    border-radius: 16px;
+    box-shadow: 0 18px 55px rgba(0, 0, 0, .42);
+}
+
 .data-table {
     width: 100%;
     border-collapse: separate;
@@ -76,6 +117,17 @@ button:focus-visible {
 @media (max-width: 720px) {
     .data-table { min-width: 620px; }
     .panel-section { overflow-x: auto; }
+    .form-section,
+    .filter-section,
+    .ticket-filter-section,
+    .cheque-filter-section,
+    .report-filter-section,
+    .financial-card,
+    .discount-form-section,
+    .discount-table-section,
+    .inventory-entry-form,
+    .inventory-history-section,
+    .inventory-summary-section { padding: 12px !important; }
     .form-row { grid-template-columns: 1fr !important; }
     .form-actions,
     .modal-actions { gap: 8px; }
