@@ -21,12 +21,13 @@ parser = argparse.ArgumentParser()
 for username in ('admin', 'secretary', 'distributor', 'customer'):
     parser.add_argument(f'--{username}-password', required=False)
 args = parser.parse_args()
+demo_password = os.environ.get("SEED_DEMO_PASSWORD")
 
 CREDS = [
-    {"username": "admin", "password": args.admin_password or os.environ.get("SEED_ADMIN_PASSWORD"), "role": User.Role.ADMIN, "is_staff": True, "is_superuser": True},
-    {"username": "secretary", "password": args.secretary_password or os.environ.get("SEED_SECRETARY_PASSWORD"), "role": User.Role.SECRETARY, "is_staff": True, "is_superuser": False},
-    {"username": "distributor", "password": args.distributor_password or os.environ.get("SEED_DISTRIBUTOR_PASSWORD"), "role": User.Role.DISTRIBUTOR, "is_staff": False, "is_superuser": False},
-    {"username": "customer", "password": args.customer_password or os.environ.get("SEED_CUSTOMER_PASSWORD"), "role": User.Role.CUSTOMER, "is_staff": False, "is_superuser": False},
+    {"username": "admin", "password": args.admin_password or os.environ.get("SEED_ADMIN_PASSWORD") or demo_password, "role": User.Role.ADMIN, "is_staff": True, "is_superuser": True},
+    {"username": "secretary", "password": args.secretary_password or os.environ.get("SEED_SECRETARY_PASSWORD") or demo_password, "role": User.Role.SECRETARY, "is_staff": True, "is_superuser": False},
+    {"username": "distributor", "password": args.distributor_password or os.environ.get("SEED_DISTRIBUTOR_PASSWORD") or demo_password, "role": User.Role.DISTRIBUTOR, "is_staff": False, "is_superuser": False},
+    {"username": "customer", "password": args.customer_password or os.environ.get("SEED_CUSTOMER_PASSWORD") or demo_password, "role": User.Role.CUSTOMER, "is_staff": False, "is_superuser": False},
 ]
 
 missing = [item['username'] for item in CREDS if not item['password'] or len(item['password']) < 8]
