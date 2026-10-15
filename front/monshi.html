@@ -8219,6 +8219,7 @@
                 let q = 'customers/backup/?page=' + p + '&page_size=15';
                 if (s) q += '&search=' + encodeURIComponent(s);
                 apiGet(q).then(function(res) {
+                    if (!res || !res.success) throw new Error('backup request failed');
                     const rows = res && res.success && res.data ? (res.data.results || []) : [];
                     backupPageState.rows = rows;
                     backupPageState.total = res && res.data ? Number(res.data.count || 0) : 0;
@@ -8226,9 +8227,7 @@
                     backupPageState.page = p;
                     renderBackupList();
                 }).catch(function() {
-                    backupPageState.rows = [];
-                    backupPageState.pages = 1;
-                    backupPageState.total = 0;
+                    showMsgOfBackup('⚠️ بارگذاری بایگانی مشتریان ناموفق بود؛ دوباره تلاش کنید.');
                     renderBackupList();
                 });
             }
