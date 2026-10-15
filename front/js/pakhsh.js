@@ -565,7 +565,18 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             return;
         }
 
+        var submitButton = $id('submitPurchaseBtn');
+        if (submitButton && submitButton.disabled) return;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ثبت...';
+        }
         apiPost('/distributors/purchases/', { items: items }).then(function (res) {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = submitButton.dataset.originalText || 'ثبت سفارش';
+            }
             var mb = $id('purchaseMsg');
             if (mb) mb.innerHTML = '';
             if (res.success) {
@@ -577,6 +588,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
                 if (mb) mb.appendChild(msgBox(errMsg(res), false));
             }
         }).catch(function () {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = submitButton.dataset.originalText || 'ثبت سفارش';
+            }
             var mb = $id('purchaseMsg');
             if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox('ارتباط با سرور برقرار نشد؛ سفارش ثبت نشد.', false)); }
         });
@@ -2191,7 +2206,18 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
         if (!title) return showErr('لطفاً عنوان یادآوری را وارد کنید.');
         if (!at) return showErr('لطفاً زمان یادآوری را وارد کنید.');
         if (at.length === 16) at += ':00';
+        var submitButton = $id('saveReminderBtn');
+        if (submitButton && submitButton.disabled) return;
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.dataset.originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> در حال ثبت...';
+        }
         apiPost('/reminders/', { customer: custId, title: title, message: message, remind_at: at }).then(function (res) {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = submitButton.dataset.originalText || 'ذخیره یادآوری';
+            }
             if (!res.success) {
                 if (mb) { mb.innerHTML = ''; mb.appendChild(msgBox(errMsg(res), false)); }
                 return;
@@ -2202,6 +2228,10 @@ var openCount = (d.new_tickets || 0) + (d.ticket_answered || 0);
             $id('reminderMessage').value = '';
             me.loadReminders();
         }).catch(function () {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.innerHTML = submitButton.dataset.originalText || 'ذخیره یادآوری';
+            }
             showErr('ارتباط با سرور برقرار نشد؛ یادآوری ثبت نشد.');
         });
     };
