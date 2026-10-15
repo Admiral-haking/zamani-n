@@ -92,7 +92,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
                 "order__customer__user"
 
-            ).all()
+            ).order_by("-created_at", "-id")
 
 
 

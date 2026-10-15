@@ -15,7 +15,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
     queryset = Inventory.objects.select_related(
         "product"
-    ).all()
+    ).order_by("product__name", "id")
 
 
     serializer_class = InventorySerializer

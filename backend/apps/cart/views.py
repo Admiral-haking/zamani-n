@@ -34,6 +34,7 @@ class CartViewSet(viewsets.ModelViewSet):
             .filter(
                 customer=customer
             )
+            .order_by("-created_at", "-id")
             .select_related(
                 "product"
             )
