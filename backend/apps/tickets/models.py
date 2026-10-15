@@ -2,6 +2,53 @@ from django.db import models
 from apps.accounts.models import User
 
 
+class TicketMessage(models.Model):
+    class Sender(models.TextChoices):
+        CUSTOMER = "CUSTOMER", "مشتری"
+        STAFF = "STAFF", "پرسنل"
+        GUEST = "GUEST", "مهمان"
+
+    ticket = models.ForeignKey(
+        "Ticket",
+        on_delete=models.CASCADE,
+        related_name="messages",
+    )
+    sender = models.CharField(
+        max_length=20,
+        choices=Sender.choices,
+        default=Sender.CUSTOMER,
+    )
+    sender_name = models.CharField(max_length=150, blank=True, default="")
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "tickets_messages"
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Ticket#{self.ticket_id} - {self.sender}: {self.text[:50]}"
+
+
+class TicketAttachment(models.Model):
+    message = models.ForeignKey(
+        TicketMessage,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(
+        upload_to="ticket_messages/%Y/%m/",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "tickets_attachments"
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"TicketMessage#{self.message_id} - {self.file.name}"
+
+
 class Ticket(models.Model):
     class Status(models.TextChoices):
         OPEN = "OPEN", "باز"
@@ -18,11 +65,6 @@ class Ticket(models.Model):
         SUGGESTION = "SUGGESTION", "پیشنهاد"
         COMPLAINT = "COMPLAINT", "شکایت"
         ACCOUNT_REQUEST = "ACCOUNT_REQUEST", "درخواست ایجاد حساب"
-
-    class Priority(models.TextChoices):
-        LOW = "LOW", "کم"
-        MEDIUM = "MEDIUM", "متوسط"
-        HIGH = "HIGH", "بالا"
 
     # برای تیکت‌های مهمان (درخواست حساب) خالی است
     user = models.ForeignKey(
@@ -45,12 +87,6 @@ class Ticket(models.Model):
         default=Category.GENERAL
     )
 
-    priority = models.CharField(
-        max_length=10,
-        choices=Priority.choices,
-        default=Priority.MEDIUM
-    )
-
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
@@ -59,6 +95,10 @@ class Ticket(models.Model):
 
     admin_reply = models.TextField(blank=True, null=True)
     admin_replied_at = models.DateTimeField(blank=True, null=True)
+
+    # پیام اضافه از طرف مشتری (چند چرخه پاسخ بین مشتری و منشی)
+    customer_reply = models.TextField(blank=True, null=True)
+    customer_replied_at = models.DateTimeField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

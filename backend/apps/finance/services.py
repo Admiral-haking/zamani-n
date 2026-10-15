@@ -11,7 +11,6 @@ from .models import Transaction
 
 
 
-
 class FinanceService:
     """
     Central service for customer financial operations.
@@ -24,7 +23,8 @@ class FinanceService:
     def add_debt(
         customer: Customer,
         amount,
-        description=""
+        description="",
+        order=None,
     ):
 
         """
@@ -62,7 +62,10 @@ class FinanceService:
             transaction_type=Transaction.Type.ORDER_DEBT,
 
 
-            description=description
+            description=description,
+
+
+            order=order,
 
 
         )
@@ -73,14 +76,13 @@ class FinanceService:
 
 
 
-
-
     @staticmethod
     @transaction.atomic
     def add_payment(
         customer: Customer,
         amount,
-        description=""
+        description="",
+        payment=None
     ):
 
         """
@@ -118,7 +120,10 @@ class FinanceService:
             transaction_type=Transaction.Type.PAYMENT,
 
 
-            description=description
+            description=description,
+
+
+            payment=payment
 
 
         )
@@ -129,9 +134,6 @@ class FinanceService:
 
 
 
-
-
     @staticmethod
     def get_balance(customer: Customer):
-
         return customer.account_balance

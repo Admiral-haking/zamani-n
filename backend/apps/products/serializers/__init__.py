@@ -1,2 +1,3 @@
 from .product_serializer import ProductSerializer
 from .category_serializer import CategorySerializer
+from .discount_serializer import ProductDiscountSerializer

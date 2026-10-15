@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
@@ -21,6 +23,8 @@ api_patterns = [
     path('dashboard/', include('apps.dashboard.urls')),
     path('tickets/', include('apps.tickets.urls')),
     path('notifications/', include('apps.notifications.urls')),
+    path('reminders/', include('apps.reminders.urls')),
+    path('sms/', include('apps.sms.urls')),
     path('reports/', include('apps.reports.urls')),
     path('customers/', include('apps.customers.urls')),
     path('distributors/', include('apps.distributors.urls')),
@@ -39,3 +43,10 @@ urlpatterns += [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/owner/', include('apps.owner.urls')),
 ]
+
+# ========================================
+# سرو فایل‌های آپلودشده (در حالت DEBUG)
+# ========================================
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -28,6 +28,9 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     serializer_class = ProductSerializer
 
+    # همه محصولات در یک پاسخ (بدون پیجینگ) برای فیلترها و dropdown ها
+    pagination_class = None
+
     def get_permissions(self):
 
         if self.action in [

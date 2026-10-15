@@ -1,10 +1,15 @@
 from rest_framework import serializers
 
+import os
+
 from apps.payments.models import Payment
 
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+
+
+    receipt_name = serializers.SerializerMethodField()
 
 
     class Meta:
@@ -24,6 +29,15 @@ class PaymentSerializer(serializers.ModelSerializer):
             "created_at",
 
         )
+
+
+    def get_receipt_name(self, obj):
+
+        if not obj.receipt:
+
+            return ""
+
+        return os.path.basename(obj.receipt.name)
 
 
 

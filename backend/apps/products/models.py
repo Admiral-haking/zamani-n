@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -102,3 +103,59 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductDiscount(models.Model):
+    """تخفیف محصولی که منشی در پنل مدیریت ثبت می‌کند (کد + درصد + بازه)"""
+
+    product_name = models.CharField(
+        max_length=200,
+        verbose_name="نام محصول",
+    )
+
+    percent = models.PositiveIntegerField(
+        verbose_name="درصد تخفیف",
+        help_text="عدد بین 1 تا 100"
+    )
+
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="کد تخفیف",
+    )
+
+    start_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="تاریخ شروع",
+    )
+
+    end_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="تاریخ انقضا",
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="product_discounts",
+        verbose_name="ثبت‌کننده",
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "products_discount"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.product_name} {self.percent}%"

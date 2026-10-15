@@ -34,11 +34,23 @@ class PricingSelector:
 
 def get_product_price(customer, product: Product):
     """
-    قیمت مؤثر محصول برای مشتری:
+    قیمت مؤثر محصول برای مشتری (اولویت‌دار):
 
-    1. اگر معرف (پخش‌کننده) مشتری روی محصول قیمت گذاشته باشد → همان قیمت
-    2. در غیر این صورت → قیمت پایه شرکت (fallback مصوب کارفرما)
+    1. قیمت دستی ثبت‌شده برای همین مشتری (پخش‌کننده در پنل ست کرده)
+    2. قیمت فروشگاه پخش‌کننده معرف مشتری
+    3. قیمت پایه شرکت (fallback مصوب کارفرما)
     """
+
+    custom_price = (
+        ProductPrice.objects
+        .filter(customer=customer, product=product)
+        .values_list("price", flat=True)
+        .first()
+    )
+
+    if custom_price is not None:
+
+        return custom_price
 
     distributor = getattr(customer, "distributor", None)
 

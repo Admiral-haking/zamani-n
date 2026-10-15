@@ -25,6 +25,13 @@ class Customer(models.Model):
         null=True
     )
 
+    shop_name = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        verbose_name="نام مغازه"
+    )
+
     phone = models.CharField(
         max_length=15,
         unique=True
@@ -78,6 +85,24 @@ class Customer(models.Model):
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
 
+    TAG_NORMAL = "normal"
+    TAG_VIP = "vip"
+    TAG_LOYAL = "loyal"
+    TAG_WHOLESALE = "wholesale"
+    TAG_CHOICES = [
+        (TAG_NORMAL, "عادی"),
+        (TAG_VIP, "VIP"),
+        (TAG_LOYAL, "وفادار"),
+        (TAG_WHOLESALE, "عمده‌فروش"),
+    ]
+
+    tag = models.CharField(
+        max_length=20,
+        choices=TAG_CHOICES,
+        default=TAG_NORMAL,
+        verbose_name="برچسب مشتری",
+    )
+
     distributor = models.ForeignKey(
         'distributors.Distributor',
         on_delete=models.SET_NULL,
@@ -87,6 +112,18 @@ class Customer(models.Model):
     )
 
     points = models.IntegerField(default=0)
+
+    price_list = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="قیمت‌های اختصاصی مشتری برای هر محصول (نام محصول: قیمت)"
+    )
+
+    discount_list = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="قیمت‌های با تخفیف برای هر محصول (نام محصول: قیمت با تخفیف)"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -195,3 +232,66 @@ class CustomerNote(models.Model):
 
     def __str__(self):
         return f"Note for {self.customer} - {self.created_at}"
+
+
+class CustomerBackup(models.Model):
+    """بک‌آپ کامل مشتریان: حتی اگر مشتری حذف شود، کل اطلاعات و تاریخچه‌اش می‌ماند."""
+
+    original_customer_id = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name="شناسه اصلی مشتری"
+    )
+    customer_code = models.CharField(max_length=20, blank=True, null=True)
+    username = models.CharField(max_length=150, blank=True, default='')
+    full_name = models.CharField(max_length=300, blank=True, default='')
+    company_name = models.CharField(max_length=200, blank=True, null=True)
+    shop_name = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, default='')
+    national_id = models.CharField(max_length=20, blank=True, null=True)
+    address = models.TextField(blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    state = models.CharField(max_length=100, blank=True, null=True, default='')
+    postal_code = models.CharField(max_length=20, blank=True, null=True, default='')
+    distributor_name = models.CharField(max_length=150, blank=True, null=True)
+    account_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+
+    is_deleted = models.BooleanField(default=False, verbose_name="حذف شده")
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    snapshot = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="عکس کامل از اطلاعات مشتری و تمام سوابق (سفارش‌ها، پرداخت‌ها، چک‌ها، تیکت‌ها و...)"
+    )
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='customer_backups_created'
+    )
+    deleted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='customer_backups_deleted'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'customer_backups'
+        ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['is_deleted']),
+            models.Index(fields=['phone']),
+            models.Index(fields=['company_name']),
+            models.Index(fields=['original_customer_id']),
+        ]
+
+    def __str__(self):
+        return f"Backup {self.original_customer_id} - {self.company_name or self.phone}"

@@ -1,99 +1,352 @@
-from django.db import transaction
+from django.db import connection, transaction
 
 from django.db.models import F
 import uuid  # 👈 برای تولید کد رهگیری
 
 from apps.finance.services import FinanceService
+from apps.finance.models import Transaction
+from apps.customers.models import Customer
 from apps.pricing.services import get_product_price
 from apps.cart.models import Cart
 from apps.orders.models import Order, OrderItem
 from apps.inventory.models import Inventory
+from apps.products.models import Product
 
 
 class OrderService:
 
     @staticmethod
     @transaction.atomic
-    def create_order_from_cart(customer):
+    def create_order_from_cart(
+        customer,
+        request_items=None,
+        defer_debt=False,
+        trust_client_prices=False,
+        allow_product_creation=False,
+    ):
+        """
+        ساخت سفارش از سبد.
 
-        cart_items = (
-            Cart.objects
-            .select_related("product")
-            .filter(customer=customer)
-        )
+        اگر اقلام معتبر در `request_items` باشد، همان چیزی که مشتری در سبد
+        انتخاب و تأیید کرده است ثبت می‌شود و سبد قدیمی سرور نادیده گرفته
+        می‌شود. در غیر این صورت از سبد سرور (`Cart`) خوانده می‌شود.
+        موجودی هرگز مانع ثبت سفارش نمی‌شود (انبار همیشه پر).
 
-        if not cart_items.exists():
+        قیمت سفارش مشتری همیشه از منبع معتبر سمت سرور محاسبه می‌شود و قیمت
+        ارسالی مرورگر نادیده گرفته می‌شود. فقط فروش دستی پرسنل/پخش‌کننده
+        می‌تواند از قیمت ارسالی استفاده کند.
+
+        با `defer_debt=True` (روش پرداخت مانده‌حساب) نه بدهی ثبت می‌شود و نه
+        موجودی کسر می‌گردد؛ فاکتور به حالت «در انتظار تأیید پخش‌کننده»
+        می‌ماند تا پس از تأیید، بدهی و موجودی یک‌بار و فقط یک‌بار بنشینند.
+        """
+
+        request_entries = [
+            raw for raw in (request_items or [])
+            if isinstance(raw, dict)
+        ]
+        use_request_items = len(request_entries) > 0
+
+        cart_items = []
+        if not use_request_items:
+            cart_items = list(
+                Cart.objects
+                .select_related("product")
+                .filter(customer=customer)
+            )
+
+        if not cart_items and not use_request_items:
             raise ValueError("Cart is empty.")
 
-        # ========================================
-        # ایجاد سفارش
-        # ========================================
         order = Order.objects.create(
             customer=customer,
-            status='PENDING'
+            status='AWAITING_APPROVAL' if defer_debt else 'PENDING'
         )
 
         total = 0
+        aggregated = {}
 
-        for item in cart_items:
-            product = item.product
+        if cart_items:
+            for item in cart_items:
+                product = item.product
+                quantity = item.quantity
 
-            if not product.is_active:
-                raise ValueError(f"{product.name} is inactive.")
+                if not product.is_active:
+                    raise ValueError(f"{product.name} is inactive.")
 
-            if item.quantity <= 0:
-                raise ValueError("Invalid quantity.")
+                if quantity <= 0:
+                    raise ValueError("Invalid quantity.")
 
-            try:
-                inventory = (
-                    Inventory.objects
-                    .select_for_update()
-                    .get(product=product)
+                price = get_product_price(customer, product)
+                key = product.id
+                if key in aggregated:
+                    aggregated[key]["quantity"] += quantity
+                else:
+                    aggregated[key] = {
+                        "product": product,
+                        "quantity": quantity,
+                        "price": price,
+                    }
+        else:
+            for raw in request_entries:
+                try:
+                    quantity = int(raw.get("quantity") or 1)
+                except (TypeError, ValueError):
+                    quantity = 1
+
+                if quantity <= 0:
+                    raise ValueError("Invalid quantity.")
+
+                product = OrderService._resolve_product(
+                    raw,
+                    allow_create=allow_product_creation,
                 )
-            except Inventory.DoesNotExist:
-                raise ValueError(f"Inventory not found for {product.name}")
 
-            if inventory.quantity < item.quantity:
-                raise ValueError(f"Inventory of {product.name} is not enough.")
+                if trust_client_prices:
+                    try:
+                        price = int(raw.get("price") or 0)
+                    except (TypeError, ValueError):
+                        price = 0
+                else:
+                    price = get_product_price(customer, product)
 
-            price = get_product_price(customer, product)
+                key = product.id
+                if key in aggregated:
+                    aggregated[key]["quantity"] += quantity
+                else:
+                    aggregated[key] = {
+                        "product": product,
+                        "quantity": quantity,
+                        "price": price,
+                    }
 
-            # کسر اتمیک موجودی؛ در صورت منفی شدن، تراکنش rollback می‌شود
-            updated = Inventory.objects.filter(
-                pk=inventory.pk,
-                quantity__gte=item.quantity,
-            ).update(
-                quantity=F("quantity") - item.quantity
-            )
-            if not updated:
-                raise ValueError(f"Inventory of {product.name} is not enough.")
+        if not aggregated:
+            raise ValueError("سبد خرید معتبر نیست.")
+
+        # موجودی درخواست مانده‌حساب فقط هنگام تأیید نهایی کسر می‌شود تا در
+        # صورت لغو، انبار به‌اشتباه خالی نماند.
+        reserve_inventory = not defer_debt
+
+        for entry in aggregated.values():
+            product = entry["product"]
+            quantity = entry["quantity"]
+            price = entry["price"]
+
+            if reserve_inventory:
+                OrderService._adjust_inventory(product, quantity)
 
             OrderItem.objects.create(
                 order=order,
                 product=product,
-                quantity=item.quantity,
+                quantity=quantity,
                 price=price
             )
 
-            total += price * item.quantity
+            total += price * quantity
 
         order.total_price = total
         order.save()
 
-        # ========================================
-        # 👇 تولید کد رهگیری بعد از ذخیره سفارش
-        # ========================================
         order.generate_tracking_code()
 
-        cart_items.delete()
+        if cart_items:
+            Cart.objects.filter(
+                customer=customer
+            ).delete()
 
-        FinanceService.add_debt(
-            customer,
-            total,
-            f"Order #{order.id}"
+        if defer_debt:
+            return order
+
+        return OrderService.record_debt(order)
+
+    @staticmethod
+    @transaction.atomic
+    def record_debt(order):
+        """ثبت بدهی فاکتور در حساب مشتری؛ دقیقاً یک‌بار (idempotent).
+
+        برای فاکتورهای «مانده‌حساب» این کار تا تأیید پخش‌کننده انجام نمی‌شود.
+        """
+
+        with transaction.atomic():
+            locked_order = OrderService._locked_order(order.pk)
+
+            if locked_order.debt_recorded:
+                return locked_order
+
+            FinanceService.add_debt(
+                locked_order.customer,
+                int(locked_order.total_price),
+                f"Order #{locked_order.id}",
+                order=locked_order,
+            )
+
+            locked_order.debt_recorded = True
+            locked_order.save(update_fields=["debt_recorded"])
+
+            return locked_order
+
+    @staticmethod
+    @transaction.atomic
+    def approve_balance_request(order):
+        """نهایی‌سازی درخواست مانده‌حساب پس از تأیید پخش‌کننده.
+
+        بدهی، کسر موجودی و تغییر وضعیت در یک تراکنش انجام می‌شود تا تأیید
+        همزمان دو نفر هم نتواند بدهی تکراری بسازد.
+        """
+
+        locked_order = OrderService._locked_order(order.pk)
+
+        if locked_order.status != 'AWAITING_APPROVAL':
+            raise ValueError("این درخواست قبلاً بررسی شده است.")
+
+        for item in locked_order.items.select_related("product").all():
+            OrderService._adjust_inventory(item.product, item.quantity)
+
+        if not locked_order.debt_recorded:
+            FinanceService.add_debt(
+                locked_order.customer,
+                int(locked_order.total_price),
+                f"Order #{locked_order.id}",
+                order=locked_order,
+            )
+            locked_order.debt_recorded = True
+
+        locked_order.status = 'CONFIRMED'
+        locked_order.save(update_fields=["debt_recorded", "status"])
+
+        return locked_order
+
+    @staticmethod
+    def _locked_order(order_id):
+        """خواندن سفارش با قفل سطری، در پایگاه‌هایی که پشتیبانی می‌کنند."""
+
+        queryset = Order.objects.select_related("customer")
+        if connection.features.has_select_for_update:
+            return queryset.select_for_update().get(pk=order_id)
+        return queryset.get(pk=order_id)
+
+    @staticmethod
+    @transaction.atomic
+    def reverse_order_finance(order):
+        """برگرداندن اثر مالی یک فاکتور لغو شده از حساب مشتری.
+
+        اگر برای این فاکتور بدهی ثبت شده باشد، مبلغ کل به‌صورت استرداد
+        (RETURN) از مانده حساب مشتری کسر می‌شود تا مشتری ماندهٔ کاذب نداشته
+        باشد. این عملیات فقط یک بار اجرا می‌شود (فیلد finance_reversed).
+        """
+
+        if order.finance_reversed:
+            return order
+
+        debt_txs = Transaction.objects.filter(
+            customer=order.customer,
+            transaction_type=Transaction.Type.ORDER_DEBT,
+            description=f"Order #{order.id}"
         )
 
+        if not debt_txs.exists():
+            return order
+
+        total = int(order.total_price)
+
+        Customer.objects.filter(pk=order.customer_id).update(
+            account_balance=F("account_balance") - total
+        )
+
+        Transaction.objects.create(
+            user=order.customer.user,
+            customer=order.customer,
+            amount=total,
+            transaction_type=Transaction.Type.RETURN,
+            description=f"لغو فاکتور #{order.id}"
+        )
+
+        order.finance_reversed = True
+
+        order.save(update_fields=["finance_reversed"])
+
         return order
+
+    @staticmethod
+    def _resolve_product(raw, allow_create=False):
+        """یافتن محصول فعال.
+
+        برای سفارش مشتری فقط محصول واقعی و فعال پذیرفته می‌شود تا داده
+        نامعتبر نتواند وارد کاتالوگ شود. ساخت خودکار محصول فقط برای فروش
+        دستی پرسنل/پخش‌کننده مجاز است.
+        """
+
+        raw_id = (
+            raw.get("product")
+            or raw.get("catalogId")
+            or raw.get("catalog_id")
+            or raw.get("id")
+        )
+
+        if raw_id is not None:
+            try:
+                raw_id = int(raw_id)
+            except (TypeError, ValueError):
+                raw_id = None
+            if raw_id is not None:
+                product = (
+                    Product.objects
+                    .filter(id=raw_id, is_active=True)
+                    .first()
+                )
+                if product is not None:
+                    return product
+
+        name = str(raw.get("name") or "").strip()
+
+        if name:
+            product = (
+                Product.objects
+                .filter(name__iexact=name, is_active=True)
+                .first()
+            )
+            if product is not None:
+                return product
+
+        if allow_create and name:
+            try:
+                price = int(raw.get("price") or 0)
+            except (TypeError, ValueError):
+                price = 0
+
+            return Product.objects.create(
+                name=name,
+                code="WEB-" + str(uuid.uuid4())[:8].upper(),
+                weight=0,
+                meat_percent=0,
+                base_price=max(price, 0),
+                is_active=True,
+            )
+
+        raise ValueError("محصول انتخاب‌شده یافت نشد یا غیرفعال است.")
+
+    @staticmethod
+    def _adjust_inventory(product, quantity):
+        """انبار همیشه پر؛ فقط در حد موجودی فعلی کسر می‌شود و هیچ‌وقت خطا نمی‌دهد."""
+
+        inventory = (
+            Inventory.objects
+            .filter(product=product)
+            .first()
+        )
+
+        if inventory is None:
+            return
+
+        if inventory.quantity < quantity:
+            return
+
+        Inventory.objects.filter(
+            pk=inventory.pk,
+            quantity__gte=quantity
+        ).update(
+            quantity=F("quantity") - quantity
+        )
 
     # ========================================
     # 👇 تابع کمکی برای به‌روزرسانی وضعیت سفارش
@@ -108,7 +361,7 @@ class OrderService:
             raise ValueError("Order not found")
 
         # وضعیت‌های معتبر
-        valid_statuses = ['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
+        valid_statuses = ['PENDING', 'AWAITING_APPROVAL', 'CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
         
         if new_status not in valid_statuses:
             raise ValueError(f"Invalid status: {new_status}")
@@ -116,6 +369,7 @@ class OrderService:
         # منطق تغییر وضعیت (اجازه نده از هر وضعیتی به هر وضعیتی بره)
         status_flow = {
             'PENDING': ['CONFIRMED', 'CANCELLED'],
+            'AWAITING_APPROVAL': ['CONFIRMED', 'CANCELLED'],
             'CONFIRMED': ['PREPARING', 'CANCELLED'],
             'PREPARING': ['SHIPPED', 'CANCELLED'],
             'SHIPPED': ['DELIVERED'],

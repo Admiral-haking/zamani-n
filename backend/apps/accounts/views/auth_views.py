@@ -20,6 +20,8 @@ from apps.accounts.serializers import (
     LoginSerializer,
     UserSerializer,
     AccountCreateSerializer,
+    ProfileUpdateSerializer,
+    ChangePasswordSerializer,
 )
 
 from apps.audit.services import AuditService
@@ -185,9 +187,57 @@ class MeView(APIView):
     ]
 
     def get(self, request):
-
-        serializer = UserSerializer(
-            request.user
-        )
-
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)
+
+    def put(self, request):
+        return self._update(request)
+
+    def patch(self, request):
+        return self._update(request, partial=True)
+
+    def _update(self, request, partial=False):
+        serializer = ProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        fields = ["first_name", "last_name", "username", "email", "phone"]
+        for field in fields:
+            if field in serializer.validated_data:
+                setattr(request.user, field, serializer.validated_data[field])
+        request.user.save(update_fields=fields)
+        return Response(UserSerializer(request.user).data)
+
+
+@extend_schema(
+    tags=["Accounts"],
+    request=ChangePasswordSerializer,
+    responses={200: OpenApiResponse(description="Password changed successfully.")},
+)
+class ChangePasswordView(APIView):
+
+    permission_classes = [
+        permissions.IsAuthenticated
+    ]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        request.user.set_password(serializer.validated_data["new_password"])
+        request.user.save(update_fields=["password"])
+        AuditService.log(
+            user=request.user,
+            action="UPDATE",
+            model_name="User",
+            object_id=request.user.id,
+            description=f"Password changed for {request.user.username}",
+        )
+        return Response(
+            {"success": True, "message": "رمز عبور با موفقیت تغییر کرد."},
+            status=status.HTTP_200_OK,
+        )

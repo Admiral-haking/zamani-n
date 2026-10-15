@@ -1,0 +1,43 @@
+﻿// RENDER: CUSTOMERS
+    // ========================================
+
+    renderCustomers() {
+        const container = document.getElementById('customerList');
+        if (!container) return;
+        if (container.dataset.inlineRendered === '1') return;
+
+        if (!Array.isArray(this.customers) || this.customers.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px;color:var(--text-gray);">
+                    <i class="fas fa-users" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+                    هیچ مشتری‌ای ثبت نشده است.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.customers.map(customer => `
+            <div class="customer-card" data-customer="${customer.id}">
+                <div class="customer-info">
+                    <div class="name">${customer.company_name || customer.full_name || 'بدون نام'}</div>
+                    <div class="detail">
+                        <span><i class="fas fa-phone"></i> ${customer.phone || 'نامشخص'}</span>
+                        <span><i class="fas fa-shopping-cart"></i> ${customer.total_orders || 0} سفارش</span>
+                        <span><i class="fas fa-star"></i> ${customer.points || 0} امتیاز</span>
+                        <span><i class="fas fa-id-card"></i> ${customer.customer_code || '---'}</span>
+                    </div>
+                </div>
+                <div class="customer-badges">
+                    ${customer.is_active ? '<span class="tag vip">فعال</span>' : '<span class="tag complaint">غیرفعال</span>'}
+                    ${customer.account_balance > 0 ? `<span class="tag wholesale">${this.formatPrice(customer.account_balance)}</span>` : ''}
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="btn-primary btn-sm view-customer" data-id="${customer.id}">پروفایل</button>
+                    <button class="btn-secondary btn-sm msg-customer" data-id="${customer.id}">پیام</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ========================================
+    

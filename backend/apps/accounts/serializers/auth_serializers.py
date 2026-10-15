@@ -104,6 +104,73 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    """
+    ویرایش پروفایل کاربر جاری (نام، نام کاربری، ایمیل، شماره تماس).
+    """
+
+    class Meta:
+        model = User
+        fields = (
+            "first_name",
+            "last_name",
+            "username",
+            "email",
+            "phone",
+        )
+
+    def validate_username(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("نام کاربری نمی‌تواند خالی باشد.")
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("نام کاربری باید حداقل ۳ کاراکتر باشد.")
+        qs = User.objects.filter(username=value)
+        if self.instance is not None:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("این نام کاربری قبلاً گرفته شده است.")
+        return value
+
+    def validate_phone(self, value):
+        if value:
+            qs = User.objects.filter(phone=value)
+            if self.instance is not None:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError("این شماره قبلاً ثبت شده است.")
+        return value
+
+    def validate_email(self, value):
+        if value:
+            qs = User.objects.filter(email=value)
+            if self.instance is not None:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError("این ایمیل قبلاً ثبت شده است.")
+        return value
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    تغییر رمز عبور کاربر جاری با تأیید رمز قبلی.
+    """
+
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=6,
+    )
+
+    def validate(self, attrs):
+        user = self.context["request"].user
+        if not user.check_password(attrs["old_password"]):
+            raise serializers.ValidationError(
+                {"old_password": "رمز عبور فعلی صحیح نیست."}
+            )
+        return attrs
+
+
 class AccountCreateSerializer(serializers.ModelSerializer):
     """
     ساخت حساب کاربری توسط ادمین کل / منشی.

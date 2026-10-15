@@ -77,6 +77,38 @@ class Transaction(BaseModel):
 
 
 
+    payment = models.ForeignKey(
+
+        "payments.Payment",
+
+        on_delete=models.SET_NULL,
+
+        related_name="transactions",
+
+        null=True,
+
+        blank=True
+
+    )
+
+
+
+    order = models.ForeignKey(
+
+        "orders.Order",
+
+        on_delete=models.SET_NULL,
+
+        related_name="transactions",
+
+        null=True,
+
+        blank=True
+
+    )
+
+
+
     class Meta:
 
         db_table = "transactions"
@@ -126,9 +158,7 @@ class Check(BaseModel):
 
     check_number = models.CharField(
 
-        max_length=100,
-
-        unique=True
+        max_length=100
 
     )
 
@@ -167,6 +197,20 @@ class Check(BaseModel):
         choices=Status.choices,
 
         default=Status.PENDING
+
+    )
+
+
+
+    registered_by = models.CharField(
+
+        max_length=20,
+
+        choices=User.Role.choices,
+
+        default=User.Role.SECRETARY,
+
+        verbose_name="ثبت‌کننده"
 
     )
 

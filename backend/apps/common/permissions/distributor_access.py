@@ -11,6 +11,10 @@ class IsDistributorOrAdminSecretary(BasePermission):
 
             return False
 
+        if not request.user.is_active:
+
+            return False
+
 
 
         return request.user.role in [

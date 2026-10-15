@@ -1,5 +1,6 @@
 from django.db import transaction
 
+from django.db.models import Sum
 from rest_framework import serializers
 
 from apps.accounts.models import User
@@ -17,6 +18,14 @@ class DistributorCustomerSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
     last_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
+    account_balance = serializers.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        read_only=True,
+    )
+    order_count = serializers.SerializerMethodField()
+    total_purchased = serializers.SerializerMethodField()
+
     class Meta:
 
         model = Customer
@@ -28,10 +37,20 @@ class DistributorCustomerSerializer(serializers.ModelSerializer):
             "password",
             "first_name",
             "last_name",
+            "full_name",
+            "email",
             "company_name",
+            "shop_name",
             "phone",
+            "national_id",
             "address",
+            "city",
+            "postal_code",
+            "tag",
             "is_active",
+            "account_balance",
+            "order_count",
+            "total_purchased",
             "created_at",
             "updated_at",
         )
@@ -40,9 +59,28 @@ class DistributorCustomerSerializer(serializers.ModelSerializer):
             "id",
             "customer_code",
             "is_active",
+            "account_balance",
             "created_at",
             "updated_at",
         )
+
+    def get_order_count(self, obj):
+        annotated = getattr(obj, "orders_count", None)
+
+        if annotated is None:
+            return obj.orders.count()
+
+        return annotated
+
+    def get_total_purchased(self, obj):
+        annotated = getattr(obj, "purchased_total", None)
+
+        if annotated is None:
+            annotated = obj.orders.aggregate(
+                total=Sum("total_price")
+            )["total"] or 0
+
+        return int(annotated)
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():

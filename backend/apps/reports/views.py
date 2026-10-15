@@ -1,5 +1,5 @@
-# backend/apps/reports/views.py
-from rest_framework import viewsets
+﻿# backend/apps/reports/views.py
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,15 +16,63 @@ from apps.inventory.models import Inventory
 from apps.finance.models import Transaction, Check
 from apps.tickets.models import Ticket
 from apps.distributors.models import Distributor
+from apps.payments.models import Payment
 from apps.common.permissions.permissions import IsAdminOrSecretary
+from apps.common.permissions.distributor_access import IsDistributorOrAdminSecretary
+
+# فاکتورهایی که فروش محسوب می‌شوند (خریدهای واقعی مشتری)
+SALES_STATUSES = ('CONFIRMED', 'PREPARING', 'SHIPPED', 'DELIVERED')
 
 
 class ReportView(viewsets.ViewSet):
     """
     گزارشات پیشرفته برای پنل منشی
+    (اکشن‌های بدهکاران/پرونده شخص/فاکتورها برای پخش‌کننده هم باز است
+    ولی خودکار فقط به مشتریان همان پخش‌کننده محدود می‌شود)
     """
-    
+
     permission_classes = [IsAdminOrSecretary]
+
+    def get_permissions(self):
+        if self.action in ['debtors', 'person', 'invoices']:
+            return [IsDistributorOrAdminSecretary()]
+        return [IsAdminOrSecretary()]
+
+    @staticmethod
+    def _distributor_profile(user):
+        if user.role == 'DISTRIBUTOR':
+            return getattr(user, 'distributor_profile', None)
+        return None
+
+    @staticmethod
+    def _to_date(value):
+        if not value:
+            return None
+        try:
+            return datetime.strptime(str(value), '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return None
+
+    @staticmethod
+    def _payment_info(order):
+        success_payments = [
+            p for p in order.payments.all() if p.status == Payment.Status.SUCCESS
+        ]
+        paid = sum(int(p.amount) for p in success_payments)
+        total = int(order.total_price)
+        remaining = max(total - paid, 0)
+        method = '---'
+        if order.payments.exists():
+            method = order.payments.order_by('-created_at').first().method
+        return paid, remaining, method
+
+    @staticmethod
+    def _customer_name(customer):
+        if customer.company_name:
+            return customer.company_name
+        if customer.user_id:
+            return customer.user.get_full_name() or customer.user.username
+        return f'مشتری #{customer.id}'
 
     def list(self, request):
         return Response({
@@ -50,7 +98,7 @@ class ReportView(viewsets.ViewSet):
         customer_id = request.query_params.get('customer_id')
         distributor_id = request.query_params.get('distributor_id')
         
-        queryset = Order.objects.filter(status='DELIVERED')
+        queryset = Order.objects.filter(status__in=SALES_STATUSES)
         
         if from_date:
             queryset = queryset.filter(created_at__date__gte=from_date)
@@ -116,86 +164,287 @@ class ReportView(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def debtors(self, request):
-        """گزارش کامل بدهکاران"""
-        from_date = request.query_params.get('from_date')
-        to_date = request.query_params.get('to_date')
-        
-        # بدهکاران از چک‌های نقد نشده
-        checks_query = Check.objects.filter(
-            status__in=[Check.Status.PENDING, Check.Status.APPROVED]
-        ).select_related('customer')
-        
-        # بدهکاران از تراکنش‌های منفی
-        transactions_query = Transaction.objects.filter(
-            amount__lt=0
-        ).select_related('customer')
-        
-        if from_date:
-            checks_query = checks_query.filter(created_at__date__gte=from_date)
-            transactions_query = transactions_query.filter(created_at__date__gte=from_date)
-        if to_date:
-            checks_query = checks_query.filter(created_at__date__lte=to_date)
-            transactions_query = transactions_query.filter(created_at__date__lte=to_date)
-        
-        debtors_dict = {}
-        
-        # از چک‌ها
-        for check in checks_query:
-            customer = check.customer
-            if customer:
-                key = customer.id
-                if key not in debtors_dict:
-                    debtors_dict[key] = {
-                        'id': customer.id,
-                        'name': customer.company_name or customer.full_name,
-                        'phone': customer.phone,
-                        'total_debt': 0,
-                        'checks': [],
-                        'transactions': []
-                    }
-                debtors_dict[key]['total_debt'] += check.amount
-                debtors_dict[key]['checks'].append({
-                    'number': check.check_number,
-                    'amount': check.amount,
-                    'due_date': check.due_date,
-                    'bank': check.bank_name,
-                    'status': check.status
+        """گزارش کامل بدهکاران (بر اساس مانده واقعی حساب از دیتابیس)"""
+        from_date = self._to_date(request.query_params.get('from_date'))
+        to_date = self._to_date(request.query_params.get('to_date'))
+        search = (request.query_params.get('search') or '').strip()
+
+        customers = Customer.objects.filter(
+            account_balance__gt=0, is_active=True
+        ).select_related('user', 'distributor').order_by('-account_balance')
+
+        if request.user.role == 'DISTRIBUTOR':
+            profile = self._distributor_profile(request.user)
+            if profile is None:
+                return Response({'total_debtors': 0, 'total_debt_amount': 0, 'debtors': []})
+            customers = customers.filter(distributor=profile)
+
+        if search:
+            customers = customers.filter(
+                Q(company_name__icontains=search)
+                | Q(phone__icontains=search)
+                | Q(user__first_name__icontains=search)
+                | Q(user__last_name__icontains=search)
+                | Q(user__username__icontains=search)
+            )
+
+        debtors = []
+        for customer in customers:
+            name = self._customer_name(customer)
+
+            # چک‌های نقد نشده
+            checks_qs = Check.objects.filter(
+                customer=customer,
+                status__in=[Check.Status.PENDING, Check.Status.APPROVED]
+            )
+            checks = [{
+                'number': ch.check_number,
+                'amount': int(ch.amount),
+                'due_date': ch.due_date.strftime('%Y-%m-%d') if ch.due_date else None,
+                'bank': ch.bank_name,
+                'status': ch.status,
+            } for ch in checks_qs]
+            total_checks = sum(int(ch.amount) for ch in checks_qs)
+
+            # فاکتورهای معوق (سفارش‌های دارای مانده)
+            orders_qs = customer.orders.exclude(status='CANCELLED').prefetch_related('payments')
+            if from_date:
+                orders_qs = orders_qs.filter(created_at__date__gte=from_date)
+            if to_date:
+                orders_qs = orders_qs.filter(created_at__date__lte=to_date)
+
+            invoices = []
+            for order in orders_qs:
+                paid, remaining, method = self._payment_info(order)
+                if remaining <= 0:
+                    continue
+                invoices.append({
+                    'id': order.id,
+                    'invoice_number': order.tracking_code or f'#{order.id}',
+                    'date': order.created_at.strftime('%Y-%m-%d'),
+                    'amount': int(order.total_price),
+                    'paid': paid,
+                    'remaining': remaining,
+                    'method': method,
+                    'status': order.status,
                 })
-        
-        # از تراکنش‌ها
-        for transaction in transactions_query:
-            customer = transaction.customer
-            if customer:
-                key = customer.id
-                if key not in debtors_dict:
-                    debtors_dict[key] = {
-                        'id': customer.id,
-                        'name': customer.company_name or customer.full_name,
-                        'phone': customer.phone,
-                        'total_debt': 0,
-                        'checks': [],
-                        'transactions': []
-                    }
-                debtors_dict[key]['total_debt'] += abs(transaction.amount)
-                debtors_dict[key]['transactions'].append({
-                    'amount': transaction.amount,
-                    'description': transaction.description,
-                    'date': transaction.created_at,
-                    'type': transaction.transaction_type
-                })
-        
-        # مرتب‌سازی بر اساس میزان بدهی
-        result = sorted(
-            debtors_dict.values(),
-            key=lambda x: x['total_debt'],
-            reverse=True
-        )
-        
+
+            open_tickets = 0
+            if customer.user_id:
+                open_tickets = Ticket.objects.filter(
+                    user_id=customer.user_id,
+                    status__in=[Ticket.Status.OPEN, Ticket.Status.ANSWERED]
+                ).count()
+
+            debtors.append({
+                'id': customer.id,
+                'name': name,
+                'phone': customer.phone,
+                'national_id': customer.national_id,
+                'total_debt': abs(int(customer.account_balance)),
+                'total_checks': total_checks,
+                'checks': checks,
+                'orders_count': customer.orders.count(),
+                'open_tickets': open_tickets,
+                'invoices': invoices,
+            })
+
         return Response({
-            'total_debtors': len(result),
-            'total_debt_amount': sum(d['total_debt'] for d in result),
-            'debtors': result
+            'total_debtors': len(debtors),
+            'total_debt_amount': sum(d['total_debt'] for d in debtors),
+            'debtors': debtors,
         })
+
+    @action(detail=False, methods=['get'])
+    def person(self, request):
+        """پرونده کامل یک شخص (اطلاعات، خریدها، اقلام، فاکتورها و چک‌ها)"""
+        customer_id = request.query_params.get('customer_id')
+        if not customer_id:
+            return Response(
+                {'error': 'شناسه مشتری الزامی است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            customer_id = int(customer_id)
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'شناسه مشتری نامعتبر است'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        customer = Customer.objects.filter(
+            id=customer_id
+        ).select_related('user', 'distributor').first()
+        if not customer:
+            return Response(
+                {'error': 'مشتری یافت نشد'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if request.user.role == 'DISTRIBUTOR':
+            profile = self._distributor_profile(request.user)
+            if profile is None or customer.distributor_id != profile.id:
+                return Response(
+                    {'error': 'مشتری یافت نشد'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+        from_date = self._to_date(request.query_params.get('from_date'))
+        to_date = self._to_date(request.query_params.get('to_date'))
+
+        orders_qs = customer.orders.select_related(
+            'customer__user', 'customer__distributor'
+        ).prefetch_related('items__product', 'payments')
+        if from_date:
+            orders_qs = orders_qs.filter(created_at__date__gte=from_date)
+        if to_date:
+            orders_qs = orders_qs.filter(created_at__date__lte=to_date)
+
+        purchases = []
+        items = []
+        invoices = []
+        for order in orders_qs:
+            invoice_number = order.tracking_code or f'#{order.id}'
+            date_str = order.created_at.strftime('%Y-%m-%d')
+            paid, remaining, method = self._payment_info(order)
+
+            purchases.append({
+                'id': order.id,
+                'invoice_number': invoice_number,
+                'date': date_str,
+                'items_count': order.items.count(),
+                'total_price': int(order.total_price),
+                'status': order.status,
+            })
+
+            for item in order.items.all():
+                items.append({
+                    'order_id': order.id,
+                    'invoice_number': invoice_number,
+                    'date': date_str,
+                    'product_name': item.product.name,
+                    'quantity': item.quantity,
+                    'price': int(item.price),
+                    'total': int(item.price) * item.quantity,
+                })
+
+            if order.status != 'CANCELLED':
+                invoices.append({
+                    'id': order.id,
+                    'invoice_number': invoice_number,
+                    'date': date_str,
+                    'products': [
+                        {'name': item.product.name, 'quantity': item.quantity}
+                        for item in order.items.all()
+                    ],
+                    'amount': int(order.total_price),
+                    'paid': paid,
+                    'remaining': remaining,
+                    'method': method,
+                    'status': order.status,
+                    'is_printed': bool(order.is_printed),
+                })
+
+        checks = [{
+            'id': ch.id,
+            'check_number': ch.check_number,
+            'bank_name': ch.bank_name,
+            'amount': int(ch.amount),
+            'issue_date': ch.issue_date.strftime('%Y-%m-%d') if ch.issue_date else None,
+            'due_date': ch.due_date.strftime('%Y-%m-%d') if ch.due_date else None,
+            'status': ch.status,
+        } for ch in customer.checks.all()]
+
+        info = {
+            'id': customer.id,
+            'name': self._customer_name(customer),
+            'phone': customer.phone,
+            'email': customer.user.email if customer.user_id else '',
+            'national_id': customer.national_id,
+            'shop_name': customer.shop_name or '',
+            'company_name': customer.company_name or '',
+            'address': customer.address,
+            'city': customer.city,
+            'postal_code': customer.postal_code,
+            'distributor_name': customer.distributor.full_name if customer.distributor_id else '',
+            'account_balance': int(customer.account_balance),
+            'total_orders': customer.total_orders,
+            'total_spent': int(customer.total_spent),
+            'points': customer.points,
+            'customer_code': customer.customer_code,
+            'created_at': customer.created_at.strftime('%Y-%m-%d') if customer.created_at else None,
+        }
+
+        return Response({
+            'info': info,
+            'purchases': purchases,
+            'items': items,
+            'invoices': invoices,
+            'checks': checks,
+        })
+
+    @action(detail=False, methods=['get'])
+    def invoices(self, request):
+        """گزارش عمومی فاکتورها با فیلترهای پیشرفته"""
+        from_date = self._to_date(request.query_params.get('from_date'))
+        to_date = self._to_date(request.query_params.get('to_date'))
+        product_id = request.query_params.get('product_id')
+        invoice_number = request.query_params.get('invoice_number')
+        sale_type = request.query_params.get('sale_type')
+        search = (request.query_params.get('search') or '').strip()
+
+        orders = Order.objects.select_related(
+            'customer__user', 'customer__distributor'
+        ).prefetch_related('items__product', 'payments').order_by('-created_at')
+
+        if request.user.role == 'DISTRIBUTOR':
+            profile = self._distributor_profile(request.user)
+            if profile is None:
+                return Response([])
+            orders = orders.filter(customer__distributor=profile)
+
+        if from_date:
+            orders = orders.filter(created_at__date__gte=from_date)
+        if to_date:
+            orders = orders.filter(created_at__date__lte=to_date)
+        if invoice_number:
+            orders = orders.filter(
+                Q(id=invoice_number) | Q(tracking_code__icontains=invoice_number)
+            )
+        if search:
+            orders = orders.filter(
+                Q(customer__company_name__icontains=search)
+                | Q(customer__user__first_name__icontains=search)
+                | Q(customer__user__last_name__icontains=search)
+                | Q(customer__phone__icontains=search)
+                | Q(tracking_code__icontains=search)
+            )
+        if product_id:
+            orders = orders.filter(items__product__id=product_id).distinct()
+        if sale_type == 'distributor':
+            orders = orders.filter(customer__distributor__isnull=False)
+
+        rows = []
+        for order in orders[:500]:
+            paid, remaining, method = self._payment_info(order)
+            customer = order.customer
+            rows.append({
+                'id': order.id,
+                'invoice_number': order.tracking_code or f'#{order.id}',
+                'date': order.created_at.strftime('%Y-%m-%d'),
+                'customer_id': customer.id,
+                'customer_name': self._customer_name(customer),
+                'distributor_name': customer.distributor.full_name if customer.distributor_id else '',
+                'products': [{'name': i.product.name, 'quantity': i.quantity} for i in order.items.all()],
+                'amount': int(order.total_price),
+                'paid': paid,
+                'remaining': remaining,
+                'method': method,
+                'status': order.status,
+                'is_printed': bool(order.is_printed),
+            })
+
+        return Response(rows)
 
     @action(detail=False, methods=['get'])
     def profit_loss(self, request):
@@ -204,7 +453,7 @@ class ReportView(viewsets.ViewSet):
         to_date = request.query_params.get('to_date')
         period = request.query_params.get('period', 'daily')  # daily, weekly, monthly, yearly
         
-        queryset = Order.objects.filter(status='DELIVERED')
+        queryset = Order.objects.filter(status__in=SALES_STATUSES)
         
         if from_date:
             queryset = queryset.filter(created_at__date__gte=from_date)
@@ -272,7 +521,7 @@ class ReportView(viewsets.ViewSet):
             # سفارشات مشتریان این توزیع‌کننده
             orders = Order.objects.filter(
                 customer__distributor=distributor,
-                status='DELIVERED'
+                status__in=SALES_STATUSES
             )
             
             if from_date:
@@ -311,7 +560,6 @@ class ReportView(viewsets.ViewSet):
         from_date = request.query_params.get('from_date')
         to_date = request.query_params.get('to_date')
         status = request.query_params.get('status')
-        priority = request.query_params.get('priority')
         
         queryset = Ticket.objects.select_related('user')
         
@@ -321,17 +569,12 @@ class ReportView(viewsets.ViewSet):
             queryset = queryset.filter(created_at__date__lte=to_date)
         if status:
             queryset = queryset.filter(status=status)
-        if priority:
-            queryset = queryset.filter(priority=priority)
         
         total = queryset.count()
         open_tickets = queryset.filter(status__in=[Ticket.Status.OPEN, Ticket.Status.ANSWERED]).count()
         closed = queryset.filter(status=Ticket.Status.CLOSED).count()
         
-        # تیکت‌های به تفکیک اولویت
-        by_priority = queryset.values('priority').annotate(count=Count('id'))
-        
-        # تیکت‌های به تفکیک دسته‌بندی
+        # تیکت‌ها به تفکیک دسته‌بندی
         by_category = queryset.values('category').annotate(count=Count('id'))
         
         # جزئیات تیکت‌ها
@@ -345,7 +588,6 @@ class ReportView(viewsets.ViewSet):
                     'username': ticket.user.username,
                     'role': ticket.user.role
                 },
-                'priority': ticket.priority,
                 'status': ticket.status,
                 'category': ticket.category,
                 'created_at': ticket.created_at,
@@ -358,7 +600,6 @@ class ReportView(viewsets.ViewSet):
                 'open': open_tickets,
                 'closed': closed
             },
-            'by_priority': by_priority,
             'by_category': by_category,
             'tickets': tickets_data
         })
@@ -424,7 +665,7 @@ class ReportView(viewsets.ViewSet):
         # مشتریان برتر
         top_customers = queryset.annotate(
             order_count=Count('orders'),
-            total_spent_annotated=Sum('orders__total_price', filter=Q(orders__status='DELIVERED'))
+            total_spent_annotated=Sum('orders__total_price', filter=Q(orders__status__in=SALES_STATUSES))
         ).filter(order_count__gt=0).order_by('-total_spent_annotated')[:10]
         
         top_customers_data = []
@@ -452,7 +693,7 @@ class ReportView(viewsets.ViewSet):
         limit = int(request.query_params.get('limit', 20))
         
         order_items = OrderItem.objects.filter(
-            order__status='DELIVERED'
+            order__status__in=SALES_STATUSES
         )
         
         if from_date:
@@ -486,7 +727,7 @@ class ReportView(viewsets.ViewSet):
         
         if report_type == 'sales':
             writer.writerow(['شماره سفارش', 'مشتری', 'مبلغ', 'تاریخ', 'وضعیت'])
-            orders = Order.objects.filter(status='DELIVERED')[:100]
+            orders = Order.objects.filter(status__in=SALES_STATUSES)[:100]
             for order in orders:
                 writer.writerow([
                     order.id,

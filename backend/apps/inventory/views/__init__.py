@@ -1,1 +1,4 @@
-from .inventory_views import InventoryViewSet
+from .inventory_views import (
+    InventoryLogViewSet,
+    InventoryViewSet,
+)

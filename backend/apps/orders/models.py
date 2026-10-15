@@ -9,6 +9,7 @@ class Order(models.Model):
 
     STATUS_CHOICES = [
         ("PENDING", "Pending"),
+        ("AWAITING_APPROVAL", "Awaiting distributor approval"),
         ("CONFIRMED", "Confirmed"),
         ("PREPARING", "Preparing"),
         ("SHIPPED", "Shipped"),        # 👈 اضافه شد
@@ -28,6 +29,15 @@ class Order(models.Model):
         default="PENDING"
     )
 
+    # ========================================
+    # 👇 فاکتور «مانده‌حساب» تا تأیید پخش‌کننده بدهی ثبت نمی‌کند؛ این پرچم
+    # 👇 تضمین می‌کند بدهی هر فاکتور دقیقاً یک‌بار در حساب مشتری بنشیند
+    # ========================================
+    debt_recorded = models.BooleanField(
+        default=False,
+        verbose_name="بدهی این فاکتور در حساب مشتری ثبت شده"
+    )
+
     total_price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
@@ -43,6 +53,19 @@ class Order(models.Model):
         blank=True,
         null=True,
         verbose_name="کد رهگیری"
+    )
+
+    is_printed = models.BooleanField(
+        default=False,
+        verbose_name="چاپ فاکتور"
+    )
+
+    # ========================================
+    # 👇 جلوگیری از برگشت مالی دوباره پس از لغو
+    # ========================================
+    finance_reversed = models.BooleanField(
+        default=False,
+        verbose_name="برگشت مالی انجام شده"
     )
 
     created_at = models.DateTimeField(

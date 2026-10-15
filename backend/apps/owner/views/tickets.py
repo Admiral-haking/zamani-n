@@ -19,7 +19,6 @@ class OwnerTicketViewSet(viewsets.ModelViewSet):
                 'title': ticket.title,
                 'description': ticket.description,
                 'status': ticket.status,
-                'priority': ticket.priority,
                 'created_at': ticket.created_at,
                 'updated_at': ticket.updated_at,
             })

@@ -93,6 +93,18 @@ class Payment(models.Model):
 
 
 
+    receipt = models.FileField(
+
+        upload_to="receipts/",
+
+        null=True,
+
+        blank=True
+
+    )
+
+
+
     created_at = models.DateTimeField(
 
         auto_now_add=True

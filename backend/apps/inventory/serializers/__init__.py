@@ -1,1 +1,4 @@
-from .inventory_serializer import InventorySerializer
+from .inventory_serializer import (
+    InventoryLogSerializer,
+    InventorySerializer,
+)

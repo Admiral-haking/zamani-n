@@ -4,11 +4,19 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import ReturnRequest
 from .serializers import ReturnRequestSerializer
+from apps.common.permissions.permissions import IsAdminOrSecretary
 
 
 class ReturnRequestViewSet(viewsets.ModelViewSet):
     serializer_class = ReturnRequestSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ['approve', 'reject', 'destroy', 'update', 'partial_update']:
+            return [IsAdminOrSecretary()]
+        if self.action == 'cancel':
+            return [IsAuthenticated()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user

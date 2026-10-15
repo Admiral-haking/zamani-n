@@ -67,3 +67,60 @@ class Distributor(models.Model):
                 random.choices(string.digits, k=8)
             )
         super().save(*args, **kwargs)
+
+
+class DistributorPurchase(models.Model):
+    """خرید پخش‌کننده از شرکت (ثبت سفارش در پنل پخش‌کننده)."""
+
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "در انتظار تایید"
+        CONFIRMED = "CONFIRMED", "تایید شده"
+        REJECTED = "REJECTED", "رد شده"
+        CANCELLED = "CANCELLED", "لغو شده"
+
+    distributor = models.ForeignKey(
+        Distributor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="purchases"
+    )
+
+    distributor_name = models.CharField(
+        max_length=150,
+        blank=True,
+        default="",
+        help_text="نام پخش‌کننده در زمان ثبت خرید (برای حفظ سابقه پس از حذف)"
+    )
+
+    items = models.JSONField(
+        default=list,
+        help_text="لیست اقلام: [{product_id, product_name, unit, quantity, price, total}]"
+    )
+
+    total_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=0,
+        default=0
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    class Meta:
+        db_table = "distributor_purchases"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"خرید #{self.id} - {self.distributor_name or (self.distributor.full_name if self.distributor else '(حذف شده)')}"

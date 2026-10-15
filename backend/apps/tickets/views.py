@@ -8,7 +8,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Count, Q
 from datetime import datetime
 
-from .models import Ticket
+from .models import Ticket, TicketMessage, TicketAttachment
 from .serializers import TicketSerializer
 from apps.audit.services import AuditService
 from apps.common.permissions.permissions import IsAdminOrSecretary
@@ -21,15 +21,17 @@ class TicketViewSet(viewsets.ModelViewSet):
     
     serializer_class = TicketSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'priority', 'category']
+    filterset_fields = ['status', 'category']
     search_fields = ['title', 'message', 'user__username', 'user__phone']
-    ordering_fields = ['created_at', 'priority', 'status']
+    ordering_fields = ['created_at', 'status']
     ordering = ['-created_at']
 
     def get_permissions(self):
         if self.action == 'guest_request':
             return [AllowAny()]
-        if self.action in ['reply', 'close', 'assign', 'add_note']:
+        if self.action in ['reply', 'close']:
+            return [IsAuthenticated()]
+        if self.action in ['assign', 'add_note', 'destroy']:
             return [IsAdminOrSecretary()]
         return [IsAuthenticated()]
 
@@ -38,20 +40,31 @@ class TicketViewSet(viewsets.ModelViewSet):
         
         # منشی و ادمین: همه تیکت‌ها با اطلاعات کاربر
         if user.role in ['ADMIN', 'SECRETARY']:
-            return Ticket.objects.select_related('user').all()
+            return Ticket.objects.select_related('user').prefetch_related('messages__attachments').all()
         
         # توزیع‌کننده: تیکت‌های خودش
         if user.role == 'DISTRIBUTOR':
-            return Ticket.objects.filter(user=user).select_related('user')
+            return Ticket.objects.filter(user=user).select_related('user').prefetch_related('messages__attachments')
         
         # مشتری: تیکت‌های خودش
         if user.role == 'CUSTOMER':
-            return Ticket.objects.filter(user=user).select_related('user')
+            return Ticket.objects.filter(user=user).select_related('user').prefetch_related('messages__attachments')
         
         return Ticket.objects.none()
 
+    def _create_initial_message(self, ticket, sender, sender_name):
+        TicketMessage.objects.create(
+            ticket=ticket,
+            sender=sender,
+            sender_name=sender_name,
+            text=ticket.message or '',
+        )
+
     def perform_create(self, serializer):
         ticket = serializer.save(user=self.request.user)
+        sender = TicketMessage.Sender.STAFF if self.request.user.role in ['ADMIN', 'SECRETARY'] else TicketMessage.Sender.CUSTOMER
+        sender_name = self.request.user.get_full_name() or self.request.user.username
+        self._create_initial_message(ticket, sender, sender_name)
         AuditService.log(
             user=self.request.user,
             action="CREATE",
@@ -83,23 +96,61 @@ class TicketViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def reply(self, request, pk=None):
-        """پاسخ به تیکت (فقط منشی و ادمین)"""
+        """پاسخ به تیکت: مشتری مالک پیام اضافه می‌کند، منشی/ادمین پاسخ می‌دهد.
+        پشتیبانی از پیوست (تصویر/فایل) از طریق فیلد attachments (چند فایل)."""
         ticket = self.get_object()
-        reply_message = request.data.get('reply_message')
-        priority = request.data.get('priority', ticket.priority)
-        
-        if not reply_message:
+        reply_message = str(request.data.get('reply_message') or '').strip()
+        files = request.FILES.getlist('attachments')
+
+        if not reply_message and not files:
             return Response(
-                {'error': 'متن پاسخ الزامی است'},
+                {'error': 'متن پاسخ یا فایل پیوست الزامی است'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        ticket.admin_reply = reply_message
-        ticket.admin_replied_at = datetime.now()
-        ticket.status = Ticket.Status.ANSWERED
-        ticket.priority = priority
+
+        is_owner = (
+            request.user.is_authenticated
+            and ticket.user_id == request.user.id
+        )
+        is_staff = request.user.role in ['ADMIN', 'SECRETARY']
+
+        if not is_staff and not is_owner:
+            return Response(
+                {'error': 'فقط مالک تیکت یا پرسنل می‌توانند پاسخ دهند'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if is_staff:
+            # پاسخ پرسنل در admin_reply می‌رود و تیکت ANSWERED می‌شود
+            if reply_message:
+                ticket.admin_reply = reply_message
+            ticket.admin_replied_at = datetime.now()
+            ticket.status = Ticket.Status.ANSWERED
+            sender = TicketMessage.Sender.STAFF
+        else:
+            # پیام مشتری در customer_reply ثبت می‌شود و تیکت دوباره OPEN می‌شود (منتظر پرسنل)
+            if reply_message:
+                ticket.customer_reply = reply_message
+            ticket.customer_replied_at = datetime.now()
+            ticket.status = Ticket.Status.OPEN
+            sender = TicketMessage.Sender.CUSTOMER
+
+        sender_name = request.user.get_full_name() or request.user.username
+
+        message = TicketMessage.objects.create(
+            ticket=ticket,
+            sender=sender,
+            sender_name=sender_name,
+            text=reply_message,
+        )
+
+        for uploaded in files:
+            TicketAttachment.objects.create(message=message, file=uploaded)
+
         ticket.save()
-        
+
+        ticket._prefetched_objects_cache = {}
+
         AuditService.log(
             user=request.user,
             action="REPLY",
@@ -107,14 +158,27 @@ class TicketViewSet(viewsets.ModelViewSet):
             object_id=ticket.id,
             description=f"Ticket #{ticket.id} replied by {request.user.username}"
         )
-        
+
         serializer = self.get_serializer(ticket)
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
     def close(self, request, pk=None):
-        """بستن تیکت"""
+        """بستن تیکت (مالک یا پرسنل)"""
         ticket = self.get_object()
+
+        is_owner = (
+            request.user.is_authenticated
+            and ticket.user_id == request.user.id
+        )
+        is_staff = request.user.role in ['ADMIN', 'SECRETARY']
+
+        if not is_staff and not is_owner:
+            return Response(
+                {'error': 'فقط مالک تیکت یا پرسنل می‌توانند تیکت را ببندند'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         ticket.status = Ticket.Status.CLOSED
         ticket.save()
         
@@ -210,24 +274,11 @@ class TicketViewSet(viewsets.ModelViewSet):
         answered = queryset.filter(status=Ticket.Status.ANSWERED).count()
         closed = queryset.filter(status=Ticket.Status.CLOSED).count()
         
-        urgent = queryset.filter(priority=Ticket.Priority.HIGH).count()
-        medium = queryset.filter(priority=Ticket.Priority.MEDIUM).count()
-        low = queryset.filter(priority=Ticket.Priority.LOW).count()
-        
-        # تیکت‌های هر دسته‌بندی
-        category_stats = queryset.values('category').annotate(
-            count=Count('id')
-        )
-        
         return Response({
             'open': open_tickets,
             'answered': answered,
             'closed': closed,
             'total': open_tickets + answered + closed,
-            'urgent': urgent,
-            'medium': medium,
-            'low': low,
-            'by_category': category_stats
         })
     @action(
         detail=False,
@@ -262,9 +313,14 @@ class TicketViewSet(viewsets.ModelViewSet):
             title=title or "درخواست ایجاد حساب کاربری",
             message=message,
             category=Ticket.Category.ACCOUNT_REQUEST,
-            priority=Ticket.Priority.MEDIUM,
             guest_name=guest_name,
             guest_phone=guest_phone,
+        )
+        TicketMessage.objects.create(
+            ticket=ticket,
+            sender=TicketMessage.Sender.GUEST,
+            sender_name=guest_name,
+            text=message,
         )
         return Response(
             {

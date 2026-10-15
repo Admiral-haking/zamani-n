@@ -9,10 +9,11 @@ from datetime import timedelta
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from apps.products.models import Product, Category
+from apps.products.models import Product, Category, ProductDiscount
 from apps.products.serializers import (
     ProductSerializer,
     CategorySerializer,
+    ProductDiscountSerializer,
 )
 from apps.products.permissions import IsAdminOrSecretary
 
@@ -53,6 +54,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.select_related("category").filter(is_active=True)
 
     serializer_class = ProductSerializer
+
+    # همه محصولات در یک پاسخ (بدون پیجینگ) برای فیلترها و dropdown ها
+    pagination_class = None
 
     permission_classes = [
         IsAuthenticated,
@@ -133,3 +137,47 @@ def get_best_sellers(request):
         'discounted': discounted_serializer.data,
         'popular': popular_serializer.data
     })
+
+
+class ProductDiscountViewSet(viewsets.ModelViewSet):
+    """مدیریت تخفیف‌های محصول توسط منشی/مدیر (خواندن برای هر کاربر واردشده)"""
+
+    queryset = ProductDiscount.objects.select_related("created_by")
+
+    serializer_class = ProductDiscountSerializer
+
+    permission_classes = [
+        IsAuthenticated
+    ]
+
+    filterset_fields = ["product_name", "code"]
+
+    def get_permissions(self):
+        # ساخت/ویرایش/حذف فقط منشی و مدیر (پخش‌کننده هم در پنل خودش مجاز است)؛
+        # خواندن برای هر کاربر واردشده
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            if self.request.user.role == "DISTRIBUTOR":
+                return [IsAuthenticated()]
+            return [IsAdminOrSecretary()]
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        active = self.request.query_params.get("active")
+        if active and active.lower() == "true":
+            from django.utils import timezone
+            queryset = queryset.filter(
+                start_date__lte=timezone.localdate()
+            ).exclude(
+                end_date__lt=timezone.localdate()
+            )
+        return queryset
+
+    def perform_destroy(self, instance):
+        # هنگام حذف تخفیف، درصد تخفیف محصول اصلی هم صفر شود
+        from django.db.models import Q
+        from apps.products.models import Product
+        Product.objects.filter(name__iexact=instance.product_name).update(
+            discount_percent=0
+        )
+        instance.delete()
