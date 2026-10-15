@@ -3528,7 +3528,14 @@
             }
 
             const value = (id) => document.getElementById(id)?.value.trim() || '';
-            const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
+            const apiErrorText = (result) => {
+                const data = result?.data;
+                if (!data) return result?.error || 'ارتباط با سرور برقرار نشد.';
+                if (typeof data === 'string') return data;
+                if (data.detail || data.error) return data.detail || data.error;
+                return Object.entries(data).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join('، ') : value}`).join(' | ') || 'ذخیره در دیتابیس انجام نشد.';
+            };
+            const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${apiErrorText(result)}`, result.success ? 'success' : 'error');
             const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
             const rows = (result) => Array.isArray(result?.data) ? result.data : (result?.data?.results || []);
 
@@ -3718,6 +3725,7 @@
                         category: (value('ticketCategory') || 'general').toUpperCase()
                     });
                     showApiResult('ticketFormMsg', result, 'تیکت در دیتابیس ثبت شد.');
+                    if (result.success) loadOwnerTables();
                 } else if (customerButton) {
                     const parts = value('newCustomerName').split(/\s+/);
                     const result = await apiPost('accounts/users/create-customer/', {
@@ -3727,6 +3735,7 @@
                         company_name: value('newCustomerName'), distributor_id: value('newCustomerDistributor') || null
                     });
                     showApiResult('addCustomerMsg', result, 'مشتری در دیتابیس ذخیره شد.');
+                    if (result.success) loadOwnerTables();
                 } else if (distributorButton) {
                     const parts = value('newDistributorName').split(/\s+/);
                     const phone = value('newDistributorPhone');
@@ -3740,6 +3749,7 @@
                         phone
                     });
                     showApiResult('addDistributorMsg', result, 'پخش‌کننده در دیتابیس ذخیره شد.');
+                    if (result.success) loadOwnerTables();
                 } else if (checkButton) {
                     const found = await apiGet(`customers/?search=${encodeURIComponent(value('checkPhone'))}`);
                     const customer = found.success && (found.data?.results || found.data || [])[0];
