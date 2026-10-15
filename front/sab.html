@@ -3629,7 +3629,11 @@
                 const note = event.target.closest('#saveNoteBtn');
                 const cash = event.target.closest('.api-cash-check');
                 const del = event.target.closest('.api-delete-check');
-                if (!view && !close && !reply && !note && !cash && !del) return;
+                const sms = event.target.closest('#sendSmsDialogBtn');
+                const bulkSms = event.target.closest('#sendBulkBtn');
+                const message = event.target.closest('#sendMsgBtn');
+                const invoice = event.target.closest('.approve-invoice,.reject-invoice');
+                if (!view && !close && !reply && !note && !cash && !del && !sms && !bulkSms && !message && !invoice) return;
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 if (view) {
@@ -3671,6 +3675,28 @@
                     const result = await apiRequest(`finance/checks/${del.dataset.id}/`, { method: 'DELETE' });
                     showMsg('checksMsg', result.success ? '✅ چک حذف شد.' : `❌ ${result.data?.detail || 'حذف انجام نشد.'}`, result.success ? 'success' : 'error');
                     if (result.success) loadOwnerTables();
+                    return;
+                }
+                if (sms) {
+                    const result = await apiPost('sms/send/', { phone: value('smsRecipient'), subject: value('smsSubject') || 'بدون موضوع', body: value('smsMessage') });
+                    showMsg('smsDialogResult', result.success ? '✅ پیام در دیتابیس ثبت شد.' : `❌ ${result.data?.error || 'ثبت پیام انجام نشد.'}`, result.success ? 'success' : 'error');
+                    return;
+                }
+                if (bulkSms) {
+                    const result = await apiPost('sms/send_bulk/', { group: value('bulkGroup'), subject: value('bulkSubject'), body: value('bulkMessage') });
+                    showMsg('bulkModalResult', result.success ? '✅ پیامک گروهی در دیتابیس ثبت شد.' : `❌ ${result.data?.error || 'ثبت پیام انجام نشد.'}`, result.success ? 'success' : 'error');
+                    return;
+                }
+                if (message) {
+                    const result = await apiPost('sms/send/', { phone: document.getElementById('msgCustomerPhone')?.textContent?.trim() || '', subject: 'پیام از زامنی برگر', body: value('msgContent') });
+                    showMsg('msgModalResult', result.success ? '✅ پیام در دیتابیس ثبت شد.' : `❌ ${result.data?.error || 'ثبت پیام انجام نشد.'}`, result.success ? 'success' : 'error');
+                    return;
+                }
+                if (invoice) {
+                    const action = invoice.classList.contains('approve-invoice') ? 'confirm' : 'cancel';
+                    if (!confirm(`آیا فاکتور #${invoice.dataset.id} ${action === 'confirm' ? 'تایید' : 'رد'} شود؟`)) return;
+                    const result = await apiPost(`orders/${invoice.dataset.id}/${action}/`, {});
+                    showMsg('invoiceMsg', result.success ? '✅ عملیات در دیتابیس ثبت شد.' : `❌ ${result.data?.detail || 'عملیات انجام نشد.'}`, result.success ? 'success' : 'error');
                 }
             }, true);
 
