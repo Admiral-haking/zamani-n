@@ -94,8 +94,14 @@
         if (!target) return;
         var content = '<i class="fas fa-exclamation-triangle"></i><span>' + esc(message || 'بارگذاری اطلاعات ناموفق بود.') + '</span>' +
             (retry ? '<button type="button" class="btn-secondary btn-sm panel-retry-btn">تلاش دوباره</button>' : '');
+        var colspan = 10;
+        if (target.tagName === 'TBODY') {
+            var table = target.closest('table');
+            var header = table && table.querySelector('thead tr');
+            if (header && header.children.length) colspan = header.children.length;
+        }
         target.innerHTML = target.tagName === 'TBODY'
-            ? '<tr><td colspan="10" class="load-error-cell"><div class="load-error">' + content + '</div></td></tr>'
+            ? '<tr><td colspan="' + colspan + '" class="load-error-cell"><div class="load-error">' + content + '</div></td></tr>'
             : '<div class="load-error">' + content + '</div>';
         var button = target.querySelector('.panel-retry-btn');
         if (button && retry) button.addEventListener('click', retry);
