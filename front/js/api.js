@@ -11,6 +11,19 @@ function _detectApiBase() {
 
 const API_URL = _detectApiBase();
 
+async function readApiResponse(response) {
+    const text = await response.text();
+    if (!text) return null;
+    try {
+        return JSON.parse(text);
+    } catch (error) {
+        // Vercel/Django may return an HTML or plain-text error page. Preserve
+        // it as data so every panel can show the real failure instead of
+        // remaining indefinitely in a loading state.
+        return { detail: text.slice(0, 1000) };
+    }
+}
+
 // ========================================
 // TOKEN MANAGEMENT
 // ========================================
@@ -55,7 +68,7 @@ async function refreshAccessToken() {
             body: JSON.stringify({ refresh: refresh })
         });
 
-        const data = await response.json();
+        const data = await readApiResponse(response);
 
         if (response.ok && data.access) {
             saveTokens(data.access, refresh);
@@ -126,7 +139,7 @@ async function apiRequest(endpoint, options = {}) {
                     return { success: true, status: 204, data: null };
                 }
 
-                const data = await retryResponse.json();
+                const data = await readApiResponse(retryResponse);
                 return {
                     success: retryResponse.ok,
                     status: retryResponse.status,
@@ -151,7 +164,7 @@ async function apiRequest(endpoint, options = {}) {
             return { success: true, status: 204, data: null };
         }
 
-        const data = await response.json();
+        const data = await readApiResponse(response);
         return {
             success: response.ok,
             status: response.status,
