@@ -5421,6 +5421,8 @@
                         } else {
                             showMsg('addDistributorMsg', '⚠️ ' + extractApiError(res), 'error');
                         }
+                    }).catch(() => {
+                        showMsg('addDistributorMsg', '⚠️ ثبت قیمت با خطای ارتباطی مواجه شد.', 'error');
                     });
                 } else {
                     pendingDistributorPrices[productId] = price;
@@ -5440,6 +5442,8 @@
                             } else {
                                 showMsg('addDistributorMsg', '⚠️ ' + extractApiError(res), 'error');
                             }
+                        }).catch(() => {
+                            showMsg('addDistributorMsg', '⚠️ حذف قیمت با خطای ارتباطی مواجه شد.', 'error');
                         });
                     }
                 } else {
@@ -5471,6 +5475,8 @@
                         } else {
                             showMsg('addDistributorMsg', '⚠️ ' + extractApiError(res), 'error');
                         }
+                    }).catch(() => {
+                        showMsg('addDistributorMsg', '⚠️ ثبت قیمت با خطای ارتباطی مواجه شد.', 'error');
                     });
                 } else {
                     pendingDistributorPrices[productId] = price;
@@ -5565,6 +5571,8 @@
                             onSuccess(distributorId).then(() => {
                                 cleanup();
                                 loadDistributors();
+                            }).catch(() => {
+                                showMsg('addDistributorMsg', '⚠️ پخش‌کننده ایجاد شد، اما ثبت قیمت‌ها انجام نشد.', 'error');
                             });
                         } else {
                             showMsg('addDistributorMsg', '⚠️ ' + extractApiError(res), 'error');
