@@ -6161,7 +6161,8 @@
                 apiGet('customers/?search=' + encodeURIComponent(q) + '&page_size=100').then(function(res) {
                     renderPersonList(res && res.success && res.data ? reportList(res.data) : []);
                 }).catch(function() {
-                    renderPersonList([]);
+                    renderPersonList(reportPageState.customers || []);
+                    showMsg('reportMsg', '⚠️ جستجوی مشتریان انجام نشد؛ اتصال سرور را بررسی کنید.', 'error');
                 });
             }
 
