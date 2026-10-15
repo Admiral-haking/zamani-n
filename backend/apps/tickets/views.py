@@ -280,6 +280,41 @@ class TicketViewSet(viewsets.ModelViewSet):
             'closed': closed,
             'total': open_tickets + answered + closed,
         })
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAdminOrSecretary],
+        url_path='support-chats/unread_count',
+    )
+    def support_chats_unread_count(self, request):
+        return Response({'unread': Ticket.objects.filter(user__isnull=True, status=Ticket.Status.OPEN).count()})
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAdminOrSecretary],
+        url_path='support-chats',
+    )
+    def support_chats(self, request):
+        tickets = Ticket.objects.filter(user__isnull=True).prefetch_related('messages__attachments').order_by('-updated_at')
+        data = []
+        for ticket in tickets:
+            messages = list(ticket.messages.all())
+            last = messages[-1] if messages else None
+            data.append({
+                'id': ticket.id,
+                'status': ticket.status,
+                'display_name': ticket.guest_name or 'مهمان',
+                'guest_phone': ticket.guest_phone,
+                'subject_display': ticket.title,
+                'last_message': last.text if last else ticket.message,
+                'last_message_at': last.created_at if last else ticket.created_at,
+                'created_at': ticket.created_at,
+                'unread_count': 1 if ticket.status == Ticket.Status.OPEN else 0,
+                'messages': [self._public_message(message) for message in messages],
+            })
+        return Response(data)
     @action(
         detail=False,
         methods=["post"],
