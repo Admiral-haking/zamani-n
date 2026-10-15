@@ -53,6 +53,8 @@ class InventorySerializer(serializers.ModelSerializer):
             "product",
             "product_name",
             "quantity",
+            "package_quantity",
+            "carton_quantity",
             "minimum_stock",
             "is_low_stock",
             "updated_at",

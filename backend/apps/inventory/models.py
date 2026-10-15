@@ -81,6 +81,10 @@ class Inventory(models.Model):
         default=0
     )
 
+    package_quantity = models.PositiveIntegerField(default=0)
+
+    carton_quantity = models.PositiveIntegerField(default=0)
+
     minimum_stock = models.PositiveIntegerField(
         default=10
     )

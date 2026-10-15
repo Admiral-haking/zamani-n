@@ -6735,8 +6735,52 @@
                 try { localStorage.setItem('zokBackupData', JSON.stringify(backupData)); } catch (e) {}
             }
 
+            let serverInventoryByName = {};
+            let inventorySyncTimer = null;
             function saveInventory() {
                 localStorage.setItem('zokInventory', JSON.stringify(inventoryProducts));
+                // localStorage remains only a short-lived offline fallback;
+                // the authoritative quantities are persisted in Django.
+                clearTimeout(inventorySyncTimer);
+                inventorySyncTimer = setTimeout(syncInventoryToServer, 150);
+            }
+
+            function syncInventoryToServer() {
+                if (typeof apiPatch !== 'function') return;
+                Object.keys(inventoryProducts).forEach(function(category) {
+                    inventoryProducts[category].forEach(function(product) {
+                        const record = serverInventoryByName[product.name];
+                        if (!record || !record.id) return;
+                        apiPatch('inventory/' + record.id + '/', {
+                            package_quantity: Math.max(0, Number(product.packageQty) || 0),
+                            carton_quantity: Math.max(0, Number(product.cartonQty) || 0),
+                            quantity: Math.max(0, (Number(product.packageQty) || 0) + (Number(product.cartonQty) || 0))
+                        }).then(function(res) {
+                            if (res && res.success) serverInventoryByName[product.name] = Object.assign({}, record, res.data);
+                        });
+                    });
+                });
+            }
+
+            function loadInventoryFromServer() {
+                if (typeof apiGet !== 'function') return;
+                apiGet('inventory/?page_size=500').then(function(res) {
+                    if (!res || !res.success) return;
+                    const rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
+                    rows.forEach(function(row) {
+                        if (row.product_name) serverInventoryByName[row.product_name] = row;
+                    });
+                    Object.keys(inventoryProducts).forEach(function(category) {
+                        inventoryProducts[category].forEach(function(product) {
+                            const row = serverInventoryByName[product.name];
+                            if (!row) return;
+                            product.packageQty = Number(row.package_quantity || 0);
+                            product.cartonQty = Number(row.carton_quantity || 0);
+                        });
+                    });
+                    localStorage.setItem('zokInventory', JSON.stringify(inventoryProducts));
+                    renderInventory();
+                });
             }
             function loadInventory() {
                 const ver = localStorage.getItem('zokInventoryVersion');
@@ -8851,6 +8895,7 @@
             window.addEventListener('load', function() {
                 jalaliEnhance();
                 loadCurrentUserProfile();
+                loadInventoryFromServer();
                 loadCustomers();
                 loadDistributors();
                 loadFinancialData();
