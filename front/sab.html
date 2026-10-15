@@ -3564,6 +3564,35 @@
 
             const value = (id) => document.getElementById(id)?.value.trim() || '';
             const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
+            const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+            const rows = (result) => Array.isArray(result?.data) ? result.data : (result?.data?.results || []);
+
+            async function loadOwnerTables() {
+                const [customers, distributors, tickets, checks] = await Promise.all([
+                    apiGet('customers/'), apiGet('distributors/'), apiGet('tickets/'), apiGet('finance/checks/')
+                ]);
+                const customerList = document.getElementById('customerList');
+                if (customerList) {
+                    const data = rows(customers);
+                    customerList.innerHTML = data.length ? data.map((c) => `<div class="list-item"><b>${esc(c.company_name || c.full_name || c.username || 'مشتری')}</b><span>${esc(c.phone || '')}</span></div>`).join('') : '<div class="empty-state">مشتری‌ای ثبت نشده است.</div>';
+                }
+                const distributorBody = document.getElementById('distributorTableBody');
+                if (distributorBody) {
+                    const data = rows(distributors);
+                    distributorBody.innerHTML = data.length ? data.map((d) => `<tr><td>${esc(d.full_name || d.name || '—')}</td><td>${esc(d.distributor_code || '—')}</td><td>${esc(d.phone || '—')}</td><td>${esc(d.city || '—')}</td><td>${d.is_active ? 'فعال' : 'غیرفعال'}</td></tr>`).join('') : '<tr><td colspan="5">پخش‌کننده‌ای ثبت نشده است.</td></tr>';
+                }
+                const ticketList = document.getElementById('ticketList');
+                if (ticketList) {
+                    const data = rows(tickets);
+                    ticketList.innerHTML = data.length ? data.map((t) => `<div class="list-item"><b>${esc(t.title || 'تیکت')}</b><span>${esc(t.status || '')}</span><p>${esc(t.message || '')}</p></div>`).join('') : '<div class="empty-state">تیکتی ثبت نشده است.</div>';
+                }
+                const checksBody = document.getElementById('checksTableBody');
+                if (checksBody) {
+                    const data = rows(checks);
+                    checksBody.innerHTML = data.length ? data.map((c) => `<tr><td>${esc(c.check_number || '—')}</td><td>${esc(c.customer_name || '—')}</td><td>${Number(c.amount || 0).toLocaleString('fa-IR')}</td><td>${esc(c.due_date || '—')}</td><td>${esc(c.status_label || c.status || '—')}</td></tr>`).join('') : '<tr><td colspan="13">چکی ثبت نشده است.</td></tr>';
+                }
+            }
+            loadOwnerTables().catch((error) => console.error('خطا در بارگذاری داده‌های پنل صاحب شرکت:', error));
 
             document.addEventListener('click', async (event) => {
                 const customerButton = event.target.closest('#saveNewCustomerBtn');
