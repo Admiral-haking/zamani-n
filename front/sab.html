@@ -3567,6 +3567,28 @@
                 }
             }
 
+            // جزئیات عملیاتی (سفارش‌ها، نمودار و تیکت‌های اخیر) از همان منبع
+            // داشبورد backend خوانده می‌شود تا جدول‌ها بعد از refresh خالی نمانند.
+            const operational = await apiGet('dashboard/');
+            if (operational.success && operational.data) {
+                const live = operational.data;
+                const orderRows = live.recent_orders || [];
+                const orderHtml = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.id)}</td><td>${esc(order.created_at)}</td><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="5">سفارشی ثبت نشده است.</td></tr>';
+                ['balanceDetailBody', 'ordersTodayTableBody'].forEach((id) => {
+                    const body = document.getElementById(id);
+                    if (body) body.innerHTML = orderHtml;
+                });
+                const chart = document.getElementById('salesChart');
+                if (chart && Array.isArray(live.sales_chart)) {
+                    const max = Math.max(...live.sales_chart.map((item) => Number(item.total || 0)), 1);
+                    chart.innerHTML = live.sales_chart.map((item) => `<div class="bar-item"><div class="bar" style="height:${Math.round(Number(item.total || 0) / max * 100)}%;"></div><div class="bar-value">${Number(item.total || 0).toLocaleString('fa-IR')}</div><div class="bar-label">${esc(item.label)}</div></div>`).join('');
+                }
+                const incomeBody = document.getElementById('incomeTableBody');
+                if (incomeBody) incomeBody.innerHTML = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.id)}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="4">درآمدی ثبت نشده است.</td></tr>';
+                const transactionBody = document.getElementById('transactionTableBody');
+                if (transactionBody) transactionBody.innerHTML = orderRows.length ? orderRows.map((order) => `<tr><td>${esc(order.id)}</td><td>${esc(order.customer)}</td><td>${Number(order.total_price || 0).toLocaleString('fa-IR')}</td><td>${esc(order.status)}</td></tr>`).join('') : '<tr><td colspan="4">تراکنشی ثبت نشده است.</td></tr>';
+            }
+
             const value = (id) => document.getElementById(id)?.value.trim() || '';
             const showApiResult = (id, result, successText) => showMsg(id, result.success ? `✅ ${successText}` : `❌ ${result.data?.detail || 'ذخیره در دیتابیس انجام نشد.'}`, result.success ? 'success' : 'error');
             const esc = (input) => String(input ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
