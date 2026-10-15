@@ -20,6 +20,8 @@ class ReturnRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return ReturnRequest.objects.none()
 
         # منشی و ادمین: همه درخواست‌های مرجوعی
         if user.role in ['ADMIN', 'SECRETARY']:
