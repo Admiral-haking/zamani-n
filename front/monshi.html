@@ -6773,7 +6773,13 @@
                             carton_quantity: Math.max(0, Number(product.cartonQty) || 0),
                             quantity: Math.max(0, (Number(product.packageQty) || 0) + (Number(product.cartonQty) || 0))
                         }).then(function(res) {
-                            if (res && res.success) serverInventoryByName[product.name] = Object.assign({}, record, res.data);
+                            if (res && res.success) {
+                                serverInventoryByName[product.name] = Object.assign({}, record, res.data);
+                            } else {
+                                showMsg('inventoryMsg', '⚠️ مقدار محلی ذخیره شد اما همگام‌سازی موجودی با سرور ناموفق بود.', 'error');
+                            }
+                        }).catch(function() {
+                            showMsg('inventoryMsg', '⚠️ مقدار محلی ذخیره شد اما همگام‌سازی موجودی با سرور ناموفق بود.', 'error');
                         });
                     });
                 });
@@ -6927,7 +6933,7 @@
                             categoryKey: entryCatKey || ''
                         });
                         renderBackupTable();
-                        showMsg('inventoryMsg', `✅ ${type === 'entry' ? 'ورود' : 'خروج'} کالا ثبت شد.`, 'success');
+                        showMsg('inventoryMsg', `✅ ${type === 'entry' ? 'ورود' : 'خروج'} کالا محلی ثبت شد و در حال همگام‌سازی با سرور است.`, 'success');
                         quantityInput.value = 0;
                     });
                 }
