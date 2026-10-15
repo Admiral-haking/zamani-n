@@ -34,12 +34,12 @@ class InventoryViewSet(viewsets.ModelViewSet):
         inventory = self.get_object()
 
 
-        amount = int(
-            request.data.get(
-                "amount",
-                0
-            )
-        )
+        try:
+            amount = int(request.data.get("amount", 0))
+        except (TypeError, ValueError):
+            return Response({"error": "مقدار باید عدد صحیح باشد"}, status=400)
+        if amount <= 0:
+            return Response({"error": "مقدار باید بزرگ‌تر از صفر باشد"}, status=400)
 
 
         inventory.quantity += amount
@@ -65,12 +65,12 @@ class InventoryViewSet(viewsets.ModelViewSet):
         inventory = self.get_object()
 
 
-        amount = int(
-            request.data.get(
-                "amount",
-                0
-            )
-        )
+        try:
+            amount = int(request.data.get("amount", 0))
+        except (TypeError, ValueError):
+            return Response({"error": "مقدار باید عدد صحیح باشد"}, status=400)
+        if amount <= 0:
+            return Response({"error": "مقدار باید بزرگ‌تر از صفر باشد"}, status=400)
 
 
         if inventory.quantity < amount:
@@ -105,7 +105,7 @@ class InventoryViewSet(viewsets.ModelViewSet):
 
         items = Inventory.objects.filter(
             quantity__lte=models.F("minimum_stock")
-        )
+        ).order_by("product__name", "id")
 
 
         serializer = self.get_serializer(
