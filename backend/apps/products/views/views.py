@@ -16,6 +16,7 @@ from apps.products.serializers import (
     ProductDiscountSerializer,
 )
 from apps.products.permissions import IsAdminOrSecretary
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -95,6 +96,10 @@ class ProductViewSet(viewsets.ModelViewSet):
 # ========================================
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+@extend_schema(
+    responses={200: OpenApiTypes.OBJECT},
+    tags=["Products"],
+)
 def get_best_sellers(request):
     """
     دریافت پرفروش‌ترین محصولات:

@@ -197,6 +197,11 @@ class LoginView(APIView):
     tags=["Accounts"],
     responses=UserSerializer,
 )
+@extend_schema(
+    tags=["Accounts"],
+    request=ProfileUpdateSerializer,
+    responses={200: UserSerializer},
+)
 class MeView(APIView):
 
     permission_classes = [
