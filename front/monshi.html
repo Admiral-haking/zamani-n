@@ -8922,10 +8922,53 @@
             showMsg(id, res && res.success ? '✅ ' + ok : '❌ ' + ((res && (res.data?.detail || res.data?.error)) || 'عملیات در دیتابیس انجام نشد.'), res && res.success ? 'success' : 'error');
         }
         document.addEventListener('click', async function (event) {
-            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,#saveNoteBtn,.approve-invoice,.reject-invoice');
+            const target = event.target.closest && event.target.closest('#submitTicketBtn,#sendSmsDialogBtn,#sendBulkBtn,#sendMsgBtn,#saveNoteBtn,#saveCheckBtn,.approve-invoice,.reject-invoice');
             if (!target) return;
             event.preventDefault();
             event.stopImmediatePropagation();
+            if (target.id === 'saveCheckBtn') {
+                const name = val('checkName');
+                const phone = val('checkPhone');
+                const nationalId = val('checkNationalId');
+                const amount = val('checkAmount');
+                const issueDate = val('checkReceiveDate');
+                const dueDate = val('checkDueDate');
+                if (!name || !phone || !nationalId || !amount || !issueDate || !dueDate) {
+                    return resultMessage('addCheckMsg', { success: false, data: { error: 'تمام فیلدهای الزامی چک را تکمیل کنید.' } }, '');
+                }
+                const customerResult = await apiPost('customers/', {
+                    username: 'cust_' + phone.replace(/[^A-Za-z0-9]/g, '') + '_' + Date.now(),
+                    password: 'Cust@' + String(Date.now()).slice(-10),
+                    company_name: name,
+                    phone: phone,
+                    national_id: nationalId
+                });
+                let customerId = customerResult.success ? customerResult.data?.id : null;
+                if (!customerId) {
+                    const existing = await apiGet('customers/?search=' + encodeURIComponent(phone));
+                    const list = existing.success ? (Array.isArray(existing.data) ? existing.data : (existing.data?.results || [])) : [];
+                    customerId = list[0]?.id;
+                }
+                if (!customerId) return resultMessage('addCheckMsg', customerResult, '');
+                const form = new FormData();
+                form.append('customer', customerId);
+                form.append('check_number', 'CHK-' + Date.now());
+                form.append('bank_name', 'نامشخص');
+                form.append('amount', amount);
+                form.append('issue_date', issueDate);
+                form.append('due_date', dueDate);
+                const file = document.getElementById('checkFile')?.files?.[0];
+                if (file) form.append('image', file);
+                const result = await apiUpload('finance/checks/', form);
+                resultMessage('addCheckMsg', result, 'چک در دیتابیس ثبت شد.');
+                if (result.success) {
+                    ['checkName', 'checkPhone', 'checkNationalId', 'checkAmount', 'checkReceiveDate', 'checkDueDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                    const fileInput = document.getElementById('checkFile');
+                    if (fileInput) fileInput.value = '';
+                    if (window.secretaryPanel) { await window.secretaryPanel.loadChecks(); window.secretaryPanel.renderChecks(); }
+                }
+                return;
+            }
             if (target.id === 'submitTicketBtn') {
                 const title = val('ticketSubjectInput');
                 const message = val('ticketMessageInput');
