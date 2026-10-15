@@ -311,6 +311,7 @@
                 console.warn('products', errMsg(res));
                 me.productsLoaded = true;
                 me.rebuildCustomerPriceList();
+                renderPanelLoadError('purchaseProductsContainer', errMsg(res), function () { me.loadProducts(); });
                 return;
             }
             var list = res.data.results || res.data || [];
@@ -346,7 +347,18 @@
                 me.renderDiscountProductSelect();
                 me.renderPriceProductMeta();
                 me.loadAllAfterProducts();
+            }).catch(function () {
+                me.renderPurchaseSelects();
+                me.renderDiscountProductSelect();
+                me.renderPriceProductMeta();
+                me.loadAllAfterProducts();
+                me.reportMsg('⚠️ قیمت‌های محصولات بارگذاری نشد؛ دوباره تلاش کنید.', 'error');
             });
+        }).catch(function () {
+            me.products = [];
+            me.productsLoaded = true;
+            me.rebuildCustomerPriceList();
+            renderPanelLoadError('purchaseProductsContainer', 'بارگذاری محصولات ناموفق بود.', function () { me.loadProducts(); });
         });
     };
 
