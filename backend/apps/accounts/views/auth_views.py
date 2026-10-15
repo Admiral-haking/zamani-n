@@ -54,6 +54,10 @@ class BaseAccountCreateView(APIView):
         return [permissions.IsAuthenticated(), IsStaffPermission()]
 
     @transaction.atomic
+    @extend_schema(
+        request=AccountCreateSerializer,
+        responses={201: OpenApiResponse(description="Account created successfully.")},
+    )
     def post(self, request):
         serializer = AccountCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
