@@ -11,6 +11,8 @@ from rest_framework.decorators import action
 from .models import Cart
 from .serializers import CartSerializer
 from apps.products.models import Product
+from apps.common.permissions.customer import IsCustomer
+from rest_framework import exceptions
 
 
 
@@ -18,14 +20,14 @@ class CartViewSet(viewsets.ModelViewSet):
 
     serializer_class = CartSerializer
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [IsCustomer]
 
 
     def get_queryset(self):
 
-        customer = self.request.user.customer_profile
+        customer = getattr(self.request.user, "customer_profile", None)
+        if customer is None:
+            return Cart.objects.none()
 
         return (
             Cart.objects
@@ -38,7 +40,9 @@ class CartViewSet(viewsets.ModelViewSet):
         )
     def perform_create(self, serializer):
 
-        customer = self.request.user.customer_profile
+        customer = getattr(self.request.user, "customer_profile", None)
+        if customer is None:
+            raise exceptions.ValidationError("حساب مشتری برای این کاربر یافت نشد.")
 
         product = serializer.validated_data["product"]
 
@@ -86,7 +90,7 @@ class CartViewSet(viewsets.ModelViewSet):
     def clear(self, request):
 
         Cart.objects.filter(
-            customer=request.user.customer_profile
+            customer=getattr(request.user, "customer_profile", None)
         ).delete()
 
 
@@ -109,7 +113,9 @@ class CartViewSet(viewsets.ModelViewSet):
         آیتم‌هایی که به محصول فعالی نگاشت نشوند نادیده گرفته می‌شوند.
         """
 
-        customer = self.request.user.customer_profile
+        customer = getattr(self.request.user, "customer_profile", None)
+        if customer is None:
+            return Response({"error": "حساب مشتری برای این کاربر یافت نشد."}, status=400)
 
         items = request.data.get("items") or []
 
