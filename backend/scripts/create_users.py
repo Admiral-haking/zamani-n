@@ -7,6 +7,7 @@ Usage (from backend folder):
 """
 import os
 import sys
+import argparse
 
 import django
 
@@ -16,12 +17,21 @@ django.setup()
 
 from apps.accounts.models import User
 
+parser = argparse.ArgumentParser()
+for username in ('admin', 'secretary', 'distributor', 'customer'):
+    parser.add_argument(f'--{username}-password')
+args = parser.parse_args()
+
 CREDS = [
-    {"username": "admin",       "password": "Admin@1404", "role": User.Role.ADMIN,       "is_staff": True,  "is_superuser": True},
-    {"username": "secretary",   "password": "Sec@1404",   "role": User.Role.SECRETARY,   "is_staff": True,  "is_superuser": False},
-    {"username": "distributor", "password": "Dist@1404",  "role": User.Role.DISTRIBUTOR, "is_staff": False, "is_superuser": False},
-    {"username": "customer",    "password": "Cust@1404",  "role": User.Role.CUSTOMER,    "is_staff": False, "is_superuser": False},
+    {"username": "admin", "password": args.admin_password or os.environ.get("SEED_ADMIN_PASSWORD"), "role": User.Role.ADMIN, "is_staff": True, "is_superuser": True},
+    {"username": "secretary", "password": args.secretary_password or os.environ.get("SEED_SECRETARY_PASSWORD"), "role": User.Role.SECRETARY, "is_staff": True, "is_superuser": False},
+    {"username": "distributor", "password": args.distributor_password or os.environ.get("SEED_DISTRIBUTOR_PASSWORD"), "role": User.Role.DISTRIBUTOR, "is_staff": False, "is_superuser": False},
+    {"username": "customer", "password": args.customer_password or os.environ.get("SEED_CUSTOMER_PASSWORD"), "role": User.Role.CUSTOMER, "is_staff": False, "is_superuser": False},
 ]
+
+missing = [item['username'] for item in CREDS if not item['password'] or len(item['password']) < 8]
+if missing:
+    raise SystemExit('Set a password of at least 8 characters for: ' + ', '.join(missing))
 
 for item in CREDS:
     user, created = User.objects.update_or_create(

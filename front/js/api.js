@@ -5,7 +5,7 @@
 function _detectApiBase() {
     const hostname = window.location.hostname || '';
     const isLocal = window.location.protocol === 'file:' || hostname === 'localhost' || hostname === '127.0.0.1';
-    if (isLocal) return 'https://zamani-backend.vercel.app/';
+    if (isLocal) return 'http://127.0.0.1:8000/api';
     return window.location.origin + '/api';
 }
 
