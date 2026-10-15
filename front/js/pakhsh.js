@@ -201,12 +201,25 @@
         var stored = {};
         try { stored = JSON.parse(localStorage.getItem('zamaniCurrentUser') || '{}'); } catch (e) { }
 
-        if (stored.role !== 'DISTRIBUTOR') {
+        // The cached profile can be stale after a role change or a fresh login.
+        // Use the authenticated backend profile as the source of truth.
+        if (!localStorage.getItem('access_token')) {
             window.location.href = 'log.html';
             return;
         }
         this.bindings();
-        this.loadAll();
+        apiGet('/accounts/me/').then(function (res) {
+            if (!res.success || String(res.data && res.data.role || '').toUpperCase() !== 'DISTRIBUTOR') {
+                window.location.href = 'log.html';
+                return;
+            }
+            me.me = res.data;
+            me.distributor = res.data.distributor || me.distributor;
+            localStorage.setItem('zamaniCurrentUser', JSON.stringify(res.data));
+            me.loadAll();
+        }).catch(function () {
+            window.location.href = 'log.html';
+        });
     };
 
     DistributorPanel.prototype.loadAll = function () {
