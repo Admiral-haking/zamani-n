@@ -6597,7 +6597,11 @@
                         return '<option value="' + p.id + '">' + escapeHtml(p.name || ('محصول #' + p.id)) + '</option>';
                     }).join('');
                     if (current) sel.value = current;
-                }).catch(function() {});
+                }).catch(function() {
+                    const sel = document.getElementById('reportProductFilter');
+                    if (sel) sel.innerHTML = '<option value="all">بارگذاری کالاها ناموفق بود</option>';
+                    showMsg('reportMsg', '⚠️ فهرست کالاها برای فیلتر گزارش دریافت نشد.', 'error');
+                });
             }
 
             function loadGeneralReport() {
