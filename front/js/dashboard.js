@@ -123,7 +123,6 @@ class Dashboard {
             return this.customerData;
         } else {
             console.warn('⚠️ اطلاعات مشتری یافت نشد');
-            this.customerData = null;
             throw new Error(response.data?.detail || 'اطلاعات مشتری دریافت نشد');
         }
     }
@@ -136,7 +135,6 @@ class Dashboard {
             return this.recentOrders;
         } else {
             console.warn('⚠️ خطا در دریافت سفارشات');
-            this.recentOrders = [];
             throw new Error(response.data?.detail || 'سفارش‌ها دریافت نشدند');
         }
     }
@@ -149,7 +147,6 @@ class Dashboard {
             return this.cartData;
         } else {
             console.warn('⚠️ خطا در دریافت سبد خرید از API');
-            this.cartData = null;
             throw new Error(response.data?.detail || 'سبد خرید دریافت نشد');
         }
     }
@@ -162,7 +159,6 @@ class Dashboard {
             return this.returnRequests;
         } else {
             console.warn('⚠️ خطا در دریافت درخواست‌های مرجوعی');
-            this.returnRequests = [];
             throw new Error(response.data?.detail || 'درخواست‌های مرجوعی دریافت نشدند');
         }
     }
@@ -178,7 +174,6 @@ class Dashboard {
             return this.cheques;
         } else {
             console.warn('⚠️ خطا در دریافت چک‌ها');
-            this.cheques = [];
             throw new Error(response.data?.detail || 'چک‌ها دریافت نشدند');
         }
     }
@@ -218,7 +213,6 @@ class Dashboard {
             return this.mySummary;
         } else {
             console.warn('⚠️ خطا در دریافت گزارش مالی شخصی');
-            this.mySummary = null;
             throw new Error(response.data?.detail || 'گزارش مالی دریافت نشد');
         }
     }
@@ -234,7 +228,6 @@ class Dashboard {
             return this.transactions;
         } else {
             console.warn('⚠️ خطا در دریافت تراکنش‌ها');
-            this.transactions = [];
             throw new Error(response.data?.detail || 'تراکنش‌ها دریافت نشدند');
         }
     }
@@ -1490,7 +1483,6 @@ alert(`📋 جزئیات چک:\n\n` +
             return this.tickets;
         } else {
             console.warn('⚠️ خطا در دریافت تیکت‌ها');
-            this.tickets = [];
             throw new Error(response.data?.detail || 'تیکت‌ها دریافت نشدند');
         }
     }
@@ -1626,7 +1618,6 @@ alert(`📋 جزئیات چک:\n\n` +
             return this.notifications;
         } else {
             console.warn('⚠️ خطا در دریافت اعلان‌ها');
-            this.notifications = [];
             throw new Error(response.data?.detail || 'اعلان‌ها دریافت نشدند');
         }
     }
