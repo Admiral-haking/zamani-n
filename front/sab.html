@@ -2427,6 +2427,9 @@
         .data-table { border-collapse: separate; border-spacing: 0 6px; }
         .data-table tbody tr { background: rgba(255,255,255,.025); }
         .data-table td, .data-table th { padding: 11px 10px; }
+        .load-error { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; min-height:90px; padding:18px; color:#f3b1aa; text-align:center; }
+        .load-error i { font-size:20px; }
+        .load-error-cell { padding:24px !important; color:#f3b1aa; text-align:center; }
         @media (max-width: 720px) { .panel-section { padding: 12px; } .section-title { align-items: flex-start; flex-direction: column; } .form-row { grid-template-columns: 1fr !important; } .form-actions button, .modal-actions button { flex: 1 1 140px; } }
     </style>
 </head>
@@ -3651,7 +3654,17 @@
                     checksBody.innerHTML = data.length ? data.map((c) => `<tr data-check-id="${esc(c.id)}"><td>${esc(c.check_number || '—')}</td><td>${esc(c.customer_name || c.customer?.company_name || '—')}</td><td>${Number(c.amount || 0).toLocaleString('fa-IR')}</td><td>${esc(c.due_date || '—')}</td><td>${esc(c.status_label || c.status || '—')}</td><td><button class="btn-success btn-sm api-cash-check" data-id="${esc(c.id)}">نقد شد</button><button class="btn-danger btn-sm api-delete-check" data-id="${esc(c.id)}">حذف</button></td></tr>`).join('') : '<tr><td colspan="13">چکی ثبت نشده است.</td></tr>';
                 }
             }
-            loadOwnerTables().catch((error) => console.error('خطا در بارگذاری داده‌های پنل صاحب شرکت:', error));
+            loadOwnerTables().catch((error) => {
+                console.error('خطا در بارگذاری داده‌های پنل صاحب شرکت:', error);
+                ['customerList', 'ticketList'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری اطلاعات ناموفق بود.</span><button class="btn-secondary btn-sm" onclick="location.reload()">تلاش دوباره</button></div>';
+                });
+                ['distributorTableBody', 'checksTableBody'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = '<tr><td colspan="13" class="load-error-cell">بارگذاری اطلاعات ناموفق بود؛ صفحه را دوباره بارگذاری کنید.</td></tr>';
+                });
+            });
 
             let activeApiTicketId = null;
             document.addEventListener('click', async (event) => {

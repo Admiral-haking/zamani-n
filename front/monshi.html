@@ -2319,6 +2319,8 @@
         .data-table { border-collapse: separate; border-spacing: 0 6px; }
         .data-table tbody tr { background: rgba(255,255,255,.025); }
         .data-table td, .data-table th { padding: 11px 10px; }
+        .load-error { display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; min-height:90px; padding:18px; color:#f3b1aa; text-align:center; }
+        .load-error i { font-size:20px; }
         @media (max-width: 720px) { .panel-section { padding: 12px; } .section-title { align-items: flex-start; flex-direction: column; } .form-row { grid-template-columns: 1fr !important; } .form-actions button, .modal-actions button { flex: 1 1 140px; } }
 </style>
 </head>
@@ -8650,7 +8652,10 @@
                     }
                     renderDailyTicketsList(rows);
                     updateDailyTicketsBadge();
-                }).catch(function() { renderDailyTicketsList([]); });
+                }).catch(function() {
+                    dailyTicketsData = [];
+                    if (box) box.innerHTML = '<div class="load-error"><i class="fas fa-exclamation-triangle"></i><span>بارگذاری گفتگوها ناموفق بود.</span><button class="btn-secondary btn-sm" onclick="window.secretaryPanel && window.secretaryPanel.loadDailyTickets ? window.secretaryPanel.loadDailyTickets() : location.reload()">تلاش دوباره</button></div>';
+                });
             }
 
             function renderDailyTicketMessages(chat) {

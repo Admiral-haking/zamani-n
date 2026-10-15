@@ -11355,6 +11355,10 @@ function addBothToCart(productId, productName) {
                 } catch (e) { return ''; }
             }
 
+            const supportLoadErrorStyle = document.createElement('style');
+            supportLoadErrorStyle.textContent = '.support-load-error{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:24px;text-align:center;color:#f3b1aa}.support-load-error i{font-size:20px}.support-load-error button{border:1px solid rgba(255,255,255,.2);border-radius:9px;padding:8px 14px;background:rgba(255,255,255,.08);color:inherit;cursor:pointer}';
+            document.head.appendChild(supportLoadErrorStyle);
+
             // فراخوانی عمومی گفتگو: توکن منقضی نباید ارسال پیام را خراب کند.
             // ابتدا با توکن، در صورت 401 تلاش برای تمدید، در نهایت ارسال بدون توکن (مهمان).
             function supportApi(endpoint, options) {
@@ -11453,7 +11457,13 @@ function addBothToCart(productId, productName) {
                         supportChatId = null;
                         renderSupportChat([]);
                     }
-                }).catch(function () {});
+                }).catch(function () {
+                    if (supportMessagesArea) {
+                        supportMessagesArea.innerHTML = '<div class="support-load-error"><i class="fas fa-exclamation-triangle"></i><span>ارتباط با پشتیبانی برقرار نشد.</span><button type="button" id="supportRetryBtn">تلاش دوباره</button></div>';
+                        const retry = document.getElementById('supportRetryBtn');
+                        if (retry) retry.addEventListener('click', loadSupportHistory);
+                    }
+                });
             }
 
             function startSupportPolling() {
@@ -11479,7 +11489,10 @@ function addBothToCart(productId, productName) {
                         }
                         return null;
                     })
-                    .catch(function () { return null; });
+                    .catch(function () {
+                        if (supportMessagesArea) addSystemMessage('⚠️ ارسال پیام ناموفق بود؛ اتصال اینترنت و سرور را بررسی کنید.');
+                        return null;
+                    });
             }
 
             function sendSupportAttachment(file, kind) {
