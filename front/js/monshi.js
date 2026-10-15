@@ -286,6 +286,51 @@ class SecretaryPanel {
         this.renderNotifications();
         this.renderDashboardDetails();
         this.updateHeaderStats();
+        this.renderSectionLoadFailures();
+    }
+
+    renderSectionLoadFailures() {
+        if (!this.loadFailures.size) return;
+
+        const sections = {
+            customers: { id: 'customerList', method: 'loadCustomers' },
+            orders: { id: 'invoiceTableBody', method: 'loadOrders' },
+            tickets: { id: 'ticketList', method: 'loadTickets' },
+            products: { id: 'productsTableBody', method: 'loadProducts' },
+            distributors: { id: 'distributorTableBody', method: 'loadDistributors' },
+            'finance/transactions': { id: 'transactionTableBody', method: 'loadTransactions' },
+            'finance/checks': { id: 'checksTableBody', method: 'loadChecks' },
+            inventory: { id: 'inventoryTableBody', method: 'loadInventory' },
+            notifications: { id: 'notifList', method: 'loadNotifications' }
+        };
+
+        this.loadFailures.forEach((label, key) => {
+            const section = sections[key];
+            if (!section) return;
+            const container = document.getElementById(section.id);
+            if (!container || container.dataset.loadFailureRendered === '1') return;
+
+            const isTable = container.tagName === 'TBODY';
+            const content = `
+                <div class="load-error" role="alert">
+                    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                    <span>بارگذاری ${label} انجام نشد.</span>
+                    <button type="button" class="btn-secondary btn-sm retry-panel-section">تلاش مجدد</button>
+                </div>`;
+            container.innerHTML = isTable
+                ? `<tr><td colspan="20" class="load-error-cell">${content}</td></tr>`
+                : content;
+            container.dataset.loadFailureRendered = '1';
+            const retry = container.querySelector('.retry-panel-section');
+            if (retry) retry.addEventListener('click', async () => {
+                retry.disabled = true;
+                retry.textContent = 'در حال تلاش...';
+                this.loadFailures.delete(key);
+                delete container.dataset.loadFailureRendered;
+                await this[section.method]();
+                this.renderAll();
+            }, { once: true });
+        });
     }
 
     // ========================================
