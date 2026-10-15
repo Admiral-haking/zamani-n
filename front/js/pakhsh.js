@@ -236,6 +236,35 @@
         this.loadTransactions();
         this.loadNotifications();
         this.renderInventory();
+        this.loadInventoryFromServer();
+    };
+
+    DistributorPanel.prototype.loadInventoryFromServer = function () {
+        var me = this;
+        apiGet('/inventory/?page_size=500').then(function (res) {
+            if (!res || !res.success) return;
+            var rows = Array.isArray(res.data) ? res.data : ((res.data && res.data.results) || []);
+            var inv = {};
+            rows.forEach(function (row) {
+                if (!row.product_name) return;
+                inv[row.product_name] = {
+                    name: row.product_name,
+                    packageQty: Number(row.package_quantity || 0),
+                    cartonQty: Number(row.carton_quantity || 0)
+                };
+            });
+            var all = Object.keys(inv).map(function (name) {
+                var p = inv[name];
+                return { name: p.name, pkg: p.packageQty, carton: p.cartonQty, total: p.packageQty + p.cartonQty };
+            });
+            var grid = $id('companyInventoryGrid');
+            if (!grid) return;
+            grid.innerHTML = all.length ? all.map(function (p) {
+                return '<div class="inventory-summary-card"><div class="summary-product-name"><i class="fas fa-cube"></i> ' + esc(p.name) + '</div>' +
+                    '<div class="summary-values"><div class="summary-item"><span class="summary-label">📦 بسته‌ای</span><span class="summary-value package">' + faNum(p.pkg) + '</span></div>' +
+                    '<div class="summary-item"><span class="summary-label">📦 کارتنی</span><span class="summary-value carton">' + faNum(p.carton) + '</span></div></div></div>';
+            }).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--text-gray);padding:18px;font-size:13px;">داده‌ای از انبار شرکت در دسترس نیست.</div>';
+        });
     };
 
     DistributorPanel.prototype.loadMe = function () {
