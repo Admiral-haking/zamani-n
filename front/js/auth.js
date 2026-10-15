@@ -257,79 +257,14 @@ function extractApiError(result) {
     return "خطا در ثبت درخواست";
 }
 
-// ارسال کد تایید پیامکی به شماره موبایل وارد‌شده
+// سرویس پیامک هنوز در backend فعال نشده است؛ از نمایش موفقیت جعلی جلوگیری می‌کنیم.
 window.sendRegistrationOtp = async function () {
-    const phone = document.getElementById("regPhone")?.value?.trim() || "";
-    if (!/^09[0-9]{9}$/.test(phone)) {
-        showAlert("❌ شماره تماس معتبر (11 رقمی و با 09 شروع شود) وارد کنید", "error");
-        return;
-    }
-
-    const btn = document.getElementById("sendOtpBtn");
-    const resendBtn = document.getElementById("resendOtpBtn");
-    if (btn) { btn.disabled = true; btn.textContent = "⏳ در حال ارسال کد..."; }
-    if (resendBtn) resendBtn.disabled = true;
-
-    try {
-        const result = await apiPost("accounts/otp/send/", { phone });
-        if (result.success) {
-            window.__regPhoneVerified = false;
-            if (window.__regOtp) {
-                window.__regOtp.clear();
-                window.__regOtp.resetTimer();
-            }
-            const status = document.getElementById("otpStatus");
-            if (status) {
-                status.textContent = "📲 کد تایید ارسال شد؛ آن را وارد کنید";
-                status.style.color = "#ffc47e";
-            }
-            if (result.data && result.data.debug_code) {
-                showAlert("کد تایید (حالت تست): " + result.data.debug_code, "info");
-            } else {
-                showAlert("📲 کد تایید ارسال شد", "success");
-            }
-            if (btn) {
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.textContent = "📲 ارسال مجدد کد تایید";
-                }, 60000);
-            }
-        } else {
-            showAlert("❌ " + extractApiError(result), "error");
-            if (btn) { btn.disabled = false; btn.textContent = "📲 ارسال کد تایید به شماره موبایل"; }
-        }
-    } catch (e) {
-        console.error("❌ Error in otp/send:", e);
-        showAlert("❌ خطا در ارتباط با سرور", "error");
-        if (btn) { btn.disabled = false; btn.textContent = "📲 ارسال کد تایید به شماره موبایل"; }
-    }
+    showAlert("ℹ️ سرویس پیامک هنوز پیکربندی نشده است؛ درخواست شما پس از ثبت توسط منشی بررسی می‌شود.", "info");
 };
 
 // بررسی کد تایید وارد‌شده
 window.verifyRegistrationOtp = async function () {
-    const phone = document.getElementById("regPhone")?.value?.trim() || "";
-    const code = window.__regOtp ? window.__regOtp.getValue() : "";
-    if (code.length !== 4) return;
-    if (!/^09[0-9]{9}$/.test(phone)) return;
-
-    const status = document.getElementById("otpStatus");
-    try {
-        const result = await apiPost("accounts/otp/verify/", { phone, code });
-        if (result.success) {
-            window.__regPhoneVerified = true;
-            if (status) {
-                status.textContent = "✅ شماره موبایل تایید شد";
-                status.style.color = "#7CFC00";
-            }
-        } else {
-            window.__regPhoneVerified = false;
-            showAlert("❌ " + extractApiError(result), "error");
-            if (window.__regOtp) window.__regOtp.clear();
-        }
-    } catch (e) {
-        console.error("❌ Error in otp/verify:", e);
-        showAlert("❌ خطا در بررسی کد تایید", "error");
-    }
+    showAlert("ℹ️ تایید پیامکی در این محیط فعال نیست؛ شماره تماس توسط منشی بررسی می‌شود.", "info");
 };
 
 async function registerUser(event) {
@@ -361,10 +296,6 @@ async function registerUser(event) {
         showAlert("❌ کد پستی باید ۱۰ رقم باشد", "error");
         return;
     }
-    if (!window.__regPhoneVerified) {
-        showAlert("❌ ابتدا شماره موبایل خود را با کد پیامکی تایید کنید", "error");
-        return;
-    }
     if (terms && !terms.checked) {
         showAlert("❌ برای ثبت نام، قوانین و شرایط را بپذیرید", "error");
         return;
@@ -377,15 +308,11 @@ async function registerUser(event) {
     }
 
     try {
-        const result = await apiPost("customers/public-registrations/", {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone,
-            national_id: nationalId,
-            shop_name: shopName,
-            postal_code: postalCode,
-            address: address,
-            referral_code: referral || ""
+        const result = await apiPost("tickets/guest-request/", {
+            guest_name: `${firstName} ${lastName}`.trim(),
+            guest_phone: phone,
+            title: `درخواست ایجاد حساب - ${shopName}`,
+            message: `کد ملی: ${nationalId}\nنام فروشگاه: ${shopName}\nکد پستی: ${postalCode}\nآدرس: ${address}\nکد معرف: ${referral || "ثبت نشده"}`
         });
 
         if (result.success) {
