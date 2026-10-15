@@ -4017,6 +4017,9 @@
                 const box = document.getElementById('contactMessagesList');
                 if (box) box.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-gray);"><i class="fas fa-spinner fa-spin" style="font-size:28px;display:block;margin-bottom:10px;"></i> در حال بارگذاری پیام‌ها...</div>';
                 return apiGet('tickets/contact-messages/?page_size=200').then(function(res) {
+                    if (!res || !res.success) {
+                        throw new Error('contact messages request failed');
+                    }
                     let rows = [];
                     if (res && res.success && res.data) {
                         rows = Array.isArray(res.data) ? res.data : (res.data.results || []);
@@ -4049,14 +4052,16 @@
                 if (mr) {
                     const id = mr.getAttribute('data-id');
                     apiPost('tickets/' + id + '/mark-read/', {})
-                        .then(function(res) { if (res && res.success) loadContactMessages(); });
+                        .then(function(res) { if (res && res.success) loadContactMessages(); else alert('علامت‌گذاری پیام انجام نشد.'); })
+                        .catch(function() { alert('ارتباط با سرور برقرار نشد.'); });
                     return;
                 }
                 const an = e.target.closest('.contact-answer');
                 if (an) {
                     const id = an.getAttribute('data-id');
                     apiPost('tickets/' + id + '/mark-read/', {})
-                        .then(function(res) { if (res && res.success) loadContactMessages(); });
+                        .then(function(res) { if (res && res.success) loadContactMessages(); else alert('ثبت پاسخ پیام انجام نشد.'); })
+                        .catch(function() { alert('ارتباط با سرور برقرار نشد.'); });
                     return;
                 }
                 const del = e.target.closest('.contact-delete');
@@ -4064,7 +4069,8 @@
                     const id = del.getAttribute('data-id');
                     if (!confirm('این پیام حذف شود؟')) return;
                     apiDelete('tickets/' + id + '/')
-                        .then(function(res) { if (res && res.success) loadContactMessages(); });
+                        .then(function(res) { if (res && res.success) loadContactMessages(); else alert('حذف پیام انجام نشد.'); })
+                        .catch(function() { alert('ارتباط با سرور برقرار نشد.'); });
                     return;
                 }
             });
